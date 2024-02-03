@@ -1,7 +1,7 @@
 <html>
 <head>
 <title>The Code Project Open License (CPOL)</title>
-<Style>
+<style>
 BODY, P, TD { font-family: Verdana, Arial, Helvetica, sans-serif; font-size: 10pt }
 H1,H2,H3,H4,H5 { color: #ff9900; font-weight: bold; }
 H1 { font-size: 14pt;color:black }
