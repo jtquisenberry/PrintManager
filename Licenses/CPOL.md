@@ -1,18 +1,5 @@
 <html>
-<head>
-<title>The Code Project Open License (CPOL)</title>
-<style>
-BODY, P, TD { font-family: Verdana, Arial, Helvetica, sans-serif; font-size: 10pt }
-H1,H2,H3,H4,H5 { color: #ff9900; font-weight: bold; }
-H1 { font-size: 14pt;color:black }
-H2 { font-size: 13pt; }
-H3 { font-size: 12pt; }
-H4 { font-size: 10pt; color: black; }
-PRE { BACKGROUND-COLOR: #FBEDBB; FONT-FAMILY: "Courier New", Courier, mono; WHITE-SPACE: pre; }
-CODE { COLOR: #990000; FONT-FAMILY: "Courier New", Courier, mono; }
-.SpacedList li { padding: 5px 0px 5px 0px;}
-</style>
-</head>
+
 <body bgcolor="#FFFFFF" color=#000000>
 
 <h1>The Code Project Open License (CPOL) 1.02</h1>
