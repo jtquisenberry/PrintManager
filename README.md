@@ -2,6 +2,22 @@
 
 
 
+
+# Building Projects
+
+## GhostHarness
+
+### Filesystem
+
+* Copy `\ghostpdl-10.02.1\pcl\pl\plchar.h` to project.
+* Copy `\ghostpdl-10.02.1\debugbin\gpdldll64.dll` to project.
+* Copy files `gpdldll64.dll`, `gpdldll64.exp`, `gpdldll64.ilk`, `gpdldll64.lib`, `gpdldll64.pdb` from `\ghostpdl-10.02.1\debugbin\` to `..\GhostPDL`.
+
+### Visual Studio Project
+
+xxx
+
+
 # Credits and References
 
 Crow, D. (2010, April 20). <i>Ask for, and receive, change notifications from a printer.</i> CodeProject. https://www.codeproject.com/Articles/74359/Ask-for-and-receive-change-notifications-from-a-pr
