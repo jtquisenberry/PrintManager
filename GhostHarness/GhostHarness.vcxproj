@@ -134,7 +134,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="GhostHarness.c" />
+    <ClCompile Include="GhostHarness.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="plapi.h" />

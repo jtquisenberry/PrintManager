@@ -36,7 +36,13 @@
 #include <stdarg.h>
 #include <stdint.h>
 
-#include "plapi.h"   /* GSAPI - gpdf version */
+// The GhostPDL is built in C, not C++
+#ifdef __cplusplus
+extern "C" {
+    #include "plapi.h"  /* GSAPI - gpdf version */
+}
+#endif
+
 
   /* We hold details of each threads working in a thread_data
    * structure. */
@@ -74,7 +80,7 @@ worker(void* td_)
 
     /* Construct the argc/argv to pass to ghostscript. */
     int argc = 0;
-    char* argv[10];
+    const char* argv[10];
 
     sprintf(out, "multi_out_%d_", td->thread_num);
     strcat(out, "%d.png");
@@ -93,7 +99,7 @@ worker(void* td_)
     }
 
     /* Run our test. */
-    code = gsapi_init_with_args(instance, argc, argv);
+    code = gsapi_init_with_args(instance, argc, (char**)argv);
     if (code < 0) {
         printf("Error %d in gsapi_init_with_args\n", code);
         goto fail;
@@ -121,7 +127,7 @@ failearly:
 }
 
 /* A list of input files to run. */
-char* in_files[] =
+const char* in_files[] =
 {
   "examples/tiger.eps",
   "examples/golfer.eps",
@@ -149,7 +155,7 @@ int main(int argc, char* argv[])
     /* Start NUM_WORKERS threads */
     for (i = 0; i < NUM_WORKERS; i++)
     {
-        td[i].in_file = in_files[i % NUM_INPUTS];
+        td[i].in_file = (char*)in_files[i % NUM_INPUTS];
         td[i].thread_num = i;
 
 #ifdef WINDOWS

@@ -15,7 +15,7 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="GhostHarness.c">
+    <ClCompile Include="GhostHarness.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
