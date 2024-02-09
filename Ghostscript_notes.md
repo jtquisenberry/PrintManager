@@ -1,0 +1,4 @@
+# Ghostscript Notes
+
+
+# GhostPDL Examples
