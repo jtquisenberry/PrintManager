@@ -75,7 +75,7 @@ with
 td[i].in_file = (char*)in_files[i % NUM_INPUTS];
 ```
 
-# Credits and References
+# Credits
 
 Crow, D. (2010, April 20). <i>Ask for, and receive, change notifications from a printer.</i> CodeProject. https://www.codeproject.com/Articles/74359/Ask-for-and-receive-change-notifications-from-a-pr
 
