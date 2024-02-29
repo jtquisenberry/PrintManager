@@ -105,6 +105,8 @@ BOOL CPrintManagerDlg::OnInitDialog()
     m_lcJobInfo.InsertColumn(6, _T("Bytes printed"), LVCFMT_RIGHT, 110);
     m_lcJobInfo.InsertColumn(7, _T("Status"), LVCFMT_LEFT, 150);
 
+    
+
     m_pEventThreadDone = new CEvent(TRUE, TRUE);     // signaled
     m_pEventStopRequested = new CEvent(FALSE, TRUE); // non-signaled
 
@@ -143,9 +145,16 @@ BOOL CPrintManagerDlg::OnInitDialog()
     m_tab1.ShowWindow(SW_SHOW);
     m_tab2.ShowWindow(SW_HIDE);
 
+
+
+    m_tab1.m_lcJobinfo2.InsertColumn(0, _T("Printer Name"), LVCFMT_RIGHT, 110);
+    m_tab1.m_lcJobinfo2.InsertColumn(1, _T("User"), LVCFMT_LEFT, 110);
+    m_tab1.m_lcJobinfo2.InsertColumn(2, _T("From"), LVCFMT_LEFT, 140);
+    m_tab1.m_lcJobinfo2.InsertColumn(3, _T("Document"), LVCFMT_LEFT, 180);
+
     // Do work on application startup.
     EnumeratePrinters();
-
+    
     return TRUE;  // return TRUE  unless you set the focus to a control
 }
 
@@ -170,17 +179,33 @@ void CPrintManagerDlg::EnumeratePrinters( void )
           dwReturned;
 
     
-    EnumPrinters(PRINTER_ENUM_LOCAL | PRINTER_ENUM_CONNECTIONS, NULL, 1, NULL, 0, &dwNeeded, &dwReturned);
+    EnumPrinters(PRINTER_ENUM_LOCAL | PRINTER_ENUM_CONNECTIONS, NULL, 2, NULL, 0, &dwNeeded, &dwReturned);
     
     LPBYTE lpBuffer = new BYTE[dwNeeded];
-    EnumPrinters(PRINTER_ENUM_LOCAL | PRINTER_ENUM_CONNECTIONS, NULL, 1, lpBuffer, dwNeeded, &dwNeeded, &dwReturned);
+    EnumPrinters(PRINTER_ENUM_LOCAL | PRINTER_ENUM_CONNECTIONS, NULL, 2, lpBuffer, dwNeeded, &dwNeeded, &dwReturned);
 
-    PPRINTER_INFO_1 p1 = (PPRINTER_INFO_1) lpBuffer;
+    PPRINTER_INFO_2 p1 = (PPRINTER_INFO_2) lpBuffer;
     
     for (DWORD x = 0; x < dwReturned; x++)
     {
-        m_cbPrinters.AddString(p1->pName);
-        m_tab1.m_cbPrinters.AddString(p1->pName);
+        // m_cbPrinters.AddString(p1->pName);
+        m_cbPrinters.AddString(p1->pPrinterName);
+        m_tab1.m_cbPrinters.AddString(p1->pPrinterName);
+
+        
+        CString strText;
+        strText.Format(_T("%s"), p1->pPrinterName);
+        int nItem = m_tab1.m_lcJobinfo2.InsertItem(m_tab1.m_lcJobinfo2.GetItemCount(), strText);
+
+        m_tab1.m_lcJobinfo2.SetItemText(nItem, 1, p1->pDriverName);
+
+        strText.Format(_T("%d on %s"), p1->Status, p1->pPortName);
+        m_tab1.m_lcJobinfo2.SetItemText(nItem, 2, strText);
+
+        strText.Format(_T("%d"), p1->cJobs);
+        m_tab1.m_lcJobinfo2.SetItemText(nItem, 3, strText);
+        
+        
 
         p1++;
     }

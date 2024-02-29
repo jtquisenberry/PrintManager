@@ -11,7 +11,7 @@ class CTAB1 : public CDialogEx
 public:
 	//CEdit m_ctab1_cedit;
 	CComboBox	m_cbPrinters;
-	CListBox  m_lcJobinfo2;
+	CListCtrl  m_lcJobinfo2;
 	CTAB1(CWnd* pParent = nullptr);   // standard constructor
 	virtual ~CTAB1();
 
