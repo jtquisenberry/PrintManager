@@ -126,12 +126,12 @@ BOOL CPrintManagerDlg::OnInitDialog()
     TCITEM item1, item2;
     item1.mask = TCIF_TEXT | TCIF_PARAM;
     item1.lParam = (LPARAM)&m_tab1;
-    item1.pszText = _T("Section 1");
+    item1.pszText = _T("Printers");
     pTabCtrl->InsertItem(0, &item1);
 
     item2.mask = TCIF_TEXT | TCIF_PARAM;
     item2.lParam = (LPARAM)&m_tab2;
-    item2.pszText = _T("Section 2");
+    item2.pszText = _T("Drivers");
     pTabCtrl2->InsertItem(1, &item2);
 
     // CRect rcItem;  // moved to header file.
@@ -147,13 +147,22 @@ BOOL CPrintManagerDlg::OnInitDialog()
 
 
 
-    m_tab1.m_lcJobinfo2.InsertColumn(0, _T("Printer Name"), LVCFMT_RIGHT, 110);
-    m_tab1.m_lcJobinfo2.InsertColumn(1, _T("User"), LVCFMT_LEFT, 110);
-    m_tab1.m_lcJobinfo2.InsertColumn(2, _T("From"), LVCFMT_LEFT, 140);
+    m_tab1.m_lcJobinfo2.InsertColumn(0, _T("Printer Name"), LVCFMT_RIGHT, 230);
+    m_tab1.m_lcJobinfo2.InsertColumn(1, _T("User"), LVCFMT_LEFT, 190);
+    m_tab1.m_lcJobinfo2.InsertColumn(2, _T("From"), LVCFMT_LEFT, 190);
     m_tab1.m_lcJobinfo2.InsertColumn(3, _T("Document"), LVCFMT_LEFT, 180);
+
+
+    
+
+    m_tab2.m_lcDrivers.InsertColumn(0, _T("Driver Name"), LVCFMT_RIGHT, 200);
+    m_tab2.m_lcDrivers.InsertColumn(1, _T("Path"), LVCFMT_LEFT, 150);
+    m_tab2.m_lcDrivers.InsertColumn(2, _T("Data File"), LVCFMT_LEFT, 150);
+    m_tab2.m_lcDrivers.InsertColumn(3, _T("Monitor"), LVCFMT_LEFT, 200);
 
     // Do work on application startup.
     EnumeratePrinters();
+    EnumerateDrivers();
     
     return TRUE;  // return TRUE  unless you set the focus to a control
 }
@@ -212,6 +221,50 @@ void CPrintManagerDlg::EnumeratePrinters( void )
     
     delete lpBuffer;
 }
+
+
+void CPrintManagerDlg::EnumerateDrivers(void)
+{
+    DWORD dwNeeded,
+        dwReturned;
+
+    EnumPrinterDrivers(NULL, _T("all"), 4, NULL, 0, &dwNeeded, &dwReturned);
+    LPBYTE lpBuffer = new BYTE[dwNeeded];
+    EnumPrinterDrivers(NULL, _T("all"), 4, lpBuffer, dwNeeded, &dwNeeded, &dwReturned);
+    PDRIVER_INFO_4 di = (PDRIVER_INFO_4)lpBuffer;
+
+    for (DWORD x = 0; x < dwReturned; x++)
+    {
+        
+        CString strText;
+        strText.Format(_T("%s"), di->pName);
+        int nItem = m_tab2.m_lcDrivers.InsertItem(m_tab2.m_lcDrivers.GetItemCount(), strText);
+        nItem = m_tab2.m_lcDrivers.InsertItem(m_tab2.m_lcDrivers.GetItemCount(), strText);
+        nItem = m_tab2.m_lcDrivers.InsertItem(m_tab2.m_lcDrivers.GetItemCount(), strText);
+        nItem = m_tab2.m_lcDrivers.InsertItem(m_tab2.m_lcDrivers.GetItemCount(), strText);
+        nItem = m_tab2.m_lcDrivers.InsertItem(m_tab2.m_lcDrivers.GetItemCount(), strText);
+
+        m_tab2.m_lcDrivers.SetItemText(nItem, 1, di->pDriverPath);
+
+        strText.Format(_T("%s"), di->pDataFile);
+        m_tab2.m_lcDrivers.SetItemText(nItem, 2, strText);
+
+        strText.Format(_T("%s"), di->pMonitorName);
+        m_tab2.m_lcDrivers.SetItemText(nItem, 3, strText);
+        
+        di++;
+    }
+
+    delete lpBuffer;
+}
+
+
+
+
+
+
+
+
 
 
 UINT ThreadFunc( LPVOID pParam )

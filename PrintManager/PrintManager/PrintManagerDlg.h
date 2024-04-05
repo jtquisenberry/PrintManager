@@ -80,6 +80,7 @@ private:
 	};
 
     void EnumeratePrinters( void );
+	void EnumerateDrivers(void);
     void RepositionChildControl( CWnd *pWnd, const int dx, const int dy, const UINT uAnchor );
 public:
 	afx_msg void OnBnClickedCancel();

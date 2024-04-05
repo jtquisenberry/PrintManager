@@ -21,6 +21,9 @@
 #define IDC_COMBO1                      1010
 #define IDC_CB_PRINTERS2                1010
 #define IDC_LC_JOBINFO2                 1011
+#define IDC_LC_DRIVERINFO               1012
+#define IDC_STATIC2                     1013
+#define IDC_STATIC22                    1013
 
 // Next default values for new objects
 // 
@@ -28,7 +31,7 @@
 #ifndef APSTUDIO_READONLY_SYMBOLS
 #define _APS_NEXT_RESOURCE_VALUE        136
 #define _APS_NEXT_COMMAND_VALUE         32771
-#define _APS_NEXT_CONTROL_VALUE         1012
+#define _APS_NEXT_CONTROL_VALUE         1014
 #define _APS_NEXT_SYMED_VALUE           101
 #endif
 #endif

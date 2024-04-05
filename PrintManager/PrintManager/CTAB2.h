@@ -10,6 +10,7 @@ class CTAB2 : public CDialogEx
 
 public:
 	CTAB2(CWnd* pParent = nullptr);   // standard constructor
+	CListCtrl  m_lcDrivers;
 	virtual ~CTAB2();
 
 // Dialog Data
@@ -21,4 +22,6 @@ protected:
 	virtual void DoDataExchange(CDataExchange* pDX);    // DDX/DDV support
 
 	DECLARE_MESSAGE_MAP()
+public:
+	afx_msg void OnLvnItemchangedLcJobinfo2(NMHDR* pNMHDR, LRESULT* pResult);
 };
