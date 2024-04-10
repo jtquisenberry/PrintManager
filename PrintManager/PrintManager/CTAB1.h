@@ -11,7 +11,7 @@ class CTAB1 : public CDialogEx
 public:
 	//CEdit m_ctab1_cedit;
 	CComboBox	m_cbPrinters;
-	CListCtrl  m_lcJobinfo2;
+	CListCtrl  m_lcPrinters;
 	CTAB1(CWnd* pParent = nullptr);   // standard constructor
 	virtual ~CTAB1();
 
@@ -26,4 +26,7 @@ protected:
 	DECLARE_MESSAGE_MAP()
 public:
 	afx_msg void OnBnClickedOk();
+	afx_msg void OnNMRClickLcJobinfo2(NMHDR* pNMHDR, LRESULT* pResult);
+	afx_msg void OnBnClickedCancelRedirect();
+	afx_msg void OnBnClickedRedirect();
 };

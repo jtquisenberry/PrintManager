@@ -147,10 +147,10 @@ BOOL CPrintManagerDlg::OnInitDialog()
 
 
 
-    m_tab1.m_lcJobinfo2.InsertColumn(0, _T("Printer Name"), LVCFMT_RIGHT, 230);
-    m_tab1.m_lcJobinfo2.InsertColumn(1, _T("User"), LVCFMT_LEFT, 190);
-    m_tab1.m_lcJobinfo2.InsertColumn(2, _T("From"), LVCFMT_LEFT, 190);
-    m_tab1.m_lcJobinfo2.InsertColumn(3, _T("Document"), LVCFMT_LEFT, 180);
+    m_tab1.m_lcPrinters.InsertColumn(0, _T("Printer Name"), LVCFMT_RIGHT, 230);
+    m_tab1.m_lcPrinters.InsertColumn(1, _T("User"), LVCFMT_LEFT, 190);
+    m_tab1.m_lcPrinters.InsertColumn(2, _T("From"), LVCFMT_LEFT, 190);
+    m_tab1.m_lcPrinters.InsertColumn(3, _T("Document"), LVCFMT_LEFT, 180);
 
 
     
@@ -204,15 +204,15 @@ void CPrintManagerDlg::EnumeratePrinters( void )
         
         CString strText;
         strText.Format(_T("%s"), p1->pPrinterName);
-        int nItem = m_tab1.m_lcJobinfo2.InsertItem(m_tab1.m_lcJobinfo2.GetItemCount(), strText);
+        int nItem = m_tab1.m_lcPrinters.InsertItem(m_tab1.m_lcPrinters.GetItemCount(), strText);
 
-        m_tab1.m_lcJobinfo2.SetItemText(nItem, 1, p1->pDriverName);
+        m_tab1.m_lcPrinters.SetItemText(nItem, 1, p1->pDriverName);
 
         strText.Format(_T("%d on %s"), p1->Status, p1->pPortName);
-        m_tab1.m_lcJobinfo2.SetItemText(nItem, 2, strText);
+        m_tab1.m_lcPrinters.SetItemText(nItem, 2, strText);
 
         strText.Format(_T("%d"), p1->cJobs);
-        m_tab1.m_lcJobinfo2.SetItemText(nItem, 3, strText);
+        m_tab1.m_lcPrinters.SetItemText(nItem, 3, strText);
         
         
 
@@ -580,7 +580,7 @@ void CPrintManagerDlg::OnSize(UINT nType, int cx, int cy)
         m_tab1.GetWindowRect(&rect3);
         ScreenToClient(&rect3);
 
-        m_tab1.m_lcJobinfo2.GetWindowRect(&rect4);
+        m_tab1.m_lcPrinters.GetWindowRect(&rect4);
         ScreenToClient(&rect4);
 
         m_tabcontrol.SetWindowPos(NULL, rect2.left, rect2.top, 
@@ -593,7 +593,7 @@ void CPrintManagerDlg::OnSize(UINT nType, int cx, int cy)
             cx, rect3.bottom - rect3.top + nHeightOffset,
             SWP_NOZORDER);
 
-        m_tab1.m_lcJobinfo2.SetWindowPos(NULL, 0, 62,
+        m_tab1.m_lcPrinters.SetWindowPos(NULL, 0, 62,
             cx - 21, rect4.bottom - rect4.top + nHeightOffset,
             SWP_NOZORDER);
         
