@@ -1,10 +1,18 @@
 // CTAB1.cpp : implementation file
 //
 
+
 #include "stdafx.h"
 #include "PrintManager.h"
 #include "afxdialogex.h"
 #include "CTAB1.h"
+#include <iostream>
+#include <vector>
+
+
+
+std::vector<CString> s;
+
 
 
 // CTAB1 dialog
@@ -51,8 +59,59 @@ void CTAB1::OnNMRClickLcJobinfo2(NMHDR* pNMHDR, LRESULT* pResult)
 {
 	LPNMITEMACTIVATE pNMItemActivate = reinterpret_cast<LPNMITEMACTIVATE>(pNMHDR);
 
+
+
+	
+
+
+
 	int xxx = m_lcPrinters.GetSelectedCount();
-	// TODO: Add your control notification handler code here
+
+	int nColumns = m_lcPrinters.GetHeaderCtrl()->GetItemCount();
+	POSITION pos = m_lcPrinters.GetFirstSelectedItemPosition();
+	int selected = -1;
+	if (pos != NULL)
+	{
+		while (pos)
+		{
+			int nItem = m_lcPrinters.GetNextSelectedItem(pos);
+			selected = nItem + 1;
+
+			
+
+			for (int i = 0; i < nColumns; i++)
+			{
+				CString sItem = m_lcPrinters.GetItemText(nItem, i);
+				// TO DO: do stuff with item text here
+
+				//std::wcout << "aaa";
+
+				if (i == 0)
+				{
+					s.push_back(sItem);
+				}
+
+
+			}
+
+		}
+	}
+	//returns -1 if not selected;
+	
+	OutputDebugString(L"\n");
+	OutputDebugString(L"SELECTED PRINTERS");
+	OutputDebugString(L"\n");
+
+
+
+	for (CString element : s)
+	{
+		OutputDebugString(element);
+		OutputDebugString(L"\n");
+	}
+
+	OutputDebugString(L"\n");
+
 	*pResult = 0;
 }
 
