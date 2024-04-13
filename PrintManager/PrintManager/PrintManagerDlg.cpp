@@ -146,7 +146,7 @@ BOOL CPrintManagerDlg::OnInitDialog()
     m_tab2.ShowWindow(SW_HIDE);
 
 
-
+    m_tab1.m_lcPrinters.SetExtendedStyle(LVS_EX_FULLROWSELECT);
     m_tab1.m_lcPrinters.InsertColumn(0, _T("Printer Name"), LVCFMT_RIGHT, 230);
     m_tab1.m_lcPrinters.InsertColumn(1, _T("User"), LVCFMT_LEFT, 190);
     m_tab1.m_lcPrinters.InsertColumn(2, _T("From"), LVCFMT_LEFT, 190);

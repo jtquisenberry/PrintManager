@@ -8,10 +8,15 @@
 #include "CTAB1.h"
 #include <iostream>
 #include <vector>
+#include <stdio.h>
 
 
+std::vector<CString> printer_names;
+std::vector<POSITION> printer_positions;
+std::vector<int> printer_item_indexes;
 
-std::vector<CString> s;
+
+//void GetSelectedPrinters();
 
 
 
@@ -57,60 +62,64 @@ void CTAB1::OnBnClickedOk()
 
 void CTAB1::OnNMRClickLcJobinfo2(NMHDR* pNMHDR, LRESULT* pResult)
 {
+	// Right-click m_lcPrinters	
 	LPNMITEMACTIVATE pNMItemActivate = reinterpret_cast<LPNMITEMACTIVATE>(pNMHDR);
-
-
-
 	
-
-
-
-	int xxx = m_lcPrinters.GetSelectedCount();
-
+	int nSelectedRows = m_lcPrinters.GetSelectedCount();
 	int nColumns = m_lcPrinters.GetHeaderCtrl()->GetItemCount();
+
+	// pos is a 1-indexed hex value indicating the position in the list from the top.
 	POSITION pos = m_lcPrinters.GetFirstSelectedItemPosition();
-	int selected = -1;
+	printer_positions.push_back(pos);
+	int nItem = -1;
 	if (pos != NULL)
 	{
 		while (pos)
 		{
-			int nItem = m_lcPrinters.GetNextSelectedItem(pos);
-			selected = nItem + 1;
-
-			
+			// nItem is a 0-indexed value indicating the position in the list from the top.
+			nItem = m_lcPrinters.GetNextSelectedItem(pos);
+			printer_positions.push_back(pos);
+			printer_item_indexes.push_back(nItem);
 
 			for (int i = 0; i < nColumns; i++)
 			{
 				CString sItem = m_lcPrinters.GetItemText(nItem, i);
-				// TO DO: do stuff with item text here
-
-				//std::wcout << "aaa";
-
 				if (i == 0)
 				{
-					s.push_back(sItem);
+					printer_names.push_back(sItem);
 				}
-
 
 			}
 
 		}
 	}
-	//returns -1 if not selected;
+	//nItem remains -1 if not selected;
 	
 	OutputDebugString(L"\n");
 	OutputDebugString(L"SELECTED PRINTERS");
 	OutputDebugString(L"\n");
 
+	for (int i=0; i < printer_names.size(); i++)
+	{ 
+		CString e = printer_names[i];
+		POSITION p = printer_positions[i];
+		int idx = printer_item_indexes[i];
 
+		wchar_t buffer[100];
+		int cx;
 
-	for (CString element : s)
-	{
-		OutputDebugString(element);
+		cx = swprintf(buffer, 100, L"%40s %4d %4d", (LPCWSTR)e, (int)p, idx);
+		OutputDebugString(buffer);
 		OutputDebugString(L"\n");
 	}
 
 	OutputDebugString(L"\n");
+
+	for (CString element : printer_names)
+	{
+		OutputDebugString(element);
+		OutputDebugString(L"\n");
+	}
 
 	*pResult = 0;
 }
@@ -124,8 +133,77 @@ void CTAB1::OnBnClickedCancelRedirect()
 
 void CTAB1::OnBnClickedRedirect()
 {
-	int xxx = m_cbPrinters.GetCurSel();
-	DWORD_PTR d = m_cbPrinters.GetItemData(xxx);
-	CString cstring;
-	m_cbPrinters.GetLBText(xxx, cstring);
+	int redirected_printer_index = m_cbPrinters.GetCurSel();
+
+	if (redirected_printer_index < 0)
+	{
+		return;
+	}
+
+	DWORD_PTR d = m_cbPrinters.GetItemData(redirected_printer_index);
+	CString redirected_printer_name;
+	m_cbPrinters.GetLBText(redirected_printer_index, redirected_printer_name);
+
+	GetSelectedPrinters();
+	return;
+}
+
+void CTAB1::GetSelectedPrinters()
+{
+	int nSelectedRows = m_lcPrinters.GetSelectedCount();
+	int nColumns = m_lcPrinters.GetHeaderCtrl()->GetItemCount();
+
+	// pos is a 1-indexed hex value indicating the position in the list from the top.
+	POSITION pos = m_lcPrinters.GetFirstSelectedItemPosition();
+	printer_positions.push_back(pos);
+	int nItem = -1;
+	if (pos != NULL)
+	{
+		while (pos)
+		{
+			// nItem is a 0-indexed value indicating the position in the list from the top.
+			nItem = m_lcPrinters.GetNextSelectedItem(pos);
+			printer_positions.push_back(pos);
+			printer_item_indexes.push_back(nItem);
+
+			for (int i = 0; i < nColumns; i++)
+			{
+				CString sItem = m_lcPrinters.GetItemText(nItem, i);
+				if (i == 0)
+				{
+					printer_names.push_back(sItem);
+				}
+
+			}
+
+		}
+	}
+	//nItem remains -1 if not selected;
+
+	OutputDebugString(L"\n");
+	OutputDebugString(L"SELECTED PRINTERS");
+	OutputDebugString(L"\n");
+
+	for (int i = 0; i < printer_names.size(); i++)
+	{
+		CString e = printer_names[i];
+		POSITION p = printer_positions[i];
+		int idx = printer_item_indexes[i];
+
+		wchar_t buffer[100];
+		int cx;
+
+		cx = swprintf(buffer, 100, L"%40s %4d %4d", (LPCWSTR)e, (int)p, idx);
+		OutputDebugString(buffer);
+		OutputDebugString(L"\n");
+	}
+
+	OutputDebugString(L"\n");
+
+	for (CString element : printer_names)
+	{
+		OutputDebugString(element);
+		OutputDebugString(L"\n");
+	}
+
 }

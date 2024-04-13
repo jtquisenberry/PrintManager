@@ -12,6 +12,7 @@ public:
 	//CEdit m_ctab1_cedit;
 	CComboBox	m_cbPrinters;
 	CListCtrl  m_lcPrinters;
+	void GetSelectedPrinters();
 	CTAB1(CWnd* pParent = nullptr);   // standard constructor
 	virtual ~CTAB1();
 
