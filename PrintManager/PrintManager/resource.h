@@ -28,6 +28,7 @@
 #define IDC_PAUSE_PRINTERS              1015
 #define IDC_CANCEL_REDIRECT2            1016
 #define IDC_RESUME_PRINTERS             1017
+#define IDC_PURGE_PRINTERS              1018
 
 // Next default values for new objects
 // 

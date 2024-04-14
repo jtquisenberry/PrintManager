@@ -50,6 +50,8 @@ BEGIN_MESSAGE_MAP(CTAB1, CDialogEx)
 	//ON_BN_CLICKED(IDC_CANCEL_REDIRECT, &CTAB1::OnBnClickedCancelRedirect)
 	ON_BN_CLICKED(IDC_REDIRECT, &CTAB1::OnBnClickedRedirect)
 	ON_BN_CLICKED(IDC_PAUSE_PRINTERS, &CTAB1::OnBnClickedPausePrinters)
+	ON_BN_CLICKED(IDC_RESUME_PRINTERS, &CTAB1::OnBnClickedResumePrinters)
+	ON_BN_CLICKED(IDC_PURGE_PRINTERS, &CTAB1::OnBnClickedPurgePrinters)
 END_MESSAGE_MAP()
 
 
@@ -214,8 +216,7 @@ void CTAB1::GetSelectedPrinters()
 }
 
 
-
-void ErrorExit(LPCTSTR lpszFunction)
+void ErrorMessage(LPCTSTR lpszFunction)
 {
 	// Retrieve the system error message for the last-error code
 
@@ -243,12 +244,86 @@ void ErrorExit(LPCTSTR lpszFunction)
 		lpszFunction, dw, lpMsgBuf);
 	MessageBox(NULL, (LPCTSTR)lpDisplayBuf, TEXT("Error"), MB_OK);
 
-	LocalFree(lpMsgBuf);
-	LocalFree(lpDisplayBuf);
-	ExitProcess(dw);
+	//LocalFree(lpMsgBuf);
+	//LocalFree(lpDisplayBuf);
+	//ExitProcess(dw);
 }
 
 
+int SetPrinterStatus(CString printer_name, int status)
+{
+	// Initialize for output
+	wchar_t buffer[100];
+	int cx;
+
+	// Initialize for printer access.
+	HANDLE pHandle;
+	PRINTER_DEFAULTS* pAll = new PRINTER_DEFAULTS();
+	pAll->DesiredAccess = PRINTER_ALL_ACCESS;
+	BOOL result = 0;
+
+	// OpenPrinter in all access mode.
+	result = OpenPrinter((LPWSTR)(LPCWSTR)printer_name, &pHandle, pAll);
+
+	DWORD dwNeeded = 0L;
+	DWORD dwReturned;
+	PPRINTER_INFO_2 pInfo = NULL;
+
+	result = GetPrinter(pHandle, 2, NULL, 0, &dwNeeded);
+	if (!dwNeeded)
+	{
+		fprintf(stderr, "[FATAL] GetPrinter() failed: %lu\n", GetLastError());
+		ClosePrinter(pHandle);
+		return EXIT_FAILURE;
+	}
+
+	pInfo = (PRINTER_INFO_2*)HeapAlloc(GetProcessHeap(), HEAP_ZERO_MEMORY, dwNeeded);
+	if (pInfo == NULL)
+	{
+		fprintf(stderr, "[FATAL] HeapAlloc() failed: %lu\n", GetLastError());
+		ClosePrinter(pHandle);
+		return EXIT_FAILURE;
+	}
+
+	result = GetPrinter(pHandle, 2, (LPBYTE)pInfo, dwNeeded, &dwNeeded);
+	cx = swprintf(buffer, 100, L"%40s Status: %4d\n", printer_name, pInfo->Status);
+	OutputDebugString(buffer);
+
+	result = SetPrinter(pHandle, 0, NULL, status);
+	if (!result)
+	{
+		ErrorMessage(TEXT("SetPrinter"));
+	}
+
+	result = GetPrinter(pHandle, 2, (LPBYTE)pInfo, dwNeeded, &dwNeeded);
+	cx = swprintf(buffer, 100, L"%40s Status: %4d\n", printer_name, pInfo->Status);
+	OutputDebugString(buffer);
+	return 0;
+}
+
+
+int PausePrinter(CString printer_name)
+{
+	BOOL result = 0;
+	result = SetPrinterStatus(printer_name, PRINTER_CONTROL_PAUSE);
+	return result;
+}
+
+
+int ResumePrinter(CString printer_name)
+{
+	BOOL result = 0;
+	result = SetPrinterStatus(printer_name, PRINTER_CONTROL_RESUME);
+	return result;
+}
+
+
+int PurgePrinter(CString printer_name)
+{
+	BOOL result = 0;
+	result = SetPrinterStatus(printer_name, PRINTER_CONTROL_PURGE);
+	return result;
+}
 
 
 void CTAB1::OnBnClickedPausePrinters()
@@ -256,43 +331,41 @@ void CTAB1::OnBnClickedPausePrinters()
 	CTAB1::GetSelectedPrinters();
 	for (CString printer_name : printer_names)
 	{
-		HANDLE pHandle;
-		int status = -999;
-		status = OpenPrinter((WCHAR*)(LPCWSTR)printer_name, &pHandle, NULL);
+		BOOL result = 0;
+		OutputDebugString(L"\n");
+		OutputDebugString(L"PRINTER STATUS");
+		OutputDebugString(L"\n");
+		result = PausePrinter(printer_name);
+		return;
+	}
+}
 
 
-		DWORD dwNeeded = 0L;
-		DWORD dwReturned;
-		PPRINTER_INFO_2 pInfo = NULL;
+void CTAB1::OnBnClickedResumePrinters()
+{
+	CTAB1::GetSelectedPrinters();
+	for (CString printer_name : printer_names)
+	{
+		BOOL result = 0;
+		OutputDebugString(L"\n");
+		OutputDebugString(L"PRINTER STATUS");
+		OutputDebugString(L"\n");
+		result = ResumePrinter(printer_name);
+		return;
+	}
+}
 
-		BOOL ret = GetPrinter(pHandle, 2, NULL, 0, &dwNeeded);
 
-		if (!dwNeeded)
-		{
-			fprintf(stderr, "[FATAL] GetPrinter() failed: %lu\n", GetLastError());
-			//ClosePrinter(pHandle);
-			// return EXIT_FAILURE;
-		}
-
-		pInfo = (PRINTER_INFO_2*)HeapAlloc(GetProcessHeap(), HEAP_ZERO_MEMORY, dwNeeded);
-
-		if (pInfo == NULL)
-		{
-			fprintf(stderr, "[FATAL] HeapAlloc() failed: %lu\n", GetLastError());
-			//ClosePrinter(pHandle);
-			// return EXIT_FAILURE;
-		}
-
-		ret = GetPrinter(pHandle, 2, (LPBYTE)pInfo, dwNeeded, &dwNeeded);
-
-		int c = PRINTER_STATUS_PAUSED;
-
-		BOOL yyy = SetPrinter(pHandle, 0, NULL, PRINTER_CONTROL_PAUSE);
-		ErrorExit(TEXT("GetProcessId"));
-		int a = 1;
-
-		ret = GetPrinter(pHandle, 2, (LPBYTE)pInfo, dwNeeded, &dwNeeded);
-		int b = 1;
-
+void CTAB1::OnBnClickedPurgePrinters()
+{
+	CTAB1::GetSelectedPrinters();
+	for (CString printer_name : printer_names)
+	{
+		BOOL result = 0;
+		OutputDebugString(L"\n");
+		OutputDebugString(L"PRINTER STATUS");
+		OutputDebugString(L"\n");
+		result = PurgePrinter(printer_name);
+		return;
 	}
 }

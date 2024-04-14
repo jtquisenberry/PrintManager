@@ -31,4 +31,6 @@ public:
 	afx_msg void OnBnClickedCancelRedirect();
 	afx_msg void OnBnClickedRedirect();
 	afx_msg void OnBnClickedPausePrinters();
+	afx_msg void OnBnClickedResumePrinters();
+	afx_msg void OnBnClickedPurgePrinters();
 };
