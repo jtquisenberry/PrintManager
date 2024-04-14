@@ -25,7 +25,9 @@
 #define IDC_STATIC2                     1013
 #define IDC_STATIC22                    1013
 #define IDC_REDIRECT                    1014
-#define IDC_CANCEL_REDIRECT             1015
+#define IDC_PAUSE_PRINTERS              1015
+#define IDC_CANCEL_REDIRECT2            1016
+#define IDC_RESUME_PRINTERS             1017
 
 // Next default values for new objects
 // 

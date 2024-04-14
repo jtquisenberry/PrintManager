@@ -10,6 +10,8 @@
 #include <vector>
 #include <stdio.h>
 
+#include <windows.h>
+#include <strsafe.h>
 
 std::vector<CString> printer_names;
 std::vector<POSITION> printer_positions;
@@ -45,8 +47,9 @@ void CTAB1::DoDataExchange(CDataExchange* pDX)
 BEGIN_MESSAGE_MAP(CTAB1, CDialogEx)
 	ON_BN_CLICKED(IDOK, &CTAB1::OnBnClickedOk)
 	ON_NOTIFY(NM_RCLICK, IDC_LC_JOBINFO2, &CTAB1::OnNMRClickLcJobinfo2)
-	ON_BN_CLICKED(IDC_CANCEL_REDIRECT, &CTAB1::OnBnClickedCancelRedirect)
+	//ON_BN_CLICKED(IDC_CANCEL_REDIRECT, &CTAB1::OnBnClickedCancelRedirect)
 	ON_BN_CLICKED(IDC_REDIRECT, &CTAB1::OnBnClickedRedirect)
+	ON_BN_CLICKED(IDC_PAUSE_PRINTERS, &CTAB1::OnBnClickedPausePrinters)
 END_MESSAGE_MAP()
 
 
@@ -150,6 +153,10 @@ void CTAB1::OnBnClickedRedirect()
 
 void CTAB1::GetSelectedPrinters()
 {
+	printer_names.clear();
+	printer_positions.clear();
+	printer_item_indexes.clear();
+
 	int nSelectedRows = m_lcPrinters.GetSelectedCount();
 	int nColumns = m_lcPrinters.GetHeaderCtrl()->GetItemCount();
 
@@ -173,9 +180,7 @@ void CTAB1::GetSelectedPrinters()
 				{
 					printer_names.push_back(sItem);
 				}
-
 			}
-
 		}
 	}
 	//nItem remains -1 if not selected;
@@ -206,4 +211,88 @@ void CTAB1::GetSelectedPrinters()
 		OutputDebugString(L"\n");
 	}
 
+}
+
+
+
+void ErrorExit(LPCTSTR lpszFunction)
+{
+	// Retrieve the system error message for the last-error code
+
+	LPVOID lpMsgBuf;
+	LPVOID lpDisplayBuf;
+	DWORD dw = GetLastError();
+
+	FormatMessage(
+		FORMAT_MESSAGE_ALLOCATE_BUFFER |
+		FORMAT_MESSAGE_FROM_SYSTEM |
+		FORMAT_MESSAGE_IGNORE_INSERTS,
+		NULL,
+		dw,
+		MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT),
+		(LPTSTR)&lpMsgBuf,
+		0, NULL);
+
+	// Display the error message and exit the process
+
+	lpDisplayBuf = (LPVOID)LocalAlloc(LMEM_ZEROINIT,
+		(lstrlen((LPCTSTR)lpMsgBuf) + lstrlen((LPCTSTR)lpszFunction) + 40) * sizeof(TCHAR));
+	StringCchPrintf((LPTSTR)lpDisplayBuf,
+		LocalSize(lpDisplayBuf) / sizeof(TCHAR),
+		TEXT("%s failed with error %d: %s"),
+		lpszFunction, dw, lpMsgBuf);
+	MessageBox(NULL, (LPCTSTR)lpDisplayBuf, TEXT("Error"), MB_OK);
+
+	LocalFree(lpMsgBuf);
+	LocalFree(lpDisplayBuf);
+	ExitProcess(dw);
+}
+
+
+
+
+void CTAB1::OnBnClickedPausePrinters()
+{
+	CTAB1::GetSelectedPrinters();
+	for (CString printer_name : printer_names)
+	{
+		HANDLE pHandle;
+		int status = -999;
+		status = OpenPrinter((WCHAR*)(LPCWSTR)printer_name, &pHandle, NULL);
+
+
+		DWORD dwNeeded = 0L;
+		DWORD dwReturned;
+		PPRINTER_INFO_2 pInfo = NULL;
+
+		BOOL ret = GetPrinter(pHandle, 2, NULL, 0, &dwNeeded);
+
+		if (!dwNeeded)
+		{
+			fprintf(stderr, "[FATAL] GetPrinter() failed: %lu\n", GetLastError());
+			//ClosePrinter(pHandle);
+			// return EXIT_FAILURE;
+		}
+
+		pInfo = (PRINTER_INFO_2*)HeapAlloc(GetProcessHeap(), HEAP_ZERO_MEMORY, dwNeeded);
+
+		if (pInfo == NULL)
+		{
+			fprintf(stderr, "[FATAL] HeapAlloc() failed: %lu\n", GetLastError());
+			//ClosePrinter(pHandle);
+			// return EXIT_FAILURE;
+		}
+
+		ret = GetPrinter(pHandle, 2, (LPBYTE)pInfo, dwNeeded, &dwNeeded);
+
+		int c = PRINTER_STATUS_PAUSED;
+
+		BOOL yyy = SetPrinter(pHandle, 0, NULL, PRINTER_CONTROL_PAUSE);
+		ErrorExit(TEXT("GetProcessId"));
+		int a = 1;
+
+		ret = GetPrinter(pHandle, 2, (LPBYTE)pInfo, dwNeeded, &dwNeeded);
+		int b = 1;
+
+	}
 }

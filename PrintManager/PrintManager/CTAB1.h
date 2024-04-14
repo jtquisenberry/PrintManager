@@ -30,4 +30,5 @@ public:
 	afx_msg void OnNMRClickLcJobinfo2(NMHDR* pNMHDR, LRESULT* pResult);
 	afx_msg void OnBnClickedCancelRedirect();
 	afx_msg void OnBnClickedRedirect();
+	afx_msg void OnBnClickedPausePrinters();
 };
