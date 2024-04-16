@@ -33,4 +33,7 @@ public:
 	afx_msg void OnBnClickedPausePrinters();
 	afx_msg void OnBnClickedResumePrinters();
 	afx_msg void OnBnClickedPurgePrinters();
+	afx_msg void OnContextMenu(CWnd* /*pWnd*/, CPoint /*point*/);
+	afx_msg void OnPrintersDebug();
+	afx_msg void OnPrintersSave();
 };

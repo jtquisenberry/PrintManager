@@ -52,6 +52,9 @@ BEGIN_MESSAGE_MAP(CTAB1, CDialogEx)
 	ON_BN_CLICKED(IDC_PAUSE_PRINTERS, &CTAB1::OnBnClickedPausePrinters)
 	ON_BN_CLICKED(IDC_RESUME_PRINTERS, &CTAB1::OnBnClickedResumePrinters)
 	ON_BN_CLICKED(IDC_PURGE_PRINTERS, &CTAB1::OnBnClickedPurgePrinters)
+	ON_WM_CONTEXTMENU()
+	ON_COMMAND(ID_PRINTERS_DEBUG, &CTAB1::OnPrintersDebug)
+	ON_COMMAND(ID_PRINTERS_SAVE, &CTAB1::OnPrintersSave)
 END_MESSAGE_MAP()
 
 
@@ -69,62 +72,45 @@ void CTAB1::OnNMRClickLcJobinfo2(NMHDR* pNMHDR, LRESULT* pResult)
 {
 	// Right-click m_lcPrinters	
 	LPNMITEMACTIVATE pNMItemActivate = reinterpret_cast<LPNMITEMACTIVATE>(pNMHDR);
-	
-	int nSelectedRows = m_lcPrinters.GetSelectedCount();
+	int right_clicked_item_index = pNMItemActivate->iItem;
 	int nColumns = m_lcPrinters.GetHeaderCtrl()->GetItemCount();
 
-	// pos is a 1-indexed hex value indicating the position in the list from the top.
-	POSITION pos = m_lcPrinters.GetFirstSelectedItemPosition();
-	printer_positions.push_back(pos);
-	int nItem = -1;
-	if (pos != NULL)
+	wchar_t buffer[500];
+	int cx;
+
+	OutputDebugString(L"\n");
+	OutputDebugString(L"RIGHT-CLICKED PRINTER");
+	OutputDebugString(L"\n");
+		
+	int buffer_start_index = 0;
+	for (int column_number = 0; column_number < nColumns; column_number++)
 	{
-		while (pos)
-		{
-			// nItem is a 0-indexed value indicating the position in the list from the top.
-			nItem = m_lcPrinters.GetNextSelectedItem(pos);
-			printer_positions.push_back(pos);
-			printer_item_indexes.push_back(nItem);
-
-			for (int i = 0; i < nColumns; i++)
-			{
-				CString sItem = m_lcPrinters.GetItemText(nItem, i);
-				if (i == 0)
-				{
-					printer_names.push_back(sItem);
-				}
-
-			}
-
-		}
+		CString sItem = m_lcPrinters.GetItemText(right_clicked_item_index, column_number);
+		cx = swprintf(&buffer[buffer_start_index], 500, L"%40s ", (LPCWSTR)sItem);
+		buffer_start_index += cx;
 	}
-	//nItem remains -1 if not selected;
+
+	if (buffer_start_index < 500)
+	{
+		buffer[buffer_start_index] = L'\0';
+	}
 	
-	OutputDebugString(L"\n");
-	OutputDebugString(L"SELECTED PRINTERS");
-	OutputDebugString(L"\n");
-
-	for (int i=0; i < printer_names.size(); i++)
-	{ 
-		CString e = printer_names[i];
-		POSITION p = printer_positions[i];
-		int idx = printer_item_indexes[i];
-
-		wchar_t buffer[100];
-		int cx;
-
-		cx = swprintf(buffer, 100, L"%40s %4d %4d", (LPCWSTR)e, (int)p, idx);
-		OutputDebugString(buffer);
-		OutputDebugString(L"\n");
-	}
-
+	OutputDebugString(buffer);
 	OutputDebugString(L"\n");
 
-	for (CString element : printer_names)
-	{
-		OutputDebugString(element);
-		OutputDebugString(L"\n");
-	}
+	/*
+	CMenu menu;
+
+	menu.LoadMenu(IDR_POPUP_MENU);
+
+	CMenu* pContextMenu = menu.GetSubMenu(0);
+
+	pContextMenu->TrackPopupMenu(TPM_LEFTALIGN | TPM_LEFTBUTTON |
+		TPM_RIGHTBUTTON, point.x, point.y, AfxGetMainWnd(), NULL);
+
+	*/
+
+
 
 	*pResult = 0;
 }
@@ -368,4 +354,46 @@ void CTAB1::OnBnClickedPurgePrinters()
 		result = PurgePrinter(printer_name);
 		return;
 	}
+}
+
+
+void CTAB1::OnContextMenu(CWnd* pWnd, CPoint point)
+{
+	// TODO: Add your message handler code here
+	// Load the desired menu
+	CMenu mnuPopupSubmit;
+	mnuPopupSubmit.LoadMenu(IDR_POPUP_PRINTERS);
+
+	// Get a pointer to the button
+	// CButton* pButton;
+	// pButton = reinterpret_cast<CButton*>(GetDlgItem(IDC_LC_JOBINFO2));
+	CListCtrl* pListCtrl;
+	pListCtrl = reinterpret_cast<CListCtrl*>(GetDlgItem(IDC_LC_JOBINFO2));
+
+	// Find the rectangle around the button
+	CRect rectSubmitButton;
+	pListCtrl->GetWindowRect(&rectSubmitButton);
+
+	// Get a pointer to the first item of the menu
+	CMenu* mnuPopupMenu = mnuPopupSubmit.GetSubMenu(0);
+	ASSERT(mnuPopupMenu);
+
+	// Find out if the user right-clicked the button
+	// because we are interested only in the button
+	if (rectSubmitButton.PtInRect(point)) // Since the user right-clicked the button, display the context menu
+		mnuPopupMenu->TrackPopupMenu(TPM_LEFTALIGN | TPM_RIGHTBUTTON, point.x, point.y, this);
+}
+
+
+void CTAB1::OnPrintersDebug()
+{
+	// TODO: Add your command handler code here
+	MessageBox(L"You selected the DEBUG menu item");
+}
+
+
+void CTAB1::OnPrintersSave()
+{
+	// TODO: Add your command handler code here
+	MessageBox(L"You selected the SAVE menu item");
 }

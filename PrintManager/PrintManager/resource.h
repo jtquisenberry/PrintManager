@@ -9,6 +9,7 @@
 #define IDR_MAINFRAME                   128
 #define IDD_TAB1                        130
 #define IDD_TAB2                        131
+#define IDR_POPUP_PRINTERS              136
 #define IDC_LC_JOBINFO                  1000
 #define IDC_CB_PRINTERS                 1001
 #define IDC_BTN_START                   1002
@@ -29,13 +30,20 @@
 #define IDC_CANCEL_REDIRECT2            1016
 #define IDC_RESUME_PRINTERS             1017
 #define IDC_PURGE_PRINTERS              1018
+#define ID_SAVEPROPERTIES_ABCD          32771
+#define ID_SAVEPROPERTIES_EFGH          32772
+#define ID_SAVEPROPERTIES_IJKL          32773
+#define ID_SAVEPROPERTIES_MNOP          32774
+#define ID_SAVEPROPERTIES_QRST          32775
+#define ID_PRINTERS_DEBUG               32776
+#define ID_PRINTERS_SAVE                32777
 
 // Next default values for new objects
 // 
 #ifdef APSTUDIO_INVOKED
 #ifndef APSTUDIO_READONLY_SYMBOLS
-#define _APS_NEXT_RESOURCE_VALUE        136
-#define _APS_NEXT_COMMAND_VALUE         32771
+#define _APS_NEXT_RESOURCE_VALUE        137
+#define _APS_NEXT_COMMAND_VALUE         32778
 #define _APS_NEXT_CONTROL_VALUE         1016
 #define _APS_NEXT_SYMED_VALUE           101
 #endif
