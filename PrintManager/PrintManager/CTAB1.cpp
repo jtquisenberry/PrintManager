@@ -16,7 +16,7 @@
 std::vector<CString> printer_names;
 std::vector<POSITION> printer_positions;
 std::vector<int> printer_item_indexes;
-
+std::vector<CString> printer_properties;
 
 //void GetSelectedPrinters();
 
@@ -25,6 +25,13 @@ std::vector<int> printer_item_indexes;
 // CTAB1 dialog
 
 IMPLEMENT_DYNAMIC(CTAB1, CDialogEx)
+
+
+int selected_printer_index = -1;
+
+
+
+
 
 CTAB1::CTAB1(CWnd* pParent /*=nullptr*/)
 	: CDialogEx(IDD_TAB1, pParent)
@@ -73,6 +80,7 @@ void CTAB1::OnNMRClickLcJobinfo2(NMHDR* pNMHDR, LRESULT* pResult)
 	// Right-click m_lcPrinters	
 	LPNMITEMACTIVATE pNMItemActivate = reinterpret_cast<LPNMITEMACTIVATE>(pNMHDR);
 	int right_clicked_item_index = pNMItemActivate->iItem;
+	selected_printer_index = right_clicked_item_index;
 	int nColumns = m_lcPrinters.GetHeaderCtrl()->GetItemCount();
 
 	wchar_t buffer[500];
@@ -97,20 +105,6 @@ void CTAB1::OnNMRClickLcJobinfo2(NMHDR* pNMHDR, LRESULT* pResult)
 	
 	OutputDebugString(buffer);
 	OutputDebugString(L"\n");
-
-	/*
-	CMenu menu;
-
-	menu.LoadMenu(IDR_POPUP_MENU);
-
-	CMenu* pContextMenu = menu.GetSubMenu(0);
-
-	pContextMenu->TrackPopupMenu(TPM_LEFTALIGN | TPM_LEFTBUTTON |
-		TPM_RIGHTBUTTON, point.x, point.y, AfxGetMainWnd(), NULL);
-
-	*/
-
-
 
 	*pResult = 0;
 }
@@ -202,6 +196,16 @@ void CTAB1::GetSelectedPrinters()
 }
 
 
+void GetClickedPrinter()
+{
+
+
+
+}
+
+
+
+
 void ErrorMessage(LPCTSTR lpszFunction)
 {
 	// Retrieve the system error message for the last-error code
@@ -248,7 +252,7 @@ int SetPrinterStatus(CString printer_name, int status)
 	pAll->DesiredAccess = PRINTER_ALL_ACCESS;
 	BOOL result = 0;
 
-	// OpenPrinter in all access mode.
+	// OpenPrinter in all-access mode
 	result = OpenPrinter((LPWSTR)(LPCWSTR)printer_name, &pHandle, pAll);
 
 	DWORD dwNeeded = 0L;
@@ -286,6 +290,75 @@ int SetPrinterStatus(CString printer_name, int status)
 	OutputDebugString(buffer);
 	return 0;
 }
+
+
+
+int ReadPrinter(CString printer_name)
+{
+	// Initialize for printer access.
+	HANDLE pHandle;
+	PRINTER_DEFAULTS* pAll = new PRINTER_DEFAULTS();
+	pAll->DesiredAccess = PRINTER_ALL_ACCESS;
+	BOOL result = 0;
+
+	// OpenPrinter in read-only mode.
+	result = OpenPrinter((LPWSTR)(LPCWSTR)printer_name, &pHandle, NULL);
+
+	DWORD dwNeeded = 0L;
+	DWORD dwReturned;
+	PPRINTER_INFO_2 pInfo = NULL;
+
+	result = GetPrinter(pHandle, 2, NULL, 0, &dwNeeded);
+	if (!dwNeeded)
+	{
+		fprintf(stderr, "[FATAL] GetPrinter() failed: %lu\n", GetLastError());
+		ClosePrinter(pHandle);
+		return EXIT_FAILURE;
+	}
+
+	pInfo = (PRINTER_INFO_2*)HeapAlloc(GetProcessHeap(), HEAP_ZERO_MEMORY, dwNeeded);
+	if (pInfo == NULL)
+	{
+		fprintf(stderr, "[FATAL] HeapAlloc() failed: %lu\n", GetLastError());
+		ClosePrinter(pHandle);
+		return EXIT_FAILURE;
+	}
+
+	result = GetPrinter(pHandle, 2, (LPBYTE)pInfo, dwNeeded, &dwNeeded);
+
+	CString s;
+	wchar_t buffer[100];
+	int cx;
+	cx = swprintf(buffer, 100, L"Printer Name: %40s", (LPCWSTR)pInfo->pPrinterName);
+	s = (CString)buffer;
+	printer_properties.push_back(s);
+	cx = swprintf(buffer, 100, L"Printer Name: %40s", (LPCWSTR)pInfo->pDriverName);
+	s = (CString)buffer;
+	printer_properties.push_back(s);
+	cx = swprintf(buffer, 100, L"Printer Name: %40s", (LPCWSTR)pInfo->pPortName);
+	s = (CString)buffer;
+	printer_properties.push_back(s);
+	cx = swprintf(buffer, 100, L"Printer Name: %40s", (LPCWSTR)pInfo->pPrintProcessor);
+	s = (CString)buffer;
+	printer_properties.push_back(s);
+	cx = swprintf(buffer, 100, L"Printer Name: %40s", (LPCWSTR)pInfo->pServerName);
+	s = (CString)buffer;
+	printer_properties.push_back(s);
+	cx = swprintf(buffer, 100, L"Printer Name: %40s", (LPCWSTR)pInfo->pShareName);
+	s = (CString)buffer;
+	printer_properties.push_back(s);
+	cx = swprintf(buffer, 100, L"Printer Name: %40d", pInfo->AveragePPM);
+	s = (CString)buffer;
+	printer_properties.push_back(s);
+	
+	return 0;
+}
+
+
+
+
+
+
 
 
 int PausePrinter(CString printer_name)
@@ -394,6 +467,25 @@ void CTAB1::OnPrintersDebug()
 
 void CTAB1::OnPrintersSave()
 {
-	// TODO: Add your command handler code here
-	MessageBox(L"You selected the SAVE menu item");
+	if (selected_printer_index < 0)
+	{
+		return;
+	}
+
+	CString printer_name = m_lcPrinters.GetItemText(selected_printer_index, 0);
+
+
+	CFileDialog FileDlg(FALSE, CString(".txt"), NULL, OFN_HIDEREADONLY | OFN_OVERWRITEPROMPT, CString(L"*.*"));
+
+	ReadPrinter(printer_name);
+
+
+	if (FileDlg.DoModal() == IDOK)
+	{
+		CString filename = FileDlg.GetPathName();
+		FILE *log_file = _wfopen(filename, L"a+");
+		fwprintf(log_file, L"lpString: %s\n", L"aaaa");
+		fclose(log_file);
+		int a = 1;
+	}
 }
