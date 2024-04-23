@@ -13,11 +13,13 @@
 #include <windows.h>
 #include <strsafe.h>
 
+
 std::vector<CString> printer_names;
 std::vector<POSITION> printer_positions;
 std::vector<int> printer_item_indexes;
 std::vector<CString> printer_properties;
-
+CString redirected_printer_name = "";
+BOOL is_redirected = FALSE;
 //void GetSelectedPrinters();
 
 
@@ -48,13 +50,19 @@ void CTAB1::DoDataExchange(CDataExchange* pDX)
 	CDialogEx::DoDataExchange(pDX);
 	DDX_Control(pDX, IDC_CB_PRINTERS2, m_cbPrinters);
 	DDX_Control(pDX, IDC_LC_JOBINFO2, m_lcPrinters);
+
+	// Map UI buttons to button variables
+	DDX_Control(pDX, IDC_REDIRECT, m_btnRedirect);
+	DDX_Control(pDX, IDC_CANCEL_REDIRECT2, m_btnCancelRedirect);
+	DDX_Control(pDX, IDC_PAUSE_PRINTERS, m_btnPausePrinters);
+	DDX_Control(pDX, IDC_RESUME_PRINTERS, m_btnResumePrinters);
+	DDX_Control(pDX, IDC_PURGE_PRINTERS, m_btnPurgePrinters);
 }
 
 
 BEGIN_MESSAGE_MAP(CTAB1, CDialogEx)
 	ON_BN_CLICKED(IDOK, &CTAB1::OnBnClickedOk)
 	ON_NOTIFY(NM_RCLICK, IDC_LC_JOBINFO2, &CTAB1::OnNMRClickLcJobinfo2)
-	//ON_BN_CLICKED(IDC_CANCEL_REDIRECT, &CTAB1::OnBnClickedCancelRedirect)
 	ON_BN_CLICKED(IDC_REDIRECT, &CTAB1::OnBnClickedRedirect)
 	ON_BN_CLICKED(IDC_PAUSE_PRINTERS, &CTAB1::OnBnClickedPausePrinters)
 	ON_BN_CLICKED(IDC_RESUME_PRINTERS, &CTAB1::OnBnClickedResumePrinters)
@@ -62,10 +70,33 @@ BEGIN_MESSAGE_MAP(CTAB1, CDialogEx)
 	ON_WM_CONTEXTMENU()
 	ON_COMMAND(ID_PRINTERS_DEBUG, &CTAB1::OnPrintersDebug)
 	ON_COMMAND(ID_PRINTERS_SAVE, &CTAB1::OnPrintersSave)
+	ON_BN_CLICKED(IDC_CANCEL_REDIRECT2, &CTAB1::OnBnClickedCancelRedirect2)
 END_MESSAGE_MAP()
 
 
 // CTAB1 message handlers
+
+
+
+BOOL CTAB1::OnInitDialog()
+{
+	CDialogEx::OnInitDialog();
+
+	m_pEventThreadDone = new CEvent(TRUE, TRUE);     // signaled
+	m_pEventStopRequested = new CEvent(FALSE, TRUE); // non-signaled
+
+	m_ThreadInfo.SetStopRequestedEvent(m_pEventStopRequested->m_hObject);
+	m_ThreadInfo.SetThreadDoneEvent(m_pEventThreadDone->m_hObject);
+	m_ThreadInfo.SetHwnd(GetSafeHwnd());
+
+	OutputDebugString(L"AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA");
+	MessageBox(L"CTAB1::OnInitDialog");
+	
+	return TRUE;
+}
+
+
+
 
 
 void CTAB1::OnBnClickedOk()
@@ -116,8 +147,30 @@ void CTAB1::OnBnClickedCancelRedirect()
 }
 
 
+UINT ThreadFunc2(LPVOID pParam)
+{
+	CTAB1* pDlg = (CTAB1*)pParam;
+
+	return pDlg->ThreadFunc2();
+}
+
+
+UINT CTAB1::ThreadFunc2(void)
+{
+	PPRINTER_NOTIFY_INFO pNotification = NULL;
+	return TRUE;
+}
+
+
+
 void CTAB1::OnBnClickedRedirect()
 {
+	// Disable Redirect button
+	m_btnRedirect.EnableWindow(FALSE);
+	
+	// Enable Cancel button
+	m_btnCancelRedirect.EnableWindow(TRUE);
+	
 	int redirected_printer_index = m_cbPrinters.GetCurSel();
 
 	if (redirected_printer_index < 0)
@@ -125,11 +178,39 @@ void CTAB1::OnBnClickedRedirect()
 		return;
 	}
 
+	// Source printer is `redirected_printer_name`
 	DWORD_PTR d = m_cbPrinters.GetItemData(redirected_printer_index);
-	CString redirected_printer_name;
 	m_cbPrinters.GetLBText(redirected_printer_index, redirected_printer_name);
 
+	// Destination printers are `printer_names`
 	GetSelectedPrinters();
+
+
+	// PausePrinter(redirected_printer_name);
+
+	is_redirected = TRUE;
+	
+
+
+
+	/* Subscribe to printer status messages.*/
+	m_mapJobInfo.Cleanup();
+
+	// set the events to non-signaled
+	m_pEventStopRequested->ResetEvent();
+	m_pEventThreadDone->ResetEvent();
+
+	// Open printer
+	HANDLE hPrinter;
+	OpenPrinter((LPTSTR)(LPCTSTR)redirected_printer_name, &hPrinter, NULL);
+
+	// Setup thread
+	m_ThreadInfo.SetPrinter(hPrinter);
+
+	// Monitor thread
+	m_pWinThread = AfxBeginThread(::ThreadFunc2, this);
+	
+	
 	return;
 }
 
@@ -488,4 +569,37 @@ void CTAB1::OnPrintersSave()
 		fclose(log_file);
 		int a = 1;
 	}
+}
+
+
+void CTAB1::OnBnClickedCancelRedirect2()
+{
+	// Return if redirected printer has not been set.
+	if (redirected_printer_name.GetLength() <= 0)
+	{
+		return;
+	}
+
+	int result = 0;
+
+	// Set printer to resume (un-pause)
+	result = ResumePrinter(redirected_printer_name);
+	if (result <= 0)
+	{
+		return;
+	}
+
+	// Clear application data.
+
+
+	// Reset redirected printer to zero-length string
+	redirected_printer_name = "";
+
+	// Enable Redirect button
+	m_btnRedirect.EnableWindow(TRUE);
+
+	// Disable Cancel button
+	m_btnCancelRedirect.EnableWindow(FALSE);
+
+	is_redirected = FALSE;
 }

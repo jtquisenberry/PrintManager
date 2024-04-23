@@ -275,6 +275,9 @@ UINT ThreadFunc( LPVOID pParam )
 }
 
 
+
+
+
 void CPrintManagerDlg::OnSelchangePrinters() 
 {
     m_btnStart.EnableWindow(TRUE);
