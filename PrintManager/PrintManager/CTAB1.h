@@ -3,6 +3,7 @@
 #include "MapEx.h"
 #include "JobInfo.h"
 #include "ThreadInfo.h"
+#include "PrintSubscriber.h"
 
 // CTAB1 dialog
 
@@ -25,6 +26,8 @@ public:
 	// Function declarations
 	void GetSelectedPrinters();
 	UINT ThreadFunc2(void);
+	void StartWorkerThread();
+	void StopWorkerThread();
 
 	CTAB1(CWnd* pParent = nullptr);   // standard constructor
 	virtual ~CTAB1();

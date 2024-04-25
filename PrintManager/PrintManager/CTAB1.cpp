@@ -59,6 +59,25 @@ void CTAB1::DoDataExchange(CDataExchange* pDX)
 	DDX_Control(pDX, IDC_PURGE_PRINTERS, m_btnPurgePrinters);
 }
 
+void CTAB1::StartWorkerThread()
+{
+
+
+}
+
+void CTAB1::StopWorkerThread()
+{
+	// signal and wait for ThreadFunc() to end 
+	m_pEventStopRequested->SetEvent();
+	WaitForSingleObject(m_pEventThreadDone->m_hObject, 8000U);
+
+	if (m_ThreadInfo.GetPrinter() != INVALID_HANDLE_VALUE)
+		ClosePrinter(m_ThreadInfo.GetPrinter());
+}
+
+
+
+
 
 BEGIN_MESSAGE_MAP(CTAB1, CDialogEx)
 	ON_BN_CLICKED(IDOK, &CTAB1::OnBnClickedOk)
@@ -149,16 +168,158 @@ void CTAB1::OnBnClickedCancelRedirect()
 
 UINT ThreadFunc2(LPVOID pParam)
 {
+	/*
+	int* pInt = (int*)pParam;
+	int k = *pInt;
 	CTAB1* pDlg = (CTAB1*)pParam;
-
 	return pDlg->ThreadFunc2();
+	*/
+
+	PrintSubscriber* pPs = (PrintSubscriber*)pParam;
+	return pPs->Worker();
 }
 
 
 UINT CTAB1::ThreadFunc2(void)
 {
 	PPRINTER_NOTIFY_INFO pNotification = NULL;
-	return TRUE;
+
+	WORD JobFields[] =
+	{
+		JOB_NOTIFY_FIELD_PRINTER_NAME,
+		JOB_NOTIFY_FIELD_MACHINE_NAME,
+		JOB_NOTIFY_FIELD_PORT_NAME,
+		JOB_NOTIFY_FIELD_USER_NAME,
+		JOB_NOTIFY_FIELD_NOTIFY_NAME,
+		JOB_NOTIFY_FIELD_DATATYPE,
+		JOB_NOTIFY_FIELD_PRINT_PROCESSOR,
+		JOB_NOTIFY_FIELD_PARAMETERS,
+		JOB_NOTIFY_FIELD_DRIVER_NAME,
+		JOB_NOTIFY_FIELD_DEVMODE,
+		JOB_NOTIFY_FIELD_STATUS,
+		JOB_NOTIFY_FIELD_STATUS_STRING,
+		JOB_NOTIFY_FIELD_DOCUMENT,
+		JOB_NOTIFY_FIELD_PRIORITY,
+		JOB_NOTIFY_FIELD_POSITION,
+		JOB_NOTIFY_FIELD_SUBMITTED,
+		JOB_NOTIFY_FIELD_START_TIME,
+		JOB_NOTIFY_FIELD_UNTIL_TIME,
+		JOB_NOTIFY_FIELD_TIME,
+		JOB_NOTIFY_FIELD_TOTAL_PAGES,
+		JOB_NOTIFY_FIELD_PAGES_PRINTED,
+		JOB_NOTIFY_FIELD_TOTAL_BYTES,
+		JOB_NOTIFY_FIELD_BYTES_PRINTED
+	};
+	PRINTER_NOTIFY_OPTIONS_TYPE	Notifications[1] =
+	{
+		{
+			JOB_NOTIFY_TYPE,
+			0,
+			0,
+			0,
+			sizeof(JobFields) / sizeof(JobFields[0]),
+			JobFields
+		},
+	};
+	PRINTER_NOTIFY_OPTIONS NotificationOptions =
+	{
+		2,
+		PRINTER_NOTIFY_OPTIONS_REFRESH,
+		sizeof(Notifications) / sizeof(Notifications[0]),
+		Notifications
+	};
+
+	// get a handle to a printer change notification object.
+	HANDLE hChange = FindFirstPrinterChangeNotification(m_ThreadInfo.GetPrinter(),
+		PRINTER_CHANGE_ALL,
+		0,
+		&NotificationOptions);
+
+	DWORD dwChange;
+	HANDLE aHandles[2];
+	aHandles[0] = hChange;
+	aHandles[1] = m_ThreadInfo.GetStopRequestedEvent();
+
+	while (hChange != INVALID_HANDLE_VALUE)
+	{
+		// sleep until a printer change notification wakes this thread or the
+		// event becomes set indicating it's time for the thread to end.
+		WaitForMultipleObjects(2, aHandles, FALSE, INFINITE);
+
+		if (WaitForSingleObject(hChange, 0U) == WAIT_OBJECT_0)
+		{
+			FindNextPrinterChangeNotification(hChange, &dwChange, &NotificationOptions, (LPVOID*)&pNotification);
+
+			if (pNotification != NULL)
+			{
+				// if a notification overflow occurred,
+				if (pNotification->Flags & PRINTER_NOTIFY_INFO_DISCARDED)
+				{
+					DWORD dwOldFlags = NotificationOptions.Flags;
+
+
+					// PRINTER_CHANGE_SET_JOB
+					int a = PRINTER_CHANGE_ADD_JOB;
+
+
+
+					// we must refresh to continue
+					NotificationOptions.Flags = PRINTER_NOTIFY_OPTIONS_REFRESH;
+
+					FreePrinterNotifyInfo(pNotification);
+
+					FindNextPrinterChangeNotification(hChange, &dwChange, &NotificationOptions, (LPVOID*)&pNotification);
+
+					NotificationOptions.Flags = dwOldFlags;
+				}
+
+				// iterate through each notification
+				for (DWORD x = 0; x < pNotification->Count; x++)
+				{
+					ASSERT(pNotification->aData[x].Type == JOB_NOTIFY_TYPE);
+
+					CJobInfo* pJobInfo = NULL;
+
+					// if the job info item does not exist, create a new one
+					if (!m_mapJobInfo.Lookup(pNotification->aData[x].Id, pJobInfo))
+					{
+						pJobInfo = new CJobInfo(pNotification->aData[x].Id);
+
+						m_mapJobInfo.SetAt(pNotification->aData[x].Id, pJobInfo);
+					}
+
+					ASSERT(pJobInfo != NULL);
+					pJobInfo->UpdateInfo(&pNotification->aData[x]);
+
+
+
+
+
+
+
+
+
+
+
+
+					// ::PostMessage(m_ThreadInfo.GetHwnd(), UDM_UPDATE_JOB_LIST, 0, 0);
+				}
+			}
+
+			FreePrinterNotifyInfo(pNotification);
+			pNotification = NULL;
+		}
+		else if (WaitForSingleObject(m_ThreadInfo.GetStopRequestedEvent(), 0U) == WAIT_OBJECT_0)
+		{
+			FindClosePrinterChangeNotification(hChange);
+			hChange = INVALID_HANDLE_VALUE;
+		}
+	}
+
+	// Signal the event to let the primary thread know that this thread is done
+	SetEvent(m_ThreadInfo.GetThreadDoneEvent());
+
+	return 0;
 }
 
 
@@ -207,8 +368,15 @@ void CTAB1::OnBnClickedRedirect()
 	// Setup thread
 	m_ThreadInfo.SetPrinter(hPrinter);
 
+
+	PrintSubscriber* ps = new PrintSubscriber();
+
+	// int xxx = 3;
+
 	// Monitor thread
-	m_pWinThread = AfxBeginThread(::ThreadFunc2, this);
+	// m_pWinThread = AfxBeginThread(::ThreadFunc2, this);
+	// m_pWinThread = AfxBeginThread(::ThreadFunc2, &xxx);
+	m_pWinThread = AfxBeginThread(::ThreadFunc2, ps);
 	
 	
 	return;
@@ -602,4 +770,17 @@ void CTAB1::OnBnClickedCancelRedirect2()
 	m_btnCancelRedirect.EnableWindow(FALSE);
 
 	is_redirected = FALSE;
+
+
+	// Stop thread
+	StopWorkerThread();
+
+	delete m_pEventStopRequested;
+	delete m_pEventThreadDone;
+
+	m_mapJobInfo.Cleanup();
+
+	CDialogEx::OnCancel();
+
+
 }
