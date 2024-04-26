@@ -370,6 +370,11 @@ void CTAB1::OnBnClickedRedirect()
 
 
 	PrintSubscriber* ps = new PrintSubscriber();
+	ps->m_ThreadInfo.SetPrinterW(hPrinter);
+
+
+	int eee = 0;
+
 
 	// int xxx = 3;
 

@@ -4,7 +4,15 @@
 
 PrintSubscriber::PrintSubscriber()
 {
+	m_pEventThreadDone = new CEvent(TRUE, TRUE);     // signaled
+	m_pEventStopRequested = new CEvent(FALSE, TRUE); // non-signaled
 
+	m_ThreadInfo.SetStopRequestedEvent(m_pEventStopRequested->m_hObject);
+	m_ThreadInfo.SetThreadDoneEvent(m_pEventThreadDone->m_hObject);
+	//m_ThreadInfo.SetHwnd(GetSafeHwnd());
+
+	OutputDebugString(L"\n\nBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBbb\n\n");
+	return;
 }
 
 PrintSubscriber::~PrintSubscriber()
@@ -60,6 +68,10 @@ UINT PrintSubscriber::Worker()
 		sizeof(Notifications) / sizeof(Notifications[0]),
 		Notifications
 	};
+
+
+	auto dddd = m_ThreadInfo.GetPrinterW();
+
 
 	// get a handle to a printer change notification object.
 	HANDLE hChange = FindFirstPrinterChangeNotification(m_ThreadInfo.GetPrinter(),
