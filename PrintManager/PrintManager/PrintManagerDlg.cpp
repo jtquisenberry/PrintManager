@@ -2,8 +2,9 @@
 #include "PrintManager.h"
 #include "PrintManagerDlg.h"
 #include "CTAB1.h"
-
 #include "AboutDlg.h"
+
+
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -28,6 +29,19 @@ CPrintManagerDlg::CPrintManagerDlg(CWnd* pParent /*=NULL*/)
 
     m_pEventThreadDone    = NULL;
     m_pEventStopRequested = NULL;
+
+    // Print thread ID
+    wchar_t buffer[100];
+    int cx;
+    std::thread::id this_id = std::this_thread::get_id();
+    cx = swprintf(buffer, 100, L"Thread ID:%d \n", this_id);
+    OutputDebugString(L"\n");
+    OutputDebugString(L"\n");
+    OutputDebugString(L"CPrintManagerDlg::CPrintManagerDlg\n");
+    OutputDebugString(buffer);
+    OutputDebugString(L"\n");
+    OutputDebugString(L"\n");
+
 }
 
 void CPrintManagerDlg::DoDataExchange(CDataExchange* pDX)
@@ -67,6 +81,21 @@ END_MESSAGE_MAP()
 BOOL CPrintManagerDlg::OnInitDialog()
 {
     CDialogEx::OnInitDialog();
+
+
+    // Print thread ID
+    wchar_t buffer[100];
+    int cx;
+    std::thread::id this_id = std::this_thread::get_id();
+    cx = swprintf(buffer, 100, L"Thread ID:%d \n", this_id);
+    OutputDebugString(L"\n");
+    OutputDebugString(L"\n");
+    OutputDebugString(L"CPrintManagerDlg::OnInitDialog\n");
+    OutputDebugString(buffer);
+    OutputDebugString(L"\n");
+    OutputDebugString(L"\n");
+
+
 
     // Add "About..." menu item to system menu.
 
@@ -269,6 +298,20 @@ void CPrintManagerDlg::EnumerateDrivers(void)
 
 UINT ThreadFunc( LPVOID pParam )
 {
+    
+    // Print thread ID
+    wchar_t buffer[100];
+    int cx;
+    std::thread::id this_id = std::this_thread::get_id();
+    cx = swprintf(buffer, 100, L"Thread ID:%d \n", this_id);
+    OutputDebugString(L"\n");
+    OutputDebugString(L"\n");
+    OutputDebugString(L"CPrintManagerDlg, UINT ThreadFunc(LPVOID pParam)\n");
+    OutputDebugString(buffer);
+    OutputDebugString(L"\n");
+    OutputDebugString(L"\n");
+    
+    
     CPrintManagerDlg *pDlg = (CPrintManagerDlg *) pParam;
     
     return pDlg->ThreadFunc();
@@ -286,6 +329,8 @@ void CPrintManagerDlg::OnSelchangePrinters()
 
 void CPrintManagerDlg::OnStart()
 {
+    // Clicked Start button
+    
     m_btnStart.EnableWindow(FALSE);
     m_btnStop.EnableWindow(TRUE);
     m_cbPrinters.EnableWindow(FALSE);
@@ -340,6 +385,23 @@ void CPrintManagerDlg::OnCancel()
 
 UINT CPrintManagerDlg::ThreadFunc( void )
 {
+    
+    // Print thread ID
+    wchar_t buffer[100];
+    int cx;
+    std::thread::id this_id = std::this_thread::get_id();
+    cx = swprintf(buffer, 100, L"Thread ID:%d \n", this_id);
+    OutputDebugString(L"\n");
+    OutputDebugString(L"\n");
+    OutputDebugString(L"CPrintManagerDlg, UINT CPrintManagerDlg::ThreadFunc( void )\n");
+    OutputDebugString(buffer);
+    OutputDebugString(L"\n");
+    OutputDebugString(L"\n");
+    
+    
+    
+    
+    
     PPRINTER_NOTIFY_INFO pNotification = NULL;
 
     WORD JobFields[] = 

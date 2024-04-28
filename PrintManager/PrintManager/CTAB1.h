@@ -5,6 +5,8 @@
 #include "ThreadInfo.h"
 #include "PrintSubscriber.h"
 
+#include <thread>
+
 // CTAB1 dialog
 
 class CTAB1 : public CDialogEx
@@ -58,7 +60,7 @@ private:
 	CEvent* m_pEventThreadDone;
 	CEvent* m_pEventStopRequested;
 	CWinThread* m_pWinThread;
-	CThreadInfo m_ThreadInfo;
+	// CThreadInfo m_ThreadInfo;
 
 	CMapEx<int, int, CJobInfo*, CJobInfo*> m_mapJobInfo;
 };

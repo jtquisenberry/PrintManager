@@ -38,7 +38,17 @@ int selected_printer_index = -1;
 CTAB1::CTAB1(CWnd* pParent /*=nullptr*/)
 	: CDialogEx(IDD_TAB1, pParent)
 {
-
+	// Print thread ID
+	wchar_t buffer[100];
+	int cx;
+	std::thread::id this_id = std::this_thread::get_id();
+	cx = swprintf(buffer, 100, L"Thread ID:%d \n", this_id);
+	OutputDebugString(L"\n");
+	OutputDebugString(L"\n");
+	OutputDebugString(L"CTAB1::CTAB1\n");
+	OutputDebugString(buffer);
+	OutputDebugString(L"\n");
+	OutputDebugString(L"\n");
 }
 
 CTAB1::~CTAB1()
@@ -71,8 +81,8 @@ void CTAB1::StopWorkerThread()
 	m_pEventStopRequested->SetEvent();
 	WaitForSingleObject(m_pEventThreadDone->m_hObject, 8000U);
 
-	if (m_ThreadInfo.GetPrinter() != INVALID_HANDLE_VALUE)
-		ClosePrinter(m_ThreadInfo.GetPrinter());
+	// if (m_ThreadInfo.GetPrinter() != INVALID_HANDLE_VALUE)
+	//	ClosePrinter(m_ThreadInfo.GetPrinter());
 }
 
 
@@ -94,22 +104,32 @@ END_MESSAGE_MAP()
 
 
 // CTAB1 message handlers
-
-
-
 BOOL CTAB1::OnInitDialog()
 {
 	CDialogEx::OnInitDialog();
 
+	// Print thread ID
+	wchar_t buffer[100];
+	int cx;
+	std::thread::id this_id = std::this_thread::get_id();
+	cx = swprintf(buffer, 100, L"Thread ID:%d \n", this_id);
+	OutputDebugString(L"\n");
+	OutputDebugString(L"\n");
+	OutputDebugString(L"CTAB1::OnInitDialog\n");
+	OutputDebugString(buffer);
+	OutputDebugString(L"\n");
+	OutputDebugString(L"\n");
+
 	m_pEventThreadDone = new CEvent(TRUE, TRUE);     // signaled
 	m_pEventStopRequested = new CEvent(FALSE, TRUE); // non-signaled
 
-	m_ThreadInfo.SetStopRequestedEvent(m_pEventStopRequested->m_hObject);
-	m_ThreadInfo.SetThreadDoneEvent(m_pEventThreadDone->m_hObject);
-	m_ThreadInfo.SetHwnd(GetSafeHwnd());
+	// CThreadInfo
+	// m_ThreadInfo.SetStopRequestedEvent(m_pEventStopRequested->m_hObject);
+	// m_ThreadInfo.SetThreadDoneEvent(m_pEventThreadDone->m_hObject);
+	// m_ThreadInfo.SetHwnd(GetSafeHwnd());
 
-	OutputDebugString(L"AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA");
-	MessageBox(L"CTAB1::OnInitDialog");
+	OutputDebugString(L"\n");
+	OutputDebugString(L"CTAB1::OnInitDialog()");
 	
 	return TRUE;
 }
@@ -179,7 +199,7 @@ UINT ThreadFunc2(LPVOID pParam)
 	return pPs->Worker();
 }
 
-
+/*
 UINT CTAB1::ThreadFunc2(void)
 {
 	PPRINTER_NOTIFY_INFO pNotification = NULL;
@@ -321,11 +341,13 @@ UINT CTAB1::ThreadFunc2(void)
 
 	return 0;
 }
-
+*/
 
 
 void CTAB1::OnBnClickedRedirect()
 {
+	// Clicked Redirect Button
+	
 	// Disable Redirect button
 	m_btnRedirect.EnableWindow(FALSE);
 	
@@ -366,7 +388,7 @@ void CTAB1::OnBnClickedRedirect()
 	OpenPrinter((LPTSTR)(LPCTSTR)redirected_printer_name, &hPrinter, NULL);
 
 	// Setup thread
-	m_ThreadInfo.SetPrinter(hPrinter);
+	// m_ThreadInfo.SetPrinter(hPrinter);
 
 
 	PrintSubscriber* ps = new PrintSubscriber();
