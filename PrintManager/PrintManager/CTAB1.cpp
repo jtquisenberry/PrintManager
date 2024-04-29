@@ -9,7 +9,6 @@
 #include <iostream>
 #include <vector>
 #include <stdio.h>
-
 #include <windows.h>
 #include <strsafe.h>
 
@@ -186,6 +185,24 @@ void CTAB1::OnBnClickedCancelRedirect()
 }
 
 
+UINT StartPrintSubscriber(LPVOID pParam)
+{
+	/*
+	int* pInt = (int*)pParam;
+	int k = *pInt;
+	CTAB1* pDlg = (CTAB1*)pParam;
+	return pDlg->ThreadFunc2();
+	*/
+	CTAB1* ctab1 = (CTAB1*)pParam;
+	ctab1->pPs.Start(0);
+	//PrintSubscriber* pPs = (PrintSubscriber*)pParam;
+	//return pPs->Start(0);
+	return 0;
+}
+
+
+
+
 UINT ThreadFunc2(LPVOID pParam)
 {
 	/*
@@ -196,7 +213,7 @@ UINT ThreadFunc2(LPVOID pParam)
 	*/
 
 	PrintSubscriber* pPs = (PrintSubscriber*)pParam;
-	return pPs->Worker();
+	return pPs->Start(0);
 }
 
 /*
@@ -391,9 +408,11 @@ void CTAB1::OnBnClickedRedirect()
 	// m_ThreadInfo.SetPrinter(hPrinter);
 
 
-	PrintSubscriber* ps = new PrintSubscriber();
-	ps->m_ThreadInfo.SetPrinterW(hPrinter);
-
+	//PrintSubscriber* ps = new PrintSubscriber();
+	pPs.SetPrinter(hPrinter);
+	pPs.SetStopRequestedEvent(m_pEventStopRequested->m_hObject);
+	pPs.SetThreadDoneEvent(m_pEventThreadDone->m_hObject);
+	pPs.SetHwnd(GetSafeHwnd());
 
 	int eee = 0;
 
@@ -401,9 +420,10 @@ void CTAB1::OnBnClickedRedirect()
 	// int xxx = 3;
 
 	// Monitor thread
-	// m_pWinThread = AfxBeginThread(::ThreadFunc2, this);
+	m_pWinThread = AfxBeginThread(::StartPrintSubscriber, this);
+	//m_pWinThread = AfxBeginThread(::ThreadFunc2, this);
 	// m_pWinThread = AfxBeginThread(::ThreadFunc2, &xxx);
-	m_pWinThread = AfxBeginThread(::ThreadFunc2, ps);
+	// m_pWinThread = AfxBeginThread(::ThreadFunc2, ps);
 	
 	
 	return;

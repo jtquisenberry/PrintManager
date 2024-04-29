@@ -2,25 +2,76 @@
 #include "PrintSubscriber.h"
 #include "JobInfo.h"
 
+
 PrintSubscriber::PrintSubscriber()
 {
 	m_pEventThreadDone = new CEvent(TRUE, TRUE);     // signaled
 	m_pEventStopRequested = new CEvent(FALSE, TRUE); // non-signaled
 
-	m_ThreadInfo.SetStopRequestedEvent(m_pEventStopRequested->m_hObject);
-	m_ThreadInfo.SetThreadDoneEvent(m_pEventThreadDone->m_hObject);
-	//m_ThreadInfo.SetHwnd(GetSafeHwnd());
+	m_hPrinter = INVALID_HANDLE_VALUE;
+	m_hEventStopRequested = INVALID_HANDLE_VALUE;
+	m_hEventThreadDone = INVALID_HANDLE_VALUE;
+	m_hWnd = NULL;
 
-	OutputDebugString(L"\n\nBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBbb\n\n");
+	
 	return;
 }
+
 
 PrintSubscriber::~PrintSubscriber()
 {
 
 }
 
-UINT PrintSubscriber::Worker()
+HANDLE PrintSubscriber::GetPrinter(void)
+{
+	return m_hPrinter;
+}
+
+HANDLE PrintSubscriber::GetStopRequestedEvent(void)
+{
+	return m_hEventStopRequested;
+}
+
+HANDLE PrintSubscriber::GetThreadDoneEvent(void)
+{
+	return m_hEventThreadDone;
+}
+
+HWND PrintSubscriber::GetHwnd(void)
+{
+	return m_hWnd;
+}
+
+//================================================================
+
+void PrintSubscriber::SetPrinter(HANDLE hPrinter)
+{
+	m_hPrinter = hPrinter;
+}
+
+void PrintSubscriber::SetStopRequestedEvent(HANDLE hEventStopRequested)
+{
+	m_hEventStopRequested = hEventStopRequested;
+}
+
+void PrintSubscriber::SetThreadDoneEvent(HANDLE hEventThreadDone)
+{
+	m_hEventThreadDone = hEventThreadDone;
+}
+
+void PrintSubscriber::SetHwnd(HWND hWnd)
+{
+	m_hWnd = hWnd;
+}
+
+
+
+
+
+
+
+UINT PrintSubscriber::Start(LPVOID pParam)
 {
 	PPRINTER_NOTIFY_INFO pNotification = NULL;
 
@@ -70,11 +121,11 @@ UINT PrintSubscriber::Worker()
 	};
 
 
-	auto dddd = m_ThreadInfo.GetPrinterW();
+	HANDLE hPrinter = GetPrinter();
 
 
 	// get a handle to a printer change notification object.
-	HANDLE hChange = FindFirstPrinterChangeNotification(m_ThreadInfo.GetPrinter(),
+	HANDLE hChange = FindFirstPrinterChangeNotification(GetPrinter(),
 		PRINTER_CHANGE_ALL,
 		0,
 		&NotificationOptions);
@@ -82,7 +133,7 @@ UINT PrintSubscriber::Worker()
 	DWORD dwChange;
 	HANDLE aHandles[2];
 	aHandles[0] = hChange;
-	aHandles[1] = m_ThreadInfo.GetStopRequestedEvent();
+	aHandles[1] = GetStopRequestedEvent();
 
 	while (hChange != INVALID_HANDLE_VALUE)
 	{
@@ -135,17 +186,6 @@ UINT PrintSubscriber::Worker()
 					ASSERT(pJobInfo != NULL);
 					pJobInfo->UpdateInfo(&pNotification->aData[x]);
 
-
-
-
-
-
-
-
-
-
-
-
 					// ::PostMessage(m_ThreadInfo.GetHwnd(), UDM_UPDATE_JOB_LIST, 0, 0);
 				}
 			}
@@ -153,7 +193,7 @@ UINT PrintSubscriber::Worker()
 			FreePrinterNotifyInfo(pNotification);
 			pNotification = NULL;
 		}
-		else if (WaitForSingleObject(m_ThreadInfo.GetStopRequestedEvent(), 0U) == WAIT_OBJECT_0)
+		else if (WaitForSingleObject(GetStopRequestedEvent(), 0U) == WAIT_OBJECT_0)
 		{
 			FindClosePrinterChangeNotification(hChange);
 			hChange = INVALID_HANDLE_VALUE;
@@ -161,7 +201,7 @@ UINT PrintSubscriber::Worker()
 	}
 
 	// Signal the event to let the primary thread know that this thread is done
-	SetEvent(m_ThreadInfo.GetThreadDoneEvent());
+	SetEvent(GetThreadDoneEvent());
 
 	return 0;
 }

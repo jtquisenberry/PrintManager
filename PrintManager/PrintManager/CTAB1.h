@@ -25,11 +25,18 @@ public:
 	CButton m_btnResumePrinters;
 	CButton m_btnPurgePrinters;
 
+	HANDLE m_hPrinter;
+	HANDLE m_hEventStopRequested;
+	HANDLE m_hEventThreadDone;
+	HWND m_hWnd;
+
+	PrintSubscriber pPs;
+
 	// Function declarations
 	void GetSelectedPrinters();
 	UINT ThreadFunc2(void);
 	void StartWorkerThread();
-	void StopWorkerThread();
+	void StopWorkerThread();	
 
 	CTAB1(CWnd* pParent = nullptr);   // standard constructor
 	virtual ~CTAB1();
