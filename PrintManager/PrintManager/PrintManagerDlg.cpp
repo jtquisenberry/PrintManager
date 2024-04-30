@@ -543,9 +543,9 @@ LRESULT CPrintManagerDlg::OnUpdateJobList( WPARAM, LPARAM )
         strText.Format(_T("%03d"), pJobInfo->GetJobId());
         int nItem = m_lcJobInfo.InsertItem(m_lcJobInfo.GetItemCount(), strText);
 
-        m_lcJobInfo.SetItemText(nItem, 1, pJobInfo->GetUser());
+        m_lcJobInfo.SetItemText(nItem, 1, pJobInfo->GetUserName());
         
-        strText.Format(_T("%s on %s"), pJobInfo->GetPort(), pJobInfo->GetMachine());
+        strText.Format(_T("%s on %s"), pJobInfo->GetPortName(), pJobInfo->GetMachineName());
         m_lcJobInfo.SetItemText(nItem, 2, strText);
         
         m_lcJobInfo.SetItemText(nItem, 3, pJobInfo->GetDocument());
@@ -566,7 +566,7 @@ LRESULT CPrintManagerDlg::OnUpdateJobList( WPARAM, LPARAM )
         strText.Format(_T("%d of %d"), pJobInfo->GetBytesPrinted(), pJobInfo->GetTotalBytes());
         m_lcJobInfo.SetItemText(nItem, 6, strText);
 
-        m_lcJobInfo.SetItemText(nItem, 7, pJobInfo->GetStatus());
+        m_lcJobInfo.SetItemText(nItem, 7, pJobInfo->GetStatusCustom());
     }
 
     return 0;

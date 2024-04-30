@@ -41,12 +41,14 @@ CMap<int, int, LPCTSTR, LPCTSTR> CJobInfo::m_mapJobStatus;
 
 void CJobInfo::UpdateInfo( const PPRINTER_NOTIFY_INFO_DATA pNotifyData )
 {
-    if (pNotifyData->Field == JOB_NOTIFY_FIELD_USER_NAME)
-        m_strUser = (LPCTSTR) pNotifyData->NotifyData.Data.pBuf;
+    if (pNotifyData->Field == JOB_NOTIFY_FIELD_PRINTER_NAME)
+        m_strUserName = (LPCTSTR)pNotifyData->NotifyData.Data.pBuf;
+    else if (pNotifyData->Field == JOB_NOTIFY_FIELD_USER_NAME)
+        m_strUserName = (LPCTSTR) pNotifyData->NotifyData.Data.pBuf;
     else if (pNotifyData->Field == JOB_NOTIFY_FIELD_MACHINE_NAME)
-        m_strMachine = (LPCTSTR) pNotifyData->NotifyData.Data.pBuf;
+        m_strMachineName = (LPCTSTR) pNotifyData->NotifyData.Data.pBuf;
     else if (pNotifyData->Field == JOB_NOTIFY_FIELD_PORT_NAME)
-        m_strPort = (LPCTSTR) pNotifyData->NotifyData.Data.pBuf;
+        m_strPortName = (LPCTSTR) pNotifyData->NotifyData.Data.pBuf;
     else if (pNotifyData->Field == JOB_NOTIFY_FIELD_DOCUMENT)
         m_strDocument = (LPCTSTR) pNotifyData->NotifyData.Data.pBuf;
     else if (pNotifyData->Field == JOB_NOTIFY_FIELD_SUBMITTED)
@@ -74,19 +76,19 @@ int CJobInfo::GetJobId( void ) const
     return m_nJobId;
 }
 
-LPCTSTR CJobInfo::GetUser( void ) const
+LPCTSTR CJobInfo::GetUserName( void ) const
 {
-    return m_strUser;
+    return m_strUserName;
 }
 
-LPCTSTR CJobInfo::GetMachine( void ) const
+LPCTSTR CJobInfo::GetMachineName( void ) const
 {
-    return m_strMachine;
+    return m_strMachineName;
 }
 
-LPCTSTR CJobInfo::GetPort( void ) const
+LPCTSTR CJobInfo::GetPortName( void ) const
 {
-    return m_strPort;
+    return m_strPortName;
 }
 
 LPCTSTR CJobInfo::GetDocument( void ) const
@@ -119,7 +121,7 @@ int CJobInfo::GetBytesPrinted( void ) const
     return m_nBytesPrinted;
 }
 
-LPCTSTR CJobInfo::GetStatus( void ) const
+LPCTSTR CJobInfo::GetStatusCustom( void ) const
 {
     LPCTSTR lpszStatus = NULL;
 
