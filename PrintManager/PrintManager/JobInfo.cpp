@@ -41,30 +41,54 @@ CMap<int, int, LPCTSTR, LPCTSTR> CJobInfo::m_mapJobStatus;
 
 void CJobInfo::UpdateInfo( const PPRINTER_NOTIFY_INFO_DATA pNotifyData )
 {
-    if (pNotifyData->Field == JOB_NOTIFY_FIELD_PRINTER_NAME)
-        m_strUserName = (LPCTSTR)pNotifyData->NotifyData.Data.pBuf;
-    else if (pNotifyData->Field == JOB_NOTIFY_FIELD_USER_NAME)
+    if (pNotifyData->Field == JOB_NOTIFY_FIELD_PRINTER_NAME)                     // 0x00
+        m_strPrinterName = (LPCTSTR)pNotifyData->NotifyData.Data.pBuf;
+    else if (pNotifyData->Field == JOB_NOTIFY_FIELD_MACHINE_NAME)                // 0x01
+        m_strMachineName = (LPCTSTR)pNotifyData->NotifyData.Data.pBuf;
+    else if (pNotifyData->Field == JOB_NOTIFY_FIELD_PORT_NAME)                   // 0x02
+        m_strPortName = (LPCTSTR)pNotifyData->NotifyData.Data.pBuf;
+    else if (pNotifyData->Field == JOB_NOTIFY_FIELD_USER_NAME)                   // 0x03
         m_strUserName = (LPCTSTR) pNotifyData->NotifyData.Data.pBuf;
-    else if (pNotifyData->Field == JOB_NOTIFY_FIELD_MACHINE_NAME)
-        m_strMachineName = (LPCTSTR) pNotifyData->NotifyData.Data.pBuf;
-    else if (pNotifyData->Field == JOB_NOTIFY_FIELD_PORT_NAME)
-        m_strPortName = (LPCTSTR) pNotifyData->NotifyData.Data.pBuf;
-    else if (pNotifyData->Field == JOB_NOTIFY_FIELD_DOCUMENT)
+    else if (pNotifyData->Field == JOB_NOTIFY_FIELD_NOTIFY_NAME)                 // 0x04
+        m_strNotifyName = (LPCTSTR)pNotifyData->NotifyData.Data.pBuf;
+    else if (pNotifyData->Field == JOB_NOTIFY_FIELD_DATATYPE)                    // 0x05
+        m_strDatatype = (LPCTSTR)pNotifyData->NotifyData.Data.pBuf;
+    else if (pNotifyData->Field == JOB_NOTIFY_FIELD_PRINT_PROCESSOR)             // 0x06
+        m_strPrintProcessor = (LPCTSTR)pNotifyData->NotifyData.Data.pBuf;
+    else if (pNotifyData->Field == JOB_NOTIFY_FIELD_PARAMETERS)                  // 0x07
+        m_strParameters = (LPCTSTR)pNotifyData->NotifyData.Data.pBuf;
+    else if (pNotifyData->Field == JOB_NOTIFY_FIELD_DRIVER_NAME)                 // 0x08
+        m_strDriverName = (LPCTSTR)pNotifyData->NotifyData.Data.pBuf;
+    else if (pNotifyData->Field == JOB_NOTIFY_FIELD_DEVMODE)                     // 0x09
+        m_strDevmode = (LPCTSTR)pNotifyData->NotifyData.Data.pBuf;
+    else if (pNotifyData->Field == JOB_NOTIFY_FIELD_STATUS)                      // 0x0A
+        m_nStatus = (int)pNotifyData->NotifyData.Data.pBuf;
+    else if (pNotifyData->Field == JOB_NOTIFY_FIELD_STATUS_STRING)               // 0x0B
+        m_strStatusString = (LPCTSTR)pNotifyData->NotifyData.Data.pBuf;
+    else if (pNotifyData->Field == JOB_NOTIFY_FIELD_SECURITY_DESCRIPTOR)         // 0x0C
+        m_strSecurityDescripor = (LPCTSTR)pNotifyData->NotifyData.Data.pBuf;
+    else if (pNotifyData->Field == JOB_NOTIFY_FIELD_DOCUMENT)                    // 0x0D
         m_strDocument = (LPCTSTR) pNotifyData->NotifyData.Data.pBuf;
-    else if (pNotifyData->Field == JOB_NOTIFY_FIELD_SUBMITTED)
+    else if (pNotifyData->Field == JOB_NOTIFY_FIELD_PRIORITY)                    // 0x0E
+        m_nPriority = (int)pNotifyData->NotifyData.Data.pBuf;
+    else if (pNotifyData->Field == JOB_NOTIFY_FIELD_POSITION)                    // 0x0F
+        m_nPosition = (int)pNotifyData->NotifyData.Data.pBuf;
+    else if (pNotifyData->Field == JOB_NOTIFY_FIELD_SUBMITTED)                   // 0x10
         m_timeSubmitted = *((SYSTEMTIME *) pNotifyData->NotifyData.Data.pBuf);
-    else if (pNotifyData->Field == JOB_NOTIFY_FIELD_PAGES_PRINTED)
-        m_nPagesPrinted = pNotifyData->NotifyData.adwData[0];
-    else if (pNotifyData->Field == JOB_NOTIFY_FIELD_TOTAL_PAGES)
+    else if (pNotifyData->Field == JOB_NOTIFY_FIELD_START_TIME)                  // 0x11
+        m_nStartTime = (int)pNotifyData->NotifyData.Data.pBuf;
+    else if (pNotifyData->Field == JOB_NOTIFY_FIELD_UNTIL_TIME)                  // 0x12
+        m_nUntilTime = (int)pNotifyData->NotifyData.Data.pBuf;
+    else if (pNotifyData->Field == JOB_NOTIFY_FIELD_TIME)                        // 0x13
+        m_nTime = (int)pNotifyData->NotifyData.Data.pBuf;
+    else if (pNotifyData->Field == JOB_NOTIFY_FIELD_TOTAL_PAGES)                 // 0x14
         m_nTotalPages = pNotifyData->NotifyData.adwData[0];
-    else if (pNotifyData->Field == JOB_NOTIFY_FIELD_BYTES_PRINTED)
-        m_nBytesPrinted = pNotifyData->NotifyData.adwData[0];
-    else if (pNotifyData->Field == JOB_NOTIFY_FIELD_TOTAL_BYTES)
+    else if (pNotifyData->Field == JOB_NOTIFY_FIELD_PAGES_PRINTED)               // 0x15
+        m_nPagesPrinted = pNotifyData->NotifyData.adwData[0];
+    else if (pNotifyData->Field == JOB_NOTIFY_FIELD_TOTAL_BYTES)                 // 0x16
         m_nTotalBytes = pNotifyData->NotifyData.adwData[0];
-    else if (pNotifyData->Field == JOB_NOTIFY_FIELD_STATUS)
-        m_nStatus = pNotifyData->NotifyData.adwData[0]; 
-    else if (pNotifyData->Field == JOB_NOTIFY_FIELD_STATUS_STRING)
-        ;
+    else if (pNotifyData->Field == JOB_NOTIFY_FIELD_BYTES_PRINTED)               // 0x17
+        m_nBytesPrinted = pNotifyData->NotifyData.adwData[0];
     else
         TRACE(_T("Unhandled job field: %x\n"), pNotifyData->Field);
 }
