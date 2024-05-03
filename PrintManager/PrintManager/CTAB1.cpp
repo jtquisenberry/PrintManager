@@ -6,6 +6,7 @@
 #include "PrintManager.h"
 #include "afxdialogex.h"
 #include "CTAB1.h"
+#include "LogFile.h"
 #include <iostream>
 #include <vector>
 #include <stdio.h>
@@ -48,6 +49,9 @@ CTAB1::CTAB1(CWnd* pParent /*=nullptr*/)
 	OutputDebugString(buffer);
 	OutputDebugString(L"\n");
 	OutputDebugString(L"\n");
+
+	aaa++;
+	aaa++;
 }
 
 CTAB1::~CTAB1()

@@ -3,6 +3,7 @@
 #include "PrintManagerDlg.h"
 #include "CTAB1.h"
 #include "AboutDlg.h"
+#include "LogFile.h"
 
 
 
@@ -14,6 +15,9 @@ static char THIS_FILE[] = __FILE__;
 
 static const UINT UDM_UPDATE_JOB_LIST = RegisterWindowMessage(_T("UDM_UPDATE_JOB_LIST"));
 
+int aaa=777;
+FILE* write_stream;
+
 /////////////////////////////////////////////////////////////////////////////
 // CPrintManagerDlg dialog
 
@@ -24,8 +28,19 @@ CPrintManagerDlg::CPrintManagerDlg(CWnd* pParent /*=NULL*/)
     //}}AFX_DATA_INIT
     // Note that LoadIcon does not require a subsequent DestroyIcon in Win32
     m_hIcon = AfxGetApp()->LoadIcon(IDR_MAINFRAME);
+    aaa = 99999;
     
     m_rectOrig.SetRectEmpty();
+
+    //HRESULT hr = SHGetFolderPath(NULL, CSIDL_COMMON_DOCUMENTS, NULL,
+    //    SHGFP_TYPE_CURRENT, path);
+
+    aaa = 1;
+    //docdir = getenv("USERPROFILE");
+    write_stream = fopen("temp.txt", "w+");
+    int written = fwprintf_s(write_stream, L"Open File\n");
+    fclose(write_stream);
+
 
     m_pEventThreadDone    = NULL;
     m_pEventStopRequested = NULL;

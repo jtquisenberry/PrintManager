@@ -12,6 +12,11 @@
 #include "CTAB2.h"
 
 #include <thread>
+#include <stdio.h>
+
+
+// Globals
+// FILE* write_stream = NULL;
 
 /////////////////////////////////////////////////////////////////////////////
 // CPrintManagerDlg dialog
