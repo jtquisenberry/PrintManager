@@ -16,7 +16,8 @@ static char THIS_FILE[] = __FILE__;
 static const UINT UDM_UPDATE_JOB_LIST = RegisterWindowMessage(_T("UDM_UPDATE_JOB_LIST"));
 
 int aaa=777;
-FILE* write_stream;
+FILE* file1 = NULL;
+FILE* file2;
 
 /////////////////////////////////////////////////////////////////////////////
 // CPrintManagerDlg dialog
@@ -34,12 +35,36 @@ CPrintManagerDlg::CPrintManagerDlg(CWnd* pParent /*=NULL*/)
 
     //HRESULT hr = SHGetFolderPath(NULL, CSIDL_COMMON_DOCUMENTS, NULL,
     //    SHGFP_TYPE_CURRENT, path);
-
+    
     aaa = 1;
-    //docdir = getenv("USERPROFILE");
-    write_stream = fopen("temp.txt", "w+");
-    int written = fwprintf_s(write_stream, L"Open File\n");
-    fclose(write_stream);
+    char* docdir1 = getenv("USERPROFILE");
+    char docdir2[260];
+    char docdir3[260];
+    memset(&docdir2[0], 0, sizeof(docdir2));
+    memset(&docdir3[0], 0, sizeof(docdir2));
+    strcat(docdir2, docdir1);
+    strcat(docdir2, "\\filename1.txt");
+    strcat(docdir3, docdir1);
+    strcat(docdir3, "\\filename2.txt");
+
+
+
+    strcat(docdir1, "\\filename1.txt");
+
+    char* filename1 = strcat(docdir1, "\\filename1.txt");
+    free(docdir1);
+  //  char* docdir2 = getenv("USERPROFILE");
+    char* filename2 = strcat(docdir2, "\\filename2.txt");
+    
+    
+    file1 = fopen(filename1, "a+");
+    file2 = fopen(filename2, "a+");
+        
+        //write_stream = fopen("temp.txt", "w+");
+    int written = fwprintf_s(file1, L"Open File\n");
+    written = fwprintf_s(file2, L"Open File\n");
+    fclose(file1);
+    fclose(file2);
 
 
     m_pEventThreadDone    = NULL;
