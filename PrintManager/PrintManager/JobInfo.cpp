@@ -42,7 +42,8 @@ CMap<int, int, LPCTSTR, LPCTSTR> CJobInfo::m_mapJobStatus;
 void CJobInfo::UpdateInfo( const PPRINTER_NOTIFY_INFO_DATA pNotifyData )
 {
     if (pNotifyData->Field == JOB_NOTIFY_FIELD_PRINTER_NAME)                     // 0x00
-        m_strPrinterName = (LPCTSTR)pNotifyData->NotifyData.Data.pBuf;
+        // m_strPrinterName = (LPCTSTR)pNotifyData->NotifyData.Data.pBuf;
+        SetPrinterName(pNotifyData);
     else if (pNotifyData->Field == JOB_NOTIFY_FIELD_MACHINE_NAME)                // 0x01
         m_strMachineName = (LPCTSTR)pNotifyData->NotifyData.Data.pBuf;
     else if (pNotifyData->Field == JOB_NOTIFY_FIELD_PORT_NAME)                   // 0x02
@@ -66,7 +67,7 @@ void CJobInfo::UpdateInfo( const PPRINTER_NOTIFY_INFO_DATA pNotifyData )
     else if (pNotifyData->Field == JOB_NOTIFY_FIELD_STATUS_STRING)               // 0x0B
         m_strStatusString = (LPCTSTR)pNotifyData->NotifyData.Data.pBuf;
     else if (pNotifyData->Field == JOB_NOTIFY_FIELD_SECURITY_DESCRIPTOR)         // 0x0C
-        m_strSecurityDescripor = (LPCTSTR)pNotifyData->NotifyData.Data.pBuf;
+        m_strSecurityDescriptor = (LPCTSTR)pNotifyData->NotifyData.Data.pBuf;
     else if (pNotifyData->Field == JOB_NOTIFY_FIELD_DOCUMENT)                    // 0x0D
         m_strDocument = (LPCTSTR) pNotifyData->NotifyData.Data.pBuf;
     else if (pNotifyData->Field == JOB_NOTIFY_FIELD_PRIORITY)                    // 0x0E
@@ -100,29 +101,224 @@ int CJobInfo::GetJobId( void ) const
     return m_nJobId;
 }
 
+LPCTSTR CJobInfo::GetPrinterName(void) const
+{
+    return m_strPrinterName;
+}
+
+void CJobInfo::SetPrinterName(const PPRINTER_NOTIFY_INFO_DATA pNotifyData)
+{
+    m_strPrinterName = (LPCTSTR)pNotifyData->NotifyData.Data.pBuf;
+    return;
+}
+
+LPCTSTR CJobInfo::GetMachineName(void) const
+{
+    return m_strMachineName;
+}
+
+void CJobInfo::SetMachineName(const PPRINTER_NOTIFY_INFO_DATA pNotifyData)
+{
+    m_strMachineName = (LPCTSTR)pNotifyData->NotifyData.Data.pBuf;
+    return;
+}
+
+LPCTSTR CJobInfo::GetPortName(void) const
+{
+    return m_strPortName;
+}
+
+void CJobInfo::SetPortName(const PPRINTER_NOTIFY_INFO_DATA pNotifyData)
+{
+    m_strPortName = (LPCTSTR)pNotifyData->NotifyData.Data.pBuf;
+    return;
+}
+
 LPCTSTR CJobInfo::GetUserName( void ) const
 {
     return m_strUserName;
 }
 
-LPCTSTR CJobInfo::GetMachineName( void ) const
+void CJobInfo::SetUserName(const PPRINTER_NOTIFY_INFO_DATA pNotifyData)
 {
-    return m_strMachineName;
+    m_strUserName = (LPCTSTR)pNotifyData->NotifyData.Data.pBuf;
+    return;
 }
 
-LPCTSTR CJobInfo::GetPortName( void ) const
+LPCTSTR CJobInfo::GetNotifyName(void) const
 {
-    return m_strPortName;
+    return m_strNotifyName;
 }
 
-LPCTSTR CJobInfo::GetDocument( void ) const
+void CJobInfo::SetNotifyName(const PPRINTER_NOTIFY_INFO_DATA pNotifyData)
+{
+    m_strNotifyName = (LPCTSTR)pNotifyData->NotifyData.Data.pBuf;
+    return;
+}
+
+LPCTSTR CJobInfo::GetDatatype(void) const
+{
+    return m_strDatatype;
+}
+
+void CJobInfo::SetDatatype(const PPRINTER_NOTIFY_INFO_DATA pNotifyData)
+{
+    m_strDatatype = (LPCTSTR)pNotifyData->NotifyData.Data.pBuf;
+    return;
+}
+
+LPCTSTR CJobInfo::GetPrintProcessor(void) const
+{
+    return m_strPrintProcessor;
+}
+
+void CJobInfo::SetPrintProcessor(const PPRINTER_NOTIFY_INFO_DATA pNotifyData)
+{
+    m_strPrintProcessor = (LPCTSTR)pNotifyData->NotifyData.Data.pBuf;
+    return;
+}
+
+LPCTSTR CJobInfo::GetParameters(void) const
+{
+    return m_strParameters;
+}
+
+void CJobInfo::SetParameters(const PPRINTER_NOTIFY_INFO_DATA pNotifyData)
+{
+    m_strParameters = (LPCTSTR)pNotifyData->NotifyData.Data.pBuf;
+    return;
+}
+
+LPCTSTR CJobInfo::GetDriverName( void ) const
+{
+    return m_strDriverName;
+}
+
+void CJobInfo::SetDriverName(const PPRINTER_NOTIFY_INFO_DATA pNotifyData)
+{
+    m_strDriverName = (LPCTSTR)pNotifyData->NotifyData.Data.pBuf;
+    return;
+}
+
+LPCTSTR CJobInfo::GetDevmode(void) const
+{
+    return m_strDevmode;
+}
+
+void CJobInfo::SetDevmode(const PPRINTER_NOTIFY_INFO_DATA pNotifyData)
+{
+    m_strDevmode = (LPCTSTR)pNotifyData->NotifyData.Data.pBuf;
+    return;
+}
+
+int CJobInfo::GetStatus(void) const
+{
+    return m_nStatus;
+}
+
+void CJobInfo::SetStatus(const PPRINTER_NOTIFY_INFO_DATA pNotifyData)
+{
+    m_nStatus = (int)pNotifyData->NotifyData.Data.pBuf;
+    return;
+}
+
+LPCTSTR CJobInfo::GetStatusString(void) const
+{
+    return m_strStatusString;
+}
+
+void CJobInfo::SetStatusString(const PPRINTER_NOTIFY_INFO_DATA pNotifyData)
+{
+    m_strStatusString = (LPCTSTR)pNotifyData->NotifyData.Data.pBuf;
+    return;
+}
+
+LPCTSTR CJobInfo::GetSecurityDescriptor(void) const
+{
+    return m_strSecurityDescriptor;
+}
+
+void CJobInfo::SetSecurityDescriptor(const PPRINTER_NOTIFY_INFO_DATA pNotifyData)
+{
+    m_strSecurityDescriptor = (LPCTSTR)pNotifyData->NotifyData.Data.pBuf;
+    return;
+}
+
+LPCTSTR CJobInfo::GetDocument(void) const
 {
     return m_strDocument;
 }
 
-SYSTEMTIME CJobInfo::GetTimeSubmitted( void ) const
+void CJobInfo::SetDocument(const PPRINTER_NOTIFY_INFO_DATA pNotifyData)
+{
+    m_strDocument = (LPCTSTR)pNotifyData->NotifyData.Data.pBuf;
+    return;
+}
+
+int CJobInfo::GetPriority(void) const
+{
+    return m_nPriority;
+}
+
+void CJobInfo::SetPriority(const PPRINTER_NOTIFY_INFO_DATA pNotifyData)
+{
+    m_nPriority = (int)pNotifyData->NotifyData.Data.pBuf;
+    return;
+}
+
+int CJobInfo::GetPosition(void) const
+{
+    return m_nPosition;
+}
+
+void CJobInfo::SetPosition(const PPRINTER_NOTIFY_INFO_DATA pNotifyData)
+{
+    m_nPosition = (int)pNotifyData->NotifyData.Data.pBuf;
+    return;
+}
+
+SYSTEMTIME CJobInfo::GetSubmitted( void ) const
 {
     return m_timeSubmitted;
+}
+
+void CJobInfo::SetSubmitted(const PPRINTER_NOTIFY_INFO_DATA pNotifyData)
+{
+    m_timeSubmitted = *((SYSTEMTIME*)pNotifyData->NotifyData.Data.pBuf);
+    return;
+}
+
+int CJobInfo::GetStartTime(void) const
+{
+    return m_nStartTime;
+}
+
+void CJobInfo::SetStartTime(const PPRINTER_NOTIFY_INFO_DATA pNotifyData)
+{
+    m_nStartTime = (int)pNotifyData->NotifyData.Data.pBuf;
+    return;
+}
+
+int CJobInfo::GetUntilTime(void) const
+{
+    return m_nUntilTime;
+}
+
+void CJobInfo::SetUntilTime(const PPRINTER_NOTIFY_INFO_DATA pNotifyData)
+{
+    m_nUntilTime = (int)pNotifyData->NotifyData.Data.pBuf;
+    return;
+}
+
+int CJobInfo::GetTime(void) const
+{
+    return m_nTime;
+}
+
+void CJobInfo::SetTime(const PPRINTER_NOTIFY_INFO_DATA pNotifyData)
+{
+    m_nTime = (int)pNotifyData->NotifyData.Data.pBuf;
+    return;
 }
 
 int CJobInfo::GetTotalPages( void ) const
@@ -130,9 +326,21 @@ int CJobInfo::GetTotalPages( void ) const
     return m_nTotalPages;
 }
 
+void CJobInfo::SetTotalPages(const PPRINTER_NOTIFY_INFO_DATA pNotifyData)
+{
+    m_nTotalPages = (int)pNotifyData->NotifyData.Data.pBuf;
+    return;
+}
+
 int CJobInfo::GetPagesPrinted( void ) const
 {
     return m_nPagesPrinted;
+}
+
+void CJobInfo::SetPagesPrinted(const PPRINTER_NOTIFY_INFO_DATA pNotifyData)
+{
+    m_nPagesPrinted = (int)pNotifyData->NotifyData.Data.pBuf;
+    return;
 }
 
 int CJobInfo::GetTotalBytes( void ) const
@@ -140,9 +348,21 @@ int CJobInfo::GetTotalBytes( void ) const
     return m_nTotalBytes;
 }
 
+void CJobInfo::SetTotalBytes(const PPRINTER_NOTIFY_INFO_DATA pNotifyData)
+{
+    m_nTotalBytes = (int)pNotifyData->NotifyData.Data.pBuf;
+    return;
+}
+
 int CJobInfo::GetBytesPrinted( void ) const
 {
     return m_nBytesPrinted;
+}
+
+void CJobInfo::SetBytesPrinted(const PPRINTER_NOTIFY_INFO_DATA pNotifyData)
+{
+    m_nBytesPrinted = (int)pNotifyData->NotifyData.Data.pBuf;
+    return;
 }
 
 LPCTSTR CJobInfo::GetStatusCustom( void ) const

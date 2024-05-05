@@ -329,7 +329,7 @@ UINT ThreadFunc( LPVOID pParam )
     OutputDebugString(buffer);
     OutputDebugString(L"\n");
     OutputDebugString(L"\n");
-    written = fwprintf_s(file1, L"%- 70s %s\n", L"CPrintManagerDlg, UINT ThreadFunc(LPVOID pParam): ", buffer);
+    written = fwprintf_s(file1, L"%- 70s %s", L"CPrintManagerDlg, UINT ThreadFunc(LPVOID pParam): ", buffer);
     
     CPrintManagerDlg *pDlg = (CPrintManagerDlg *) pParam;
     
@@ -416,7 +416,7 @@ UINT CPrintManagerDlg::ThreadFunc( void )
     OutputDebugString(buffer);
     OutputDebugString(L"\n");
     OutputDebugString(L"\n");
-    written = fwprintf_s(file1, L"CPrintManagerDlg, UINT CPrintManagerDlg::ThreadFunc( void ): % 70s", buffer);
+    written = fwprintf_s(file1, L"%- 70s %s", L"CPrintManagerDlg, UINT CPrintManagerDlg::ThreadFunc( void ): ", buffer);
     
     
     
@@ -569,9 +569,9 @@ LRESULT CPrintManagerDlg::OnUpdateJobList( WPARAM, LPARAM )
         
         m_lcJobInfo.SetItemText(nItem, 3, pJobInfo->GetDocument());
 
-        if (pJobInfo->GetTimeSubmitted().wHour != USHRT_MAX)
+        if (pJobInfo->GetSubmitted().wHour != USHRT_MAX)
         {
-            SYSTEMTIME st1 = pJobInfo->GetTimeSubmitted(),
+            SYSTEMTIME st1 = pJobInfo->GetSubmitted(),
                        st2;
 
             SystemTimeToTzSpecificLocalTime(NULL, &st1, &st2);
