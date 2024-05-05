@@ -89,6 +89,7 @@ private:
     void EnumeratePrinters( void );
 	void EnumerateDrivers(void);
     void RepositionChildControl( CWnd *pWnd, const int dx, const int dy, const UINT uAnchor );
+
 public:
 	afx_msg void OnBnClickedCancel();
 	afx_msg void OnTcnSelchangeIdPreviewPrev(NMHDR* pNMHDR, LRESULT* pResult);
@@ -99,6 +100,8 @@ public:
 	CRect rcItem2;
 	afx_msg void OnSelchangeTabcontrol(NMHDR* pNMHDR, LRESULT* pResult);
 	afx_msg void OnTcnSelchangeTabcontrol(NMHDR* pNMHDR, LRESULT* pResult);
+
+	virtual ~CPrintManagerDlg();
 };
 
 //{{AFX_INSERT_LOCATION}}

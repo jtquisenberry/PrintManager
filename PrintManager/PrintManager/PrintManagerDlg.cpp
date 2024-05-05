@@ -16,8 +16,9 @@ static char THIS_FILE[] = __FILE__;
 static const UINT UDM_UPDATE_JOB_LIST = RegisterWindowMessage(_T("UDM_UPDATE_JOB_LIST"));
 
 int aaa=777;
-FILE* file1 = NULL;
-FILE* file2;
+//FILE* file1 = NULL;  // Declared externally
+//FILE* file2 = NULL;  // Declared externally
+int written = 0;
 
 /////////////////////////////////////////////////////////////////////////////
 // CPrintManagerDlg dialog
@@ -31,40 +32,11 @@ CPrintManagerDlg::CPrintManagerDlg(CWnd* pParent /*=NULL*/)
     m_hIcon = AfxGetApp()->LoadIcon(IDR_MAINFRAME);
     aaa = 99999;
     
+    
     m_rectOrig.SetRectEmpty();
 
-    //HRESULT hr = SHGetFolderPath(NULL, CSIDL_COMMON_DOCUMENTS, NULL,
-    //    SHGFP_TYPE_CURRENT, path);
-    
-    aaa = 1;
-    char* docdir1 = getenv("USERPROFILE");
-    char docdir2[260];
-    char docdir3[260];
-    memset(&docdir2[0], 0, sizeof(docdir2));
-    memset(&docdir3[0], 0, sizeof(docdir2));
-    strcat(docdir2, docdir1);
-    strcat(docdir2, "\\filename1.txt");
-    strcat(docdir3, docdir1);
-    strcat(docdir3, "\\filename2.txt");
-
-
-
-    strcat(docdir1, "\\filename1.txt");
-
-    char* filename1 = strcat(docdir1, "\\filename1.txt");
-    free(docdir1);
-  //  char* docdir2 = getenv("USERPROFILE");
-    char* filename2 = strcat(docdir2, "\\filename2.txt");
     
     
-    file1 = fopen(filename1, "a+");
-    file2 = fopen(filename2, "a+");
-        
-        //write_stream = fopen("temp.txt", "w+");
-    int written = fwprintf_s(file1, L"Open File\n");
-    written = fwprintf_s(file2, L"Open File\n");
-    fclose(file1);
-    fclose(file2);
 
 
     m_pEventThreadDone    = NULL;
@@ -74,15 +46,23 @@ CPrintManagerDlg::CPrintManagerDlg(CWnd* pParent /*=NULL*/)
     wchar_t buffer[100];
     int cx;
     std::thread::id this_id = std::this_thread::get_id();
-    cx = swprintf(buffer, 100, L"Thread ID:%d \n", this_id);
+    cx = swprintf(buffer, 100, L"Thread ID: %d \n", this_id);
     OutputDebugString(L"\n");
     OutputDebugString(L"\n");
     OutputDebugString(L"CPrintManagerDlg::CPrintManagerDlg\n");
     OutputDebugString(buffer);
     OutputDebugString(L"\n");
     OutputDebugString(L"\n");
+    written = fwprintf_s(file1, L"%- 70s %s", L"CPrintManagerDlg::CPrintManagerDlg: ", buffer);
 
 }
+
+CPrintManagerDlg::~CPrintManagerDlg()
+{
+    fclose(file1);
+    fclose(file2);
+}
+
 
 void CPrintManagerDlg::DoDataExchange(CDataExchange* pDX)
 {
@@ -127,15 +107,14 @@ BOOL CPrintManagerDlg::OnInitDialog()
     wchar_t buffer[100];
     int cx;
     std::thread::id this_id = std::this_thread::get_id();
-    cx = swprintf(buffer, 100, L"Thread ID:%d \n", this_id);
+    cx = swprintf(buffer, 100, L"Thread ID: %d \n", this_id);
     OutputDebugString(L"\n");
     OutputDebugString(L"\n");
     OutputDebugString(L"CPrintManagerDlg::OnInitDialog\n");
     OutputDebugString(buffer);
     OutputDebugString(L"\n");
     OutputDebugString(L"\n");
-
-
+    written = fwprintf_s(file1, L"%- 70s %s", L"CPrintManagerDlg::OnInitDialog: ", buffer);
 
     // Add "About..." menu item to system menu.
 
@@ -343,14 +322,14 @@ UINT ThreadFunc( LPVOID pParam )
     wchar_t buffer[100];
     int cx;
     std::thread::id this_id = std::this_thread::get_id();
-    cx = swprintf(buffer, 100, L"Thread ID:%d \n", this_id);
+    cx = swprintf(buffer, 100, L"Thread ID: %d \n", this_id);
     OutputDebugString(L"\n");
     OutputDebugString(L"\n");
     OutputDebugString(L"CPrintManagerDlg, UINT ThreadFunc(LPVOID pParam)\n");
     OutputDebugString(buffer);
     OutputDebugString(L"\n");
     OutputDebugString(L"\n");
-    
+    written = fwprintf_s(file1, L"%- 70s %s\n", L"CPrintManagerDlg, UINT ThreadFunc(LPVOID pParam): ", buffer);
     
     CPrintManagerDlg *pDlg = (CPrintManagerDlg *) pParam;
     
@@ -430,14 +409,14 @@ UINT CPrintManagerDlg::ThreadFunc( void )
     wchar_t buffer[100];
     int cx;
     std::thread::id this_id = std::this_thread::get_id();
-    cx = swprintf(buffer, 100, L"Thread ID:%d \n", this_id);
+    cx = swprintf(buffer, 100, L"Thread ID: %d \n", this_id);
     OutputDebugString(L"\n");
     OutputDebugString(L"\n");
     OutputDebugString(L"CPrintManagerDlg, UINT CPrintManagerDlg::ThreadFunc( void )\n");
     OutputDebugString(buffer);
     OutputDebugString(L"\n");
     OutputDebugString(L"\n");
-    
+    written = fwprintf_s(file1, L"CPrintManagerDlg, UINT CPrintManagerDlg::ThreadFunc( void ): % 70s", buffer);
     
     
     

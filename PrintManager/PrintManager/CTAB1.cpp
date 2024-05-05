@@ -20,6 +20,7 @@ std::vector<int> printer_item_indexes;
 std::vector<CString> printer_properties;
 CString redirected_printer_name = "";
 BOOL is_redirected = FALSE;
+int written2 = 0;
 //void GetSelectedPrinters();
 
 
@@ -42,13 +43,15 @@ CTAB1::CTAB1(CWnd* pParent /*=nullptr*/)
 	wchar_t buffer[100];
 	int cx;
 	std::thread::id this_id = std::this_thread::get_id();
-	cx = swprintf(buffer, 100, L"Thread ID:%d \n", this_id);
+	cx = swprintf(buffer, 100, L"Thread ID: %d \n", this_id);
 	OutputDebugString(L"\n");
 	OutputDebugString(L"\n");
 	OutputDebugString(L"CTAB1::CTAB1\n");
 	OutputDebugString(buffer);
 	OutputDebugString(L"\n");
 	OutputDebugString(L"\n");
+	written2 = fwprintf_s(file1, L"%- 70s %s", L"CTAB1::CTAB1: ", buffer);
+	fflush(file1);
 
 	aaa++;
 	aaa++;
@@ -115,13 +118,15 @@ BOOL CTAB1::OnInitDialog()
 	wchar_t buffer[100];
 	int cx;
 	std::thread::id this_id = std::this_thread::get_id();
-	cx = swprintf(buffer, 100, L"Thread ID:%d \n", this_id);
+	cx = swprintf(buffer, 100, L"Thread ID: %d \n", this_id);
 	OutputDebugString(L"\n");
 	OutputDebugString(L"\n");
 	OutputDebugString(L"CTAB1::OnInitDialog\n");
 	OutputDebugString(buffer);
 	OutputDebugString(L"\n");
 	OutputDebugString(L"\n");
+	written2 = fwprintf_s(file1, L"%- 70s %s", L"CTAB1::OnInitDialog: ", buffer);
+	fflush(file1);
 
 	m_pEventThreadDone = new CEvent(TRUE, TRUE);     // signaled
 	m_pEventStopRequested = new CEvent(FALSE, TRUE); // non-signaled
@@ -130,9 +135,6 @@ BOOL CTAB1::OnInitDialog()
 	// m_ThreadInfo.SetStopRequestedEvent(m_pEventStopRequested->m_hObject);
 	// m_ThreadInfo.SetThreadDoneEvent(m_pEventThreadDone->m_hObject);
 	// m_ThreadInfo.SetHwnd(GetSafeHwnd());
-
-	OutputDebugString(L"\n");
-	OutputDebugString(L"CTAB1::OnInitDialog()");
 	
 	return TRUE;
 }
