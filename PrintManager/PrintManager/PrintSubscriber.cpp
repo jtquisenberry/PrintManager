@@ -192,6 +192,26 @@ UINT PrintSubscriber::Start(LPVOID pParam)
 				}
 
 				int ddd = 0;
+				
+				POSITION pos = m_mapJobInfo.GetStartPosition();
+				while (pos != NULL)
+				{
+					int nKey;
+					CJobInfo* pJobInfo = new CJobInfo(NULL);
+
+					auto vvv = pJobInfo->BuildString();
+
+
+					m_mapJobInfo.GetNextAssoc(pos, nKey, pJobInfo);
+
+					ASSERT(pJobInfo != NULL);
+					int eee = 0;
+				}
+
+
+
+
+
 			}
 
 			FreePrinterNotifyInfo(pNotification);

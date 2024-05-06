@@ -60,6 +60,8 @@ public:
     void SetBytesPrinted(const PPRINTER_NOTIFY_INFO_DATA);
     LPCTSTR GetStatusCustom(void) const;
 
+    int BuildString(void);
+
     //=================================================================
     
     void UpdateInfo( const PPRINTER_NOTIFY_INFO_DATA pNotifyData );

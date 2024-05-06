@@ -39,6 +39,12 @@ CMap<int, int, LPCTSTR, LPCTSTR> CJobInfo::m_mapJobStatus;
 
 //=================================================================
 
+int CJobInfo::BuildString()
+{
+    int vvv = 0;
+    return 0;
+}
+
 void CJobInfo::UpdateInfo( const PPRINTER_NOTIFY_INFO_DATA pNotifyData )
 {
     if (pNotifyData->Field == JOB_NOTIFY_FIELD_PRINTER_NAME)                     // 0x00
