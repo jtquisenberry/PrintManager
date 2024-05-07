@@ -41,7 +41,67 @@ CMap<int, int, LPCTSTR, LPCTSTR> CJobInfo::m_mapJobStatus;
 
 int CJobInfo::BuildString()
 {
-    int vvv = 0;
+    wchar_t buffer[1000];
+    int cx;
+    cx = swprintf(buffer, 1000,
+        L"%- 30s %d\n ", L"aaa", 3);
+
+    /*
+    cx = swprintf(buffer, 1000, 
+        L"%- 30s %d\n "
+        L"%- 30s %s\n "
+        L"%- 30s %s\n "
+        L"%- 30s %s\n "
+        L"%- 30s %s\n "
+        L"%- 30s %s\n "
+        L"%- 30s %s\n "
+        L"%- 30s %s\n "
+        L"%- 30s %s\n "
+        L"%- 30s %s\n "
+        L"%- 30s %s\n "
+        L"%- 30s %d\n "
+        L"%- 30s %s\n "
+        L"%- 30s %s\n "
+        L"%- 30s %s\n "
+        L"%- 30s %d\n "
+        L"%- 30s %s\n "
+        L"%- 30s %d\n "
+        L"%- 30s %d\n "
+        L"%- 30s %d\n "
+        L"%- 30s %d\n "
+        L"%- 30s %d\n "
+        L"%- 30s %d\n "
+        L"%- 30s %d\n "
+        L"%- 30s %d\n ",
+        L"JobId", m_nJobId,
+        L"PrinterName", m_strPrinterName,
+        L"MachineName", m_strMachineName,
+        L"PortName", m_strPortName,
+        L"UserName", m_strUserName,
+        L"NotifyName", m_strNotifyName,
+        L"Datatype", m_strDatatype,
+        L"PrintProcessor", m_strPrintProcessor,
+        L"Parameters", m_strParameters,
+        L"DriverName", m_strDriverName,
+        L"Devmode", m_strDevmode,
+        L"Status", m_nStatus,
+        L"StatusString", m_strStatusString,
+        L"SecurityDescriptor", m_strSecurityDescriptor,
+        L"Document", m_strDocument,
+        L"Priority", m_nPriority,
+        L"Position", m_nPosition,
+        L"Submitted", m_timeSubmitted,
+        L"StartTime", m_nStartTime,
+        L"UntilTime", m_nUntilTime,
+        L"Time", m_nTime,
+        L"TotalPages", m_nTotalPages,
+        L"PagesPrinted", m_nPagesPrinted,
+        L"TotalBytes", m_nTotalBytes,
+        L"BytesPrinted", m_nBytesPrinted);
+    */
+
+
+    OutputDebugString(buffer);
     return 0;
 }
 
