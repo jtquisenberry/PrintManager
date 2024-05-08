@@ -81,6 +81,7 @@ private:
     CString m_strParameters;         // 0x07
     CString m_strDriverName;         // 0x08
     CString m_strDevmode;            // 0x09
+    DEVMODE* m_devDevmode;           // 0x09
     int m_nStatus;                   // 0x0A
     CString m_strStatusString;       // 0x0B
     CString m_strSecurityDescriptor; // 0x0C

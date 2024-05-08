@@ -199,11 +199,11 @@ UINT PrintSubscriber::Start(LPVOID pParam)
 					int nKey;
 					CJobInfo* pJobInfo = new CJobInfo(NULL);
 
-					auto vvv = pJobInfo->BuildString();
+					//auto vvv = pJobInfo->BuildString();
 
 
 					m_mapJobInfo.GetNextAssoc(pos, nKey, pJobInfo);
-
+					auto vvv = pJobInfo->BuildString();
 					ASSERT(pJobInfo != NULL);
 					int eee = 0;
 				}

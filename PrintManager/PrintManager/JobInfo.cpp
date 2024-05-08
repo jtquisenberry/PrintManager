@@ -44,10 +44,10 @@ int CJobInfo::BuildString()
     wchar_t buffer[1000];
     int cx;
     cx = swprintf(buffer, 1000,
-        L"%- 30s %d\n ", L"aaa", 3);
+        L"%- 30s %d\n ", L"aaa", m_nJobId);
 
-    /*
-    cx = swprintf(buffer, 1000, 
+    
+    cx = swprintf(buffer, 1000,
         L"%- 30s %d\n "
         L"%- 30s %s\n "
         L"%- 30s %s\n "
@@ -64,14 +64,14 @@ int CJobInfo::BuildString()
         L"%- 30s %s\n "
         L"%- 30s %s\n "
         L"%- 30s %d\n "
-        L"%- 30s %s\n "
         L"%- 30s %d\n "
-        L"%- 30s %d\n "
-        L"%- 30s %d\n "
-        L"%- 30s %d\n "
-        L"%- 30s %d\n "
-        L"%- 30s %d\n "
-        L"%- 30s %d\n "
+        //L"%- 30s %d\n "
+        //L"%- 30s %d\n "
+        //L"%- 30s %d\n "
+        //L"%- 30s %d\n "
+        //L"%- 30s %d\n "
+        //L"%- 30s %d\n "
+        //L"%- 30s %d\n "
         L"%- 30s %d\n ",
         L"JobId", m_nJobId,
         L"PrinterName", m_strPrinterName,
@@ -90,15 +90,40 @@ int CJobInfo::BuildString()
         L"Document", m_strDocument,
         L"Priority", m_nPriority,
         L"Position", m_nPosition,
-        L"Submitted", m_timeSubmitted,
-        L"StartTime", m_nStartTime,
-        L"UntilTime", m_nUntilTime,
-        L"Time", m_nTime,
-        L"TotalPages", m_nTotalPages,
-        L"PagesPrinted", m_nPagesPrinted,
-        L"TotalBytes", m_nTotalBytes,
-        L"BytesPrinted", m_nBytesPrinted);
-    */
+        //L"Submitted", m_timeSubmitted,
+        //L"StartTime", m_nStartTime,
+        //L"UntilTime", m_nUntilTime,
+        //L"Time", m_nTime,
+        //L"TotalPages", m_nTotalPages,
+        //L"PagesPrinted", m_nPagesPrinted,
+        //L"TotalBytes", m_nTotalBytes,
+        L"BytesPrinted", m_nBytesPrinted
+        );
+        
+        
+        
+        
+        /*
+        
+        L"%- 30s %s\n "
+        L"%- 30s %d\n "
+        L"%- 30s %s\n "
+        L"%- 30s %d\n "
+        L"%- 30s %d\n "
+        L"%- 30s %d\n "
+        L"%- 30s %d\n "
+        L"%- 30s %d\n "
+        L"%- 30s %d\n "
+        L"%- 30s %d\n "
+        L"%- 30s %d\n "
+        
+        
+        
+        ,
+        
+                
+        );
+        */    
 
 
     OutputDebugString(buffer);
@@ -111,51 +136,74 @@ void CJobInfo::UpdateInfo( const PPRINTER_NOTIFY_INFO_DATA pNotifyData )
         // m_strPrinterName = (LPCTSTR)pNotifyData->NotifyData.Data.pBuf;
         SetPrinterName(pNotifyData);
     else if (pNotifyData->Field == JOB_NOTIFY_FIELD_MACHINE_NAME)                // 0x01
-        m_strMachineName = (LPCTSTR)pNotifyData->NotifyData.Data.pBuf;
+        // m_strMachineName = (LPCTSTR)pNotifyData->NotifyData.Data.pBuf;
+        SetMachineName(pNotifyData);
     else if (pNotifyData->Field == JOB_NOTIFY_FIELD_PORT_NAME)                   // 0x02
-        m_strPortName = (LPCTSTR)pNotifyData->NotifyData.Data.pBuf;
+        // m_strPortName = (LPCTSTR)pNotifyData->NotifyData.Data.pBuf;
+        SetPortName(pNotifyData);
     else if (pNotifyData->Field == JOB_NOTIFY_FIELD_USER_NAME)                   // 0x03
-        m_strUserName = (LPCTSTR) pNotifyData->NotifyData.Data.pBuf;
+        // m_strUserName = (LPCTSTR) pNotifyData->NotifyData.Data.pBuf;
+        SetUserName(pNotifyData);
     else if (pNotifyData->Field == JOB_NOTIFY_FIELD_NOTIFY_NAME)                 // 0x04
-        m_strNotifyName = (LPCTSTR)pNotifyData->NotifyData.Data.pBuf;
+        // m_strNotifyName = (LPCTSTR)pNotifyData->NotifyData.Data.pBuf;
+        SetNotifyName(pNotifyData);
     else if (pNotifyData->Field == JOB_NOTIFY_FIELD_DATATYPE)                    // 0x05
-        m_strDatatype = (LPCTSTR)pNotifyData->NotifyData.Data.pBuf;
+        // m_strDatatype = (LPCTSTR)pNotifyData->NotifyData.Data.pBuf;
+        SetDatatype(pNotifyData);
     else if (pNotifyData->Field == JOB_NOTIFY_FIELD_PRINT_PROCESSOR)             // 0x06
-        m_strPrintProcessor = (LPCTSTR)pNotifyData->NotifyData.Data.pBuf;
+        // m_strPrintProcessor = (LPCTSTR)pNotifyData->NotifyData.Data.pBuf;
+        SetPrintProcessor(pNotifyData);
     else if (pNotifyData->Field == JOB_NOTIFY_FIELD_PARAMETERS)                  // 0x07
-        m_strParameters = (LPCTSTR)pNotifyData->NotifyData.Data.pBuf;
+        // m_strParameters = (LPCTSTR)pNotifyData->NotifyData.Data.pBuf;
+        SetParameters(pNotifyData);
     else if (pNotifyData->Field == JOB_NOTIFY_FIELD_DRIVER_NAME)                 // 0x08
-        m_strDriverName = (LPCTSTR)pNotifyData->NotifyData.Data.pBuf;
+        // m_strDriverName = (LPCTSTR)pNotifyData->NotifyData.Data.pBuf;
+        SetDriverName(pNotifyData);
     else if (pNotifyData->Field == JOB_NOTIFY_FIELD_DEVMODE)                     // 0x09
-        m_strDevmode = (LPCTSTR)pNotifyData->NotifyData.Data.pBuf;
+        // m_strDevmode = (LPCTSTR)pNotifyData->NotifyData.Data.pBuf;
+        SetDevmode(pNotifyData);
     else if (pNotifyData->Field == JOB_NOTIFY_FIELD_STATUS)                      // 0x0A
-        m_nStatus = (int)pNotifyData->NotifyData.Data.pBuf;
+        // m_nStatus = (int)pNotifyData->NotifyData.Data.pBuf;
+        SetStatus(pNotifyData);
     else if (pNotifyData->Field == JOB_NOTIFY_FIELD_STATUS_STRING)               // 0x0B
-        m_strStatusString = (LPCTSTR)pNotifyData->NotifyData.Data.pBuf;
+        // m_strStatusString = (LPCTSTR)pNotifyData->NotifyData.Data.pBuf;
+        SetStatusString(pNotifyData);
     else if (pNotifyData->Field == JOB_NOTIFY_FIELD_SECURITY_DESCRIPTOR)         // 0x0C
-        m_strSecurityDescriptor = (LPCTSTR)pNotifyData->NotifyData.Data.pBuf;
+        // m_strSecurityDescriptor = (LPCTSTR)pNotifyData->NotifyData.Data.pBuf;
+        SetSecurityDescriptor(pNotifyData);
     else if (pNotifyData->Field == JOB_NOTIFY_FIELD_DOCUMENT)                    // 0x0D
-        m_strDocument = (LPCTSTR) pNotifyData->NotifyData.Data.pBuf;
+        // m_strDocument = (LPCTSTR) pNotifyData->NotifyData.Data.pBuf;
+        SetDocument(pNotifyData);
     else if (pNotifyData->Field == JOB_NOTIFY_FIELD_PRIORITY)                    // 0x0E
-        m_nPriority = (int)pNotifyData->NotifyData.Data.pBuf;
+        // m_nPriority = (int)pNotifyData->NotifyData.Data.pBuf;
+        SetPriority(pNotifyData);
     else if (pNotifyData->Field == JOB_NOTIFY_FIELD_POSITION)                    // 0x0F
-        m_nPosition = (int)pNotifyData->NotifyData.Data.pBuf;
+        // m_nPosition = (int)pNotifyData->NotifyData.Data.pBuf;
+        SetPosition(pNotifyData);
     else if (pNotifyData->Field == JOB_NOTIFY_FIELD_SUBMITTED)                   // 0x10
-        m_timeSubmitted = *((SYSTEMTIME *) pNotifyData->NotifyData.Data.pBuf);
+        // m_timeSubmitted = *((SYSTEMTIME *) pNotifyData->NotifyData.Data.pBuf);
+        SetSubmitted(pNotifyData);
     else if (pNotifyData->Field == JOB_NOTIFY_FIELD_START_TIME)                  // 0x11
-        m_nStartTime = (int)pNotifyData->NotifyData.Data.pBuf;
+        // m_nStartTime = (int)pNotifyData->NotifyData.Data.pBuf;
+        SetStartTime(pNotifyData);
     else if (pNotifyData->Field == JOB_NOTIFY_FIELD_UNTIL_TIME)                  // 0x12
-        m_nUntilTime = (int)pNotifyData->NotifyData.Data.pBuf;
+        // m_nUntilTime = (int)pNotifyData->NotifyData.Data.pBuf;
+        SetUntilTime(pNotifyData);
     else if (pNotifyData->Field == JOB_NOTIFY_FIELD_TIME)                        // 0x13
-        m_nTime = (int)pNotifyData->NotifyData.Data.pBuf;
+        // m_nTime = (int)pNotifyData->NotifyData.Data.pBuf;
+        SetTime(pNotifyData);
     else if (pNotifyData->Field == JOB_NOTIFY_FIELD_TOTAL_PAGES)                 // 0x14
-        m_nTotalPages = pNotifyData->NotifyData.adwData[0];
+        // m_nTotalPages = pNotifyData->NotifyData.adwData[0];
+        SetTotalPages(pNotifyData);
     else if (pNotifyData->Field == JOB_NOTIFY_FIELD_PAGES_PRINTED)               // 0x15
-        m_nPagesPrinted = pNotifyData->NotifyData.adwData[0];
+        // m_nPagesPrinted = pNotifyData->NotifyData.adwData[0];
+        SetPagesPrinted(pNotifyData);
     else if (pNotifyData->Field == JOB_NOTIFY_FIELD_TOTAL_BYTES)                 // 0x16
-        m_nTotalBytes = pNotifyData->NotifyData.adwData[0];
+        // m_nTotalBytes = pNotifyData->NotifyData.adwData[0];
+        SetTotalBytes(pNotifyData);
     else if (pNotifyData->Field == JOB_NOTIFY_FIELD_BYTES_PRINTED)               // 0x17
-        m_nBytesPrinted = pNotifyData->NotifyData.adwData[0];
+        // m_nBytesPrinted = pNotifyData->NotifyData.adwData[0];
+        SetBytesPrinted(pNotifyData);
     else
         TRACE(_T("Unhandled job field: %x\n"), pNotifyData->Field);
 }
@@ -273,7 +321,8 @@ LPCTSTR CJobInfo::GetDevmode(void) const
 
 void CJobInfo::SetDevmode(const PPRINTER_NOTIFY_INFO_DATA pNotifyData)
 {
-    m_strDevmode = (LPCTSTR)pNotifyData->NotifyData.Data.pBuf;
+    m_devDevmode = (DEVMODE*)pNotifyData->NotifyData.Data.pBuf;
+    m_strDevmode = L"DEVMODE PLACEHOLDER";
     return;
 }
 
@@ -306,7 +355,8 @@ LPCTSTR CJobInfo::GetSecurityDescriptor(void) const
 
 void CJobInfo::SetSecurityDescriptor(const PPRINTER_NOTIFY_INFO_DATA pNotifyData)
 {
-    m_strSecurityDescriptor = (LPCTSTR)pNotifyData->NotifyData.Data.pBuf;
+    //m_strSecurityDescriptor = (LPCTSTR)pNotifyData->NotifyData.Data.pBuf;
+    m_strSecurityDescriptor = L"UNSUPPORTED";
     return;
 }
 
