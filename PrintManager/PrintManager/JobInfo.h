@@ -89,6 +89,7 @@ private:
     int m_nPriority;                 // 0x0E
     int m_nPosition;                 // 0x0F
     SYSTEMTIME m_timeSubmitted;      // 0x10
+    CString m_strSubmitted;
     int m_nStartTime;                // 0x11
     int m_nUntilTime;                // 0x12
     int m_nTime;                     // 0x13

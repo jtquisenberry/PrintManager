@@ -15,6 +15,8 @@ CJobInfo::CJobInfo( const int nJobId )
     m_nPagesPrinted       = 0;
     m_nTotalBytes         = 0;
     m_nBytesPrinted       = 0;
+    m_strStatusString = L"UNSUPPORTED";
+    m_strSecurityDescriptor = L"UNSUPPORTED";
 
     // since m_mapJobStatus is used by all instances, we only want to populate it once
     if (m_mapJobStatus.IsEmpty())
@@ -41,13 +43,13 @@ CMap<int, int, LPCTSTR, LPCTSTR> CJobInfo::m_mapJobStatus;
 
 int CJobInfo::BuildString()
 {
-    wchar_t buffer[1000];
+    wchar_t buffer[1200];
     int cx;
-    cx = swprintf(buffer, 1000,
-        L"%- 30s %d\n ", L"aaa", m_nJobId);
+    //cx = swprintf(buffer, 1000,
+    //    L"%- 30s %d\n ", L"aaa", m_nJobId);
 
     
-    cx = swprintf(buffer, 1000,
+    cx = swprintf(buffer, 1200,
         L"%- 30s %d\n "
         L"%- 30s %s\n "
         L"%- 30s %s\n "
@@ -65,13 +67,13 @@ int CJobInfo::BuildString()
         L"%- 30s %s\n "
         L"%- 30s %d\n "
         L"%- 30s %d\n "
-        //L"%- 30s %d\n "
-        //L"%- 30s %d\n "
-        //L"%- 30s %d\n "
-        //L"%- 30s %d\n "
-        //L"%- 30s %d\n "
-        //L"%- 30s %d\n "
-        //L"%- 30s %d\n "
+        L"%- 30s %s\n "
+        L"%- 30s %d\n "
+        L"%- 30s %d\n "
+        L"%- 30s %d\n "
+        L"%- 30s %d\n "
+        L"%- 30s %d\n "
+        L"%- 30s %d\n "
         L"%- 30s %d\n ",
         L"JobId", m_nJobId,
         L"PrinterName", m_strPrinterName,
@@ -90,13 +92,13 @@ int CJobInfo::BuildString()
         L"Document", m_strDocument,
         L"Priority", m_nPriority,
         L"Position", m_nPosition,
-        //L"Submitted", m_timeSubmitted,
-        //L"StartTime", m_nStartTime,
-        //L"UntilTime", m_nUntilTime,
-        //L"Time", m_nTime,
-        //L"TotalPages", m_nTotalPages,
-        //L"PagesPrinted", m_nPagesPrinted,
-        //L"TotalBytes", m_nTotalBytes,
+        L"Submitted", m_strSubmitted,
+        L"StartTime", m_nStartTime,
+        L"UntilTime", m_nUntilTime,
+        L"Time", m_nTime,
+        L"TotalPages", m_nTotalPages,
+        L"PagesPrinted", m_nPagesPrinted,
+        L"TotalBytes", m_nTotalBytes,
         L"BytesPrinted", m_nBytesPrinted
         );
         
@@ -401,6 +403,28 @@ SYSTEMTIME CJobInfo::GetSubmitted( void ) const
 void CJobInfo::SetSubmitted(const PPRINTER_NOTIFY_INFO_DATA pNotifyData)
 {
     m_timeSubmitted = *((SYSTEMTIME*)pNotifyData->NotifyData.Data.pBuf);
+    // CString str4{ wstr.c_str() };
+    
+    wchar_t* buffer = new wchar_t[100];
+
+    int cx;
+    cx = swprintf(buffer, 100,
+        L"%d-%02d-%02d %02d:%02d:%02d.%03d",
+        m_timeSubmitted.wYear,
+        m_timeSubmitted.wMonth,
+        m_timeSubmitted.wDay,
+        m_timeSubmitted.wHour,
+        m_timeSubmitted.wMinute,
+        m_timeSubmitted.wSecond,
+        m_timeSubmitted.wMilliseconds);
+    
+    CString m_strSubmittedA(buffer);
+    m_strSubmitted = m_strSubmittedA;
+    
+
+
+    // str4{ wstr.c_str() };
+    
     return;
 }
 
