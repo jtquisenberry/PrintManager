@@ -61,6 +61,7 @@ public:
     LPCTSTR GetStatusCustom(void) const;
 
     int BuildString(void);
+    CString GetString(void);
 
     //=================================================================
     
@@ -98,5 +99,7 @@ private:
     int m_nTotalBytes;               // 0x16
     int m_nBytesPrinted;             // 0x17
     
+    CString m_strAllProperties;
+
 };
 

@@ -203,7 +203,12 @@ UINT PrintSubscriber::Start(LPVOID pParam)
 
 
 					m_mapJobInfo.GetNextAssoc(pos, nKey, pJobInfo);
-					auto vvv = pJobInfo->BuildString();
+					int cx2 = pJobInfo->BuildString();
+
+					OutputDebugString(L"\n\n");
+					OutputDebugStringW(pJobInfo->GetString());
+					OutputDebugString(L"\n\n");
+
 					ASSERT(pJobInfo != NULL);
 					int eee = 0;
 				}

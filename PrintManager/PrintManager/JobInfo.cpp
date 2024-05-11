@@ -41,13 +41,17 @@ CMap<int, int, LPCTSTR, LPCTSTR> CJobInfo::m_mapJobStatus;
 
 //=================================================================
 
+CString CJobInfo::GetString()
+{
+    return m_strAllProperties;
+}
+
+
+
 int CJobInfo::BuildString()
 {
-    wchar_t buffer[1200];
+    wchar_t* buffer = new wchar_t[1200];
     int cx;
-    //cx = swprintf(buffer, 1000,
-    //    L"%- 30s %d\n ", L"aaa", m_nJobId);
-
     
     cx = swprintf(buffer, 1200,
         L"%- 30s %d\n "
@@ -101,34 +105,12 @@ int CJobInfo::BuildString()
         L"TotalBytes", m_nTotalBytes,
         L"BytesPrinted", m_nBytesPrinted
         );
-        
-        
-        
-        
-        /*
-        
-        L"%- 30s %s\n "
-        L"%- 30s %d\n "
-        L"%- 30s %s\n "
-        L"%- 30s %d\n "
-        L"%- 30s %d\n "
-        L"%- 30s %d\n "
-        L"%- 30s %d\n "
-        L"%- 30s %d\n "
-        L"%- 30s %d\n "
-        L"%- 30s %d\n "
-        L"%- 30s %d\n "
-        
-        
-        
-        ,
-        
-                
-        );
-        */    
+
+    CString m_strAllProperties_temp(buffer);
+    m_strAllProperties = m_strAllProperties_temp;
 
 
-    OutputDebugString(buffer);
+    // OutputDebugString(buffer);
     return 0;
 }
 
