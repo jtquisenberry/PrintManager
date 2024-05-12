@@ -317,7 +317,7 @@ int CJobInfo::GetStatus(void) const
 
 void CJobInfo::SetStatus(const PPRINTER_NOTIFY_INFO_DATA pNotifyData)
 {
-    m_nStatus = (int)pNotifyData->NotifyData.Data.pBuf;
+    m_nStatus = pNotifyData->NotifyData.adwData[0];
     return;
 }
 
@@ -339,7 +339,6 @@ LPCTSTR CJobInfo::GetSecurityDescriptor(void) const
 
 void CJobInfo::SetSecurityDescriptor(const PPRINTER_NOTIFY_INFO_DATA pNotifyData)
 {
-    //m_strSecurityDescriptor = (LPCTSTR)pNotifyData->NotifyData.Data.pBuf;
     m_strSecurityDescriptor = L"UNSUPPORTED";
     return;
 }
@@ -362,7 +361,7 @@ int CJobInfo::GetPriority(void) const
 
 void CJobInfo::SetPriority(const PPRINTER_NOTIFY_INFO_DATA pNotifyData)
 {
-    m_nPriority = (int)pNotifyData->NotifyData.Data.pBuf;
+    m_nPriority = pNotifyData->NotifyData.adwData[0];
     return;
 }
 
@@ -373,7 +372,7 @@ int CJobInfo::GetPosition(void) const
 
 void CJobInfo::SetPosition(const PPRINTER_NOTIFY_INFO_DATA pNotifyData)
 {
-    m_nPosition = (int)pNotifyData->NotifyData.Data.pBuf;
+    m_nPosition = pNotifyData->NotifyData.adwData[0];
     return;
 }
 
@@ -417,7 +416,7 @@ int CJobInfo::GetStartTime(void) const
 
 void CJobInfo::SetStartTime(const PPRINTER_NOTIFY_INFO_DATA pNotifyData)
 {
-    m_nStartTime = (int)pNotifyData->NotifyData.Data.pBuf;
+    m_nStartTime = pNotifyData->NotifyData.adwData[0];
     return;
 }
 
@@ -428,7 +427,7 @@ int CJobInfo::GetUntilTime(void) const
 
 void CJobInfo::SetUntilTime(const PPRINTER_NOTIFY_INFO_DATA pNotifyData)
 {
-    m_nUntilTime = (int)pNotifyData->NotifyData.Data.pBuf;
+    m_nUntilTime = pNotifyData->NotifyData.adwData[0];
     return;
 }
 
@@ -439,7 +438,7 @@ int CJobInfo::GetTime(void) const
 
 void CJobInfo::SetTime(const PPRINTER_NOTIFY_INFO_DATA pNotifyData)
 {
-    m_nTime = (int)pNotifyData->NotifyData.Data.pBuf;
+    m_nTime = pNotifyData->NotifyData.adwData[0];
     return;
 }
 
@@ -450,7 +449,7 @@ int CJobInfo::GetTotalPages( void ) const
 
 void CJobInfo::SetTotalPages(const PPRINTER_NOTIFY_INFO_DATA pNotifyData)
 {
-    m_nTotalPages = (int)pNotifyData->NotifyData.Data.pBuf;
+    m_nTotalPages = pNotifyData->NotifyData.adwData[0];
     return;
 }
 
@@ -461,7 +460,7 @@ int CJobInfo::GetPagesPrinted( void ) const
 
 void CJobInfo::SetPagesPrinted(const PPRINTER_NOTIFY_INFO_DATA pNotifyData)
 {
-    m_nPagesPrinted = (int)pNotifyData->NotifyData.Data.pBuf;
+    m_nPagesPrinted = pNotifyData->NotifyData.adwData[0];
     return;
 }
 
@@ -472,7 +471,7 @@ int CJobInfo::GetTotalBytes( void ) const
 
 void CJobInfo::SetTotalBytes(const PPRINTER_NOTIFY_INFO_DATA pNotifyData)
 {
-    m_nTotalBytes = (int)pNotifyData->NotifyData.Data.pBuf;
+    m_nTotalBytes = pNotifyData->NotifyData.adwData[0];
     return;
 }
 
@@ -483,7 +482,7 @@ int CJobInfo::GetBytesPrinted( void ) const
 
 void CJobInfo::SetBytesPrinted(const PPRINTER_NOTIFY_INFO_DATA pNotifyData)
 {
-    m_nBytesPrinted = (int)pNotifyData->NotifyData.Data.pBuf;
+    m_nBytesPrinted = pNotifyData->NotifyData.adwData[0];
     return;
 }
 

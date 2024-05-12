@@ -209,6 +209,9 @@ UINT PrintSubscriber::Start(LPVOID pParam)
 					OutputDebugStringW(pJobInfo->GetString());
 					OutputDebugString(L"\n\n");
 
+					int written2 = 0;
+					written2 = fwprintf_s(g_fileApplication, L"\n\n%s\n\n", pJobInfo->GetString());
+
 					ASSERT(pJobInfo != NULL);
 					int eee = 0;
 				}

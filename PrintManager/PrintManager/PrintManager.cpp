@@ -9,8 +9,8 @@
 static char THIS_FILE[] = __FILE__;
 #endif
 
-FILE* file1 = NULL;  // Declared externally
-FILE* file2 = NULL;  // Declared externally
+FILE* g_fileApplication = NULL;  // Declared externally
+FILE* g_fileOutput = NULL;  // Declared externally
 
 
 
@@ -54,15 +54,15 @@ BOOL CPrintManagerApp::InitInstance()
 	strcat(path2, base_path);
 	strcat(path2, "\\print_manager_objects.txt");
 
-	file1 = fopen(path1, "a+");
-	file2 = fopen(path2, "a+");
+	g_fileApplication = fopen(path1, "a+");
+	g_fileOutput = fopen(path2, "a+");
 
-	fwprintf_s(file1, L"\nSTART\n");
-	fwprintf_s(file1, L"---------------------------------------\n\n");
-	fwprintf_s(file2, L"\nSTART\n");
-	fwprintf_s(file2, L"---------------------------------------\n\n");
-	fflush(file1);
-	fflush(file2);
+	fwprintf_s(g_fileApplication, L"\nSTART\n");
+	fwprintf_s(g_fileApplication, L"---------------------------------------\n\n");
+	fwprintf_s(g_fileOutput, L"\nSTART\n");
+	fwprintf_s(g_fileOutput, L"---------------------------------------\n\n");
+	fflush(g_fileApplication);
+	fflush(g_fileOutput);
 	
 	CPrintManagerDlg dlg;
 

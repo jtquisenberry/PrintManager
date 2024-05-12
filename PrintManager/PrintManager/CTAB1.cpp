@@ -50,8 +50,8 @@ CTAB1::CTAB1(CWnd* pParent /*=nullptr*/)
 	OutputDebugString(buffer);
 	OutputDebugString(L"\n");
 	OutputDebugString(L"\n");
-	written2 = fwprintf_s(file1, L"%- 70s %s", L"CTAB1::CTAB1: ", buffer);
-	fflush(file1);
+	written2 = fwprintf_s(g_fileApplication, L"%- 70s %s", L"CTAB1::CTAB1: ", buffer);
+	fflush(g_fileApplication);
 
 	aaa++;
 	aaa++;
@@ -125,8 +125,8 @@ BOOL CTAB1::OnInitDialog()
 	OutputDebugString(buffer);
 	OutputDebugString(L"\n");
 	OutputDebugString(L"\n");
-	written2 = fwprintf_s(file1, L"%- 70s %s", L"CTAB1::OnInitDialog: ", buffer);
-	fflush(file1);
+	written2 = fwprintf_s(g_fileApplication, L"%- 70s %s", L"CTAB1::OnInitDialog: ", buffer);
+	fflush(g_fileApplication);
 
 	m_pEventThreadDone = new CEvent(TRUE, TRUE);     // signaled
 	m_pEventStopRequested = new CEvent(FALSE, TRUE); // non-signaled
@@ -482,7 +482,7 @@ void CTAB1::GetSelectedPrinters()
 		wchar_t buffer[100];
 		int cx;
 
-		cx = swprintf(buffer, 100, L"%40s %4d %4d", (LPCWSTR)e, (int)p, idx);
+		cx = swprintf(buffer, 100, L"%- 40s %4d %4d", (LPCWSTR)e, (int)p, idx);
 		OutputDebugString(buffer);
 		OutputDebugString(L"\n");
 	}

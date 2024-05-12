@@ -1,6 +1,11 @@
 #include "MapEx.h"
 #include "JobInfo.h"
 #include "ThreadInfo.h"
+#include "LogFile.h"
+
+//FILE* g_fileApplication = NULL;  // Declared externally
+//FILE* g_fileOutput = NULL;  // Declared externally
+//int written = 0;
 
 #pragma once
 class PrintSubscriber
