@@ -65,12 +65,6 @@ void PrintSubscriber::SetHwnd(HWND hWnd)
 	m_hWnd = hWnd;
 }
 
-
-
-
-
-
-
 UINT PrintSubscriber::Start(LPVOID pParam)
 {
 	PPRINTER_NOTIFY_INFO pNotification = NULL;
@@ -188,6 +182,9 @@ UINT PrintSubscriber::Start(LPVOID pParam)
 
 					int zzz = 0;
 
+					// Put JobId in stack
+
+
 					// ::PostMessage(m_ThreadInfo.GetHwnd(), UDM_UPDATE_JOB_LIST, 0, 0);
 				}
 
@@ -213,12 +210,8 @@ UINT PrintSubscriber::Start(LPVOID pParam)
 					written2 = fwprintf_s(g_fileApplication, L"\n\n%s\n\n", pJobInfo->GetString());
 
 					ASSERT(pJobInfo != NULL);
-					int eee = 0;
+
 				}
-
-
-
-
 
 			}
 

@@ -2,6 +2,7 @@
 #include "JobInfo.h"
 #include "ThreadInfo.h"
 #include "LogFile.h"
+#include <vector>
 
 //FILE* g_fileApplication = NULL;  // Declared externally
 //FILE* g_fileOutput = NULL;  // Declared externally
@@ -12,9 +13,9 @@ class PrintSubscriber
 {
 public:
 	// Function declarations
-	UINT Start(LPVOID pParam);
 	PrintSubscriber();   // standard constructor
 	virtual ~PrintSubscriber();
+	UINT Start(LPVOID pParam);
 	CEvent* m_pEventThreadDone;
 	CEvent* m_pEventStopRequested;
 	// CThreadInfo m_ThreadInfo;
@@ -35,6 +36,6 @@ public:
     HANDLE m_hEventThreadDone;
     HWND m_hWnd;
 
-
+	std::vector<int> m_PrintStack;
 
 };

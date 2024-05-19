@@ -258,6 +258,7 @@
     <ClCompile Include="CTAB2.cpp" />
     <ClCompile Include="JobInfo.cpp" />
     <ClCompile Include="LogFile.cpp" />
+    <ClCompile Include="PrintConverter.cpp" />
     <ClCompile Include="PrintSubscriber.cpp" />
     <ClCompile Include="StdAfx.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Create</PrecompiledHeader>
@@ -282,6 +283,7 @@
     <ClInclude Include="JobInfo.h" />
     <ClInclude Include="LogFile.h" />
     <ClInclude Include="MapEx.h" />
+    <ClInclude Include="PrintConverter.h" />
     <ClInclude Include="PrintSubscriber.h" />
     <ClInclude Include="Resource.h" />
     <ClInclude Include="StdAfx.h" />

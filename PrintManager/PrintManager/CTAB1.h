@@ -4,6 +4,7 @@
 #include "JobInfo.h"
 #include "ThreadInfo.h"
 #include "PrintSubscriber.h"
+#include "PrintConverter.h"
 
 #include <thread>
 
@@ -31,12 +32,15 @@ public:
 	HWND m_hWnd;
 
 	PrintSubscriber pPs;
+	PrintConverter pPc;
 
 	// Function declarations
 	void GetSelectedPrinters();
 	UINT ThreadFunc2(void);
 	void StartWorkerThread();
 	void StopWorkerThread();	
+
+	std::vector<int> m_PrintStack;
 
 	CTAB1(CWnd* pParent = nullptr);   // standard constructor
 	virtual ~CTAB1();
@@ -67,6 +71,7 @@ private:
 	CEvent* m_pEventThreadDone;
 	CEvent* m_pEventStopRequested;
 	CWinThread* m_pWinThread;
+	CWinThread* m_pWinThread2;
 	// CThreadInfo m_ThreadInfo;
 
 	CMapEx<int, int, CJobInfo*, CJobInfo*> m_mapJobInfo;
