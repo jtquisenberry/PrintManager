@@ -41,6 +41,11 @@ public:
 	void StopWorkerThread();	
 
 	std::vector<int> m_PrintStack;
+	std::vector<int>* m_PrintStack2;
+
+
+	
+
 
 	CTAB1(CWnd* pParent = nullptr);   // standard constructor
 	virtual ~CTAB1();

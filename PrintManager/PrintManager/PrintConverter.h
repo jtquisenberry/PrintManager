@@ -20,7 +20,7 @@ public:
 	CEvent* m_pEventStopRequested;
 	// CThreadInfo m_ThreadInfo;
 	CMapEx<int, int, CJobInfo*, CJobInfo*> m_mapJobInfo;
-	std::vector<int> m_PrintStack;
+	std::vector<int>* m_PrintStack;
 	
 
 	HANDLE m_hPrinter;

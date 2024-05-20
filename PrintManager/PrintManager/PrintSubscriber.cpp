@@ -184,7 +184,11 @@ UINT PrintSubscriber::Start(LPVOID pParam)
 
 					// Put JobId in stack
 
-
+					int job_id = 0;
+					job_id = pJobInfo->GetJobId();
+					m_PrintStack->push_back(pJobInfo->GetJobId());
+					int bbb = 0;
+					bbb++;
 					// ::PostMessage(m_ThreadInfo.GetHwnd(), UDM_UPDATE_JOB_LIST, 0, 0);
 				}
 

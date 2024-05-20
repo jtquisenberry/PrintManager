@@ -36,6 +36,6 @@ public:
     HANDLE m_hEventThreadDone;
     HWND m_hWnd;
 
-	std::vector<int> m_PrintStack;
+	std::vector<int>* m_PrintStack;
 
 };

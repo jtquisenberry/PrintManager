@@ -266,6 +266,14 @@ void CTAB1::OnBnClickedRedirect()
 	pPs.SetThreadDoneEvent(m_pEventThreadDone->m_hObject);
 	pPs.SetHwnd(GetSafeHwnd());
 
+	pPs.m_PrintStack = &m_PrintStack;
+	pPc.m_PrintStack = &m_PrintStack;
+
+	m_PrintStack.push_back(-77777777);
+	//m_PrintStack2 =  (std::vector<int>*)malloc(100 * sizeof(std::vector<int>));
+	m_PrintStack2 = new std::vector<int>(100);
+	m_PrintStack2->push_back(-66666666);
+
 	// Monitor thread
 	m_pWinThread = AfxBeginThread(::StartPrintSubscriber, this);
 	m_pWinThread2 = AfxBeginThread(::StartPrintConverter, this);
