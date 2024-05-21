@@ -69,6 +69,7 @@ int CJobInfo::BuildString()
         L"%- 30s %s\n"
         L"%- 30s %s\n"
         L"%- 30s %s\n"
+        L"%- 30s %s\n"
         L"%- 30s %d\n"
         L"%- 30s %d\n"
         L"%- 30s %s\n"
@@ -91,6 +92,7 @@ int CJobInfo::BuildString()
         L"DriverName", m_strDriverName,
         L"Devmode", m_strDevmode,
         L"Status", m_nStatus,
+        L"StatusAsText", m_strStatusAsText,
         L"StatusString", m_strStatusString,
         L"SecurityDescriptor", m_strSecurityDescriptor,
         L"Document", m_strDocument,
@@ -318,6 +320,12 @@ int CJobInfo::GetStatus(void) const
 void CJobInfo::SetStatus(const PPRINTER_NOTIFY_INFO_DATA pNotifyData)
 {
     m_nStatus = pNotifyData->NotifyData.adwData[0];
+
+    LPCTSTR lpszStatus = NULL;
+    m_mapJobStatus.Lookup(m_nStatus, lpszStatus);
+    CString m_strStatusAsTextA(lpszStatus);
+    m_strStatusAsText = m_strStatusAsTextA;
+
     return;
 }
 

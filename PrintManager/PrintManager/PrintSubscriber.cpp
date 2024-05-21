@@ -119,10 +119,20 @@ UINT PrintSubscriber::Start(LPVOID pParam)
 
 
 	// get a handle to a printer change notification object.
+
+
+	/* Set which notifications*/
+	
 	HANDLE hChange = FindFirstPrinterChangeNotification(GetPrinter(),
 		PRINTER_CHANGE_ALL,
 		0,
 		&NotificationOptions);
+	/*
+	HANDLE hChange = FindFirstPrinterChangeNotification(GetPrinter(),
+		PRINTER_CHANGE_WRITE_JOB,
+		0,
+		&NotificationOptions);
+	*/
 
 	DWORD dwChange;
 	HANDLE aHandles[2];
@@ -182,13 +192,7 @@ UINT PrintSubscriber::Start(LPVOID pParam)
 
 					int zzz = 0;
 
-					// Put JobId in stack
-
-					int job_id = 0;
-					job_id = pJobInfo->GetJobId();
-					m_PrintStack->push_back(pJobInfo->GetJobId());
-					int bbb = 0;
-					bbb++;
+					
 					// ::PostMessage(m_ThreadInfo.GetHwnd(), UDM_UPDATE_JOB_LIST, 0, 0);
 				}
 
@@ -212,6 +216,17 @@ UINT PrintSubscriber::Start(LPVOID pParam)
 
 					int written2 = 0;
 					written2 = fwprintf_s(g_fileApplication, L"\n\n%s\n\n", pJobInfo->GetString());
+
+
+					// Put JobId in stack
+
+					int job_id = 0;
+					job_id = pJobInfo->GetJobId();
+					m_PrintStack->push_back(pJobInfo->GetJobId());
+					int bbb = 0;
+					bbb++;
+
+
 
 					ASSERT(pJobInfo != NULL);
 
