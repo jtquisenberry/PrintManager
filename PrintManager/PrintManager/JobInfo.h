@@ -31,6 +31,7 @@ public:
     LPCTSTR GetDevmode(void) const;                                 // 0x09
     void SetDevmode(const PPRINTER_NOTIFY_INFO_DATA);
     int GetStatus(void) const;                                     // 0x0A
+    int GetStatusChanges(void) const;
     void SetStatus(const PPRINTER_NOTIFY_INFO_DATA);
     LPCTSTR GetStatusString(void) const;                            // 0x0B
     void SetStatusString(const PPRINTER_NOTIFY_INFO_DATA);
@@ -84,6 +85,7 @@ private:
     CString m_strDevmode;            // 0x09
     DEVMODE* m_devDevmode;           // 0x09
     int m_nStatus;                   // 0x0A
+    int m_nStatusChanges;
     CString m_strStatusAsText;
     CString m_strStatusString;       // 0x0B
     CString m_strSecurityDescriptor; // 0x0C

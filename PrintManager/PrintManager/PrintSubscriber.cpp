@@ -215,17 +215,34 @@ UINT PrintSubscriber::Start(LPVOID pParam)
 					OutputDebugString(L"\n\n");
 
 					int written2 = 0;
-					written2 = fwprintf_s(g_fileApplication, L"\n\n%s\n\n", pJobInfo->GetString());
+					if (pJobInfo->GetStatusChanges() > 0) 
+					{
+						written2 = fwprintf_s(g_fileApplication, L"\n\n");
+						written2 = fwprintf_s(g_fileApplication, L"***** BEGIN NEW JOB *****\n");
+						written2 = fwprintf_s(g_fileApplication, L"%s", pJobInfo->GetString());
+						written2 = fwprintf_s(g_fileApplication, L"***** END NEW JOB *******\n");
+						written2 = fwprintf_s(g_fileApplication, L"\n\n");
+						fflush(g_fileApplication);
+
+						// Put JobId in stack
+						int job_id = 0;
+						job_id = pJobInfo->GetJobId();
+						m_PrintStack->push_back(pJobInfo->GetJobId());
+						int debug_breakpoint = 0;
+						debug_breakpoint++;
+
+					}
+					else
+					{
+						written2 = fwprintf_s(g_fileApplication, L"\n\n");
+						written2 = fwprintf_s(g_fileApplication, L"%s", pJobInfo->GetString());
+						written2 = fwprintf_s(g_fileApplication, L"\n\n");
+						fflush(g_fileApplication);
+					}
+					
 
 
-					// Put JobId in stack
-
-					int job_id = 0;
-					job_id = pJobInfo->GetJobId();
-					m_PrintStack->push_back(pJobInfo->GetJobId());
-					int bbb = 0;
-					bbb++;
-
+					
 
 
 					ASSERT(pJobInfo != NULL);

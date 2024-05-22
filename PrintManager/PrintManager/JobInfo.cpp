@@ -17,6 +17,8 @@ CJobInfo::CJobInfo( const int nJobId )
     m_nBytesPrinted       = 0;
     m_strStatusString = L"UNSUPPORTED";
     m_strSecurityDescriptor = L"UNSUPPORTED";
+    m_nStatusChanges = 0;
+    m_nStatus = -1;
 
     // since m_mapJobStatus is used by all instances, we only want to populate it once
     if (m_mapJobStatus.IsEmpty())
@@ -50,10 +52,10 @@ CString CJobInfo::GetString()
 
 int CJobInfo::BuildString()
 {
-    wchar_t* buffer = new wchar_t[1200];
+    wchar_t* buffer = new wchar_t[2000];
     int cx;
     
-    cx = swprintf(buffer, 1200,
+    cx = swprintf(buffer, 2000,
         L"%- 30s %d\n"
         L"%- 30s %s\n"
         L"%- 30s %s\n"
@@ -317,9 +319,25 @@ int CJobInfo::GetStatus(void) const
     return m_nStatus;
 }
 
+int CJobInfo::GetStatusChanges(void) const
+{
+    return m_nStatusChanges;
+}
+
+
 void CJobInfo::SetStatus(const PPRINTER_NOTIFY_INFO_DATA pNotifyData)
 {
+    int last_status = m_nStatus;
     m_nStatus = pNotifyData->NotifyData.adwData[0];
+
+    // if last status was set by a notification, rather than the constructor.
+    if (last_status > -1)
+    {
+        if (m_nStatus - last_status != 0)
+        {
+            m_nStatusChanges++;
+        }
+    }
 
     LPCTSTR lpszStatus = NULL;
     m_mapJobStatus.Lookup(m_nStatus, lpszStatus);
