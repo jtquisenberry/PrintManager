@@ -12,7 +12,6 @@ PrintSubscriber::PrintSubscriber()
 	m_hEventStopRequested = INVALID_HANDLE_VALUE;
 	m_hEventThreadDone = INVALID_HANDLE_VALUE;
 	m_hWnd = NULL;
-
 	
 	return;
 }
@@ -115,24 +114,12 @@ UINT PrintSubscriber::Start(LPVOID pParam)
 	};
 
 
-	HANDLE hPrinter = GetPrinter();
-
-
-	// get a handle to a printer change notification object.
-
-
-	/* Set which notifications*/
-	
+	// Get a handle to a change notification object associated with the 
+	// specified printer or print server.	
 	HANDLE hChange = FindFirstPrinterChangeNotification(GetPrinter(),
 		PRINTER_CHANGE_ALL,
 		0,
 		&NotificationOptions);
-	/*
-	HANDLE hChange = FindFirstPrinterChangeNotification(GetPrinter(),
-		PRINTER_CHANGE_WRITE_JOB,
-		0,
-		&NotificationOptions);
-	*/
 
 	DWORD dwChange;
 	HANDLE aHandles[2];
@@ -151,18 +138,15 @@ UINT PrintSubscriber::Start(LPVOID pParam)
 
 			if (pNotification != NULL)
 			{
-				// if a notification overflow occurred,
+				// If the Flags member has the PRINTER_NOTIFY_INFO_DISCARDED bit set, 
+				// this indicates that an overflow or error occurred, and notifications may have been lost. 
+			    // https://learn.microsoft.com/en-us/windows/win32/printdocs/printer-notify-info
 				if (pNotification->Flags & PRINTER_NOTIFY_INFO_DISCARDED)
 				{
 					DWORD dwOldFlags = NotificationOptions.Flags;
 
-
-					// PRINTER_CHANGE_SET_JOB
-					int a = PRINTER_CHANGE_ADD_JOB;
-
-
-
-					// we must refresh to continue
+					// The function provides current data for all monitored printer information fields. 
+					// https://learn.microsoft.com/en-us/windows/win32/printdocs/printer-notify-options
 					NotificationOptions.Flags = PRINTER_NOTIFY_OPTIONS_REFRESH;
 
 					FreePrinterNotifyInfo(pNotification);
@@ -172,78 +156,74 @@ UINT PrintSubscriber::Start(LPVOID pParam)
 					NotificationOptions.Flags = dwOldFlags;
 				}
 
-				// iterate through each notification
+				// Iterate over the notifications.
 				for (DWORD x = 0; x < pNotification->Count; x++)
 				{
 					ASSERT(pNotification->aData[x].Type == JOB_NOTIFY_TYPE);
 
 					CJobInfo* pJobInfo = NULL;
 
-					// if the job info item does not exist, create a new one
+					// if the JobInfo object does not exist, create a new one.
 					if (!m_mapJobInfo.Lookup(pNotification->aData[x].Id, pJobInfo))
 					{
 						pJobInfo = new CJobInfo(pNotification->aData[x].Id);
-
 						m_mapJobInfo.SetAt(pNotification->aData[x].Id, pJobInfo);
 					}
 
 					ASSERT(pJobInfo != NULL);
 					pJobInfo->UpdateInfo(&pNotification->aData[x]);
-
-					int zzz = 0;
-
-					
-					// ::PostMessage(m_ThreadInfo.GetHwnd(), UDM_UPDATE_JOB_LIST, 0, 0);
 				}
 
-				int ddd = 0;
-				
+				// Iterate over the members of the CMap. At this point, the 
+				// JobInfo objects have been updated with all available properties.
 				POSITION pos = m_mapJobInfo.GetStartPosition();
 				while (pos != NULL)
 				{
 					int nKey;
 					CJobInfo* pJobInfo = new CJobInfo(NULL);
 
-					//auto vvv = pJobInfo->BuildString();
-
-
 					m_mapJobInfo.GetNextAssoc(pos, nKey, pJobInfo);
-					int cx2 = pJobInfo->BuildString();
 
-					OutputDebugString(L"\n\n");
-					OutputDebugStringW(pJobInfo->GetString());
-					OutputDebugString(L"\n\n");
+					// This is the first point at which it is possible to build a string
+					// representation of the JobInfo
+					int characters_written = pJobInfo->BuildString();
+					if (characters_written < 1)
+					{
+						continue;
+					}
+										
 
-					int written2 = 0;
+					// Output JobInfo strings to debug and to file.
 					if (pJobInfo->GetStatusChanges() > 0) 
 					{
-						written2 = fwprintf_s(g_fileApplication, L"\n\n");
-						written2 = fwprintf_s(g_fileApplication, L"***** BEGIN NEW JOB *****\n");
-						written2 = fwprintf_s(g_fileApplication, L"%s", pJobInfo->GetString());
-						written2 = fwprintf_s(g_fileApplication, L"***** END NEW JOB *******\n");
-						written2 = fwprintf_s(g_fileApplication, L"\n\n");
+						OutputDebugString(L"\n\n");
+						OutputDebugString(L"***** BEGIN NEW JOB *****\n");
+						OutputDebugStringW(pJobInfo->GetString());
+						OutputDebugString(L"***** END NEW JOB *******\n");
+						OutputDebugString(L"\n\n");						
+						
+						characters_written = fwprintf_s(g_fileApplication, L"\n\n");
+						characters_written = fwprintf_s(g_fileApplication, L"***** BEGIN NEW JOB *****\n");
+						characters_written = fwprintf_s(g_fileApplication, L"%s", (LPCWSTR)pJobInfo->GetString());
+						characters_written = fwprintf_s(g_fileApplication, L"***** END NEW JOB *******\n");
+						characters_written = fwprintf_s(g_fileApplication, L"\n\n");
 						fflush(g_fileApplication);
 
 						// Put JobId in stack
-						int job_id = 0;
-						job_id = pJobInfo->GetJobId();
 						m_PrintStack->push_back(pJobInfo->GetJobId());
 						int debug_breakpoint = 0;
-						debug_breakpoint++;
-
 					}
 					else
 					{
-						written2 = fwprintf_s(g_fileApplication, L"\n\n");
-						written2 = fwprintf_s(g_fileApplication, L"%s", pJobInfo->GetString());
-						written2 = fwprintf_s(g_fileApplication, L"\n\n");
+						OutputDebugString(L"\n\n");
+						OutputDebugStringW(pJobInfo->GetString());
+						OutputDebugString(L"\n\n");
+						
+						characters_written = fwprintf_s(g_fileApplication, L"\n\n");
+						characters_written = fwprintf_s(g_fileApplication, L"%s", (LPCWSTR)pJobInfo->GetString());
+						characters_written = fwprintf_s(g_fileApplication, L"\n\n");
 						fflush(g_fileApplication);
 					}
-					
-
-
-					
-
 
 					ASSERT(pJobInfo != NULL);
 

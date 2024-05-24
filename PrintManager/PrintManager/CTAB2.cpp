@@ -40,7 +40,6 @@ END_MESSAGE_MAP()
 void CTAB2::OnLvnItemchangedLcJobinfo2(NMHDR* pNMHDR, LRESULT* pResult)
 {
 	LPNMLISTVIEW pNMLV = reinterpret_cast<LPNMLISTVIEW>(pNMHDR);
-	// TODO: Add your control notification handler code here
 	*pResult = 0;
 }
 

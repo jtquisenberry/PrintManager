@@ -39,8 +39,6 @@ UINT PrintConverter::Start(LPVOID pParam)
 			cx = swprintf(buffer, 100, L"job_id ID: %d \n", job_id);
 			OutputDebugString(buffer);
 			m_PrintStack->pop_back();
-			int aaa = 0;
-			aaa++;
 		}
 
 		Sleep(2000);

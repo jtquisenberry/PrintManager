@@ -13,7 +13,7 @@ class PrintSubscriber
 {
 public:
 	// Function declarations
-	PrintSubscriber();   // standard constructor
+	PrintSubscriber(void);   // standard constructor
 	virtual ~PrintSubscriber();
 	UINT Start(LPVOID pParam);
 	CEvent* m_pEventThreadDone;

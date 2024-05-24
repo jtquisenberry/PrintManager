@@ -83,24 +83,24 @@ int CJobInfo::BuildString()
         L"%- 30s %d\n"
         L"%- 30s %d\n",
         L"JobId", m_nJobId,
-        L"PrinterName", m_strPrinterName,
-        L"MachineName", m_strMachineName,
-        L"PortName", m_strPortName,
-        L"UserName", m_strUserName,
-        L"NotifyName", m_strNotifyName,
-        L"Datatype", m_strDatatype,
-        L"PrintProcessor", m_strPrintProcessor,
-        L"Parameters", m_strParameters,
-        L"DriverName", m_strDriverName,
-        L"Devmode", m_strDevmode,
+        L"PrinterName", (LPCWSTR)m_strPrinterName,
+        L"MachineName", (LPCWSTR)m_strMachineName,
+        L"PortName", (LPCWSTR)m_strPortName,
+        L"UserName", (LPCWSTR)m_strUserName,
+        L"NotifyName", (LPCWSTR)m_strNotifyName,
+        L"Datatype", (LPCWSTR)m_strDatatype,
+        L"PrintProcessor", (LPCWSTR)m_strPrintProcessor,
+        L"Parameters", (LPCWSTR)m_strParameters,
+        L"DriverName", (LPCWSTR)m_strDriverName,
+        L"Devmode", (LPCWSTR)m_strDevmode,
         L"Status", m_nStatus,
-        L"StatusAsText", m_strStatusAsText,
-        L"StatusString", m_strStatusString,
-        L"SecurityDescriptor", m_strSecurityDescriptor,
-        L"Document", m_strDocument,
+        L"StatusAsText", (LPCWSTR)m_strStatusAsText,
+        L"StatusString", (LPCWSTR)m_strStatusString,
+        L"SecurityDescriptor", (LPCWSTR)m_strSecurityDescriptor,
+        L"Document", (LPCWSTR)m_strDocument,
         L"Priority", m_nPriority,
         L"Position", m_nPosition,
-        L"Submitted", m_strSubmitted,
+        L"Submitted", (LPCWSTR)m_strSubmitted,
         L"StartTime", m_nStartTime,
         L"UntilTime", m_nUntilTime,
         L"Time", m_nTime,
@@ -113,9 +113,7 @@ int CJobInfo::BuildString()
     CString m_strAllProperties_temp(buffer);
     m_strAllProperties = m_strAllProperties_temp;
 
-
-    // OutputDebugString(buffer);
-    return 0;
+    return cx;
 }
 
 void CJobInfo::UpdateInfo( const PPRINTER_NOTIFY_INFO_DATA pNotifyData )

@@ -33,17 +33,23 @@ IMPLEMENT_DYNAMIC(CTAB1, CDialogEx)
 int selected_printer_index = -1;
 
 
-
-
-
 CTAB1::CTAB1(CWnd* pParent /*=nullptr*/)
 	: CDialogEx(IDD_TAB1, pParent)
 {
+
+	CTAB1::m_hEventStopRequested = INVALID_HANDLE_VALUE;
+	CTAB1::m_hPrinter = INVALID_HANDLE_VALUE;
+	CTAB1::m_hWnd = 0x0;
+
+
+
 	// Print thread ID
 	wchar_t buffer[100];
-	int cx;
+	int cx = 0;
 	std::thread::id this_id = std::this_thread::get_id();
-	cx = swprintf(buffer, 100, L"Thread ID: %d \n", this_id);
+
+	// Convert thread::id to int
+	cx = swprintf(buffer, 100, L"Thread ID: %d \n", *(int*)&this_id);
 	OutputDebugString(L"\n");
 	OutputDebugString(L"\n");
 	OutputDebugString(L"CTAB1::CTAB1\n");
@@ -52,9 +58,6 @@ CTAB1::CTAB1(CWnd* pParent /*=nullptr*/)
 	OutputDebugString(L"\n");
 	written2 = fwprintf_s(g_fileApplication, L"%- 70s %s", L"CTAB1::CTAB1: ", buffer);
 	fflush(g_fileApplication);
-
-	aaa++;
-	aaa++;
 }
 
 CTAB1::~CTAB1()
@@ -118,7 +121,7 @@ BOOL CTAB1::OnInitDialog()
 	wchar_t buffer[100];
 	int cx;
 	std::thread::id this_id = std::this_thread::get_id();
-	cx = swprintf(buffer, 100, L"Thread ID: %d \n", this_id);
+	cx = swprintf(buffer, 100, L"Thread ID: %d \n", *(int*)&this_id);
 	OutputDebugString(L"\n");
 	OutputDebugString(L"\n");
 	OutputDebugString(L"CTAB1::OnInitDialog\n");
@@ -158,7 +161,7 @@ void CTAB1::OnNMRClickLcJobinfo2(NMHDR* pNMHDR, LRESULT* pResult)
 	selected_printer_index = right_clicked_item_index;
 	int nColumns = m_lcPrinters.GetHeaderCtrl()->GetItemCount();
 
-	wchar_t buffer[500];
+	wchar_t buffer[5000];
 	int cx;
 
 	OutputDebugString(L"\n");
@@ -324,11 +327,10 @@ void CTAB1::GetSelectedPrinters()
 		CString e = printer_names[i];
 		POSITION p = printer_positions[i];
 		int idx = printer_item_indexes[i];
-
 		wchar_t buffer[100];
 		int cx;
 
-		cx = swprintf(buffer, 100, L"%- 40s %4d %4d", (LPCWSTR)e, (int)p, idx);
+		cx = swprintf(buffer, 100, L"%- 40s %4lu %4d", (LPCWSTR)e, (unsigned long)p, idx);
 		OutputDebugString(buffer);
 		OutputDebugString(L"\n");
 	}
@@ -341,6 +343,7 @@ void CTAB1::GetSelectedPrinters()
 		OutputDebugString(L"\n");
 	}
 
+	return;
 }
 
 
@@ -404,7 +407,7 @@ int SetPrinterStatus(CString printer_name, int status)
 	result = OpenPrinter((LPWSTR)(LPCWSTR)printer_name, &pHandle, pAll);
 
 	DWORD dwNeeded = 0L;
-	DWORD dwReturned;
+	DWORD dwReturned = 0L;
 	PPRINTER_INFO_2 pInfo = NULL;
 
 	result = GetPrinter(pHandle, 2, NULL, 0, &dwNeeded);
@@ -424,7 +427,7 @@ int SetPrinterStatus(CString printer_name, int status)
 	}
 
 	result = GetPrinter(pHandle, 2, (LPBYTE)pInfo, dwNeeded, &dwNeeded);
-	cx = swprintf(buffer, 100, L"%40s Status: %4d\n", printer_name, pInfo->Status);
+	cx = swprintf(buffer, 100, L"%40s Status: %4d\n", (LPCWSTR)printer_name, pInfo->Status);
 	OutputDebugString(buffer);
 
 	result = SetPrinter(pHandle, 0, NULL, status);
@@ -434,7 +437,7 @@ int SetPrinterStatus(CString printer_name, int status)
 	}
 
 	result = GetPrinter(pHandle, 2, (LPBYTE)pInfo, dwNeeded, &dwNeeded);
-	cx = swprintf(buffer, 100, L"%40s Status: %4d\n", printer_name, pInfo->Status);
+	cx = swprintf(buffer, 100, L"%40s Status: %4d\n", (LPCWSTR)printer_name, pInfo->Status);
 	OutputDebugString(buffer);
 	return 0;
 }
@@ -543,8 +546,9 @@ void CTAB1::OnBnClickedPausePrinters()
 		OutputDebugString(L"PRINTER STATUS");
 		OutputDebugString(L"\n");
 		result = PausePrinter(printer_name);
-		return;
 	}
+
+	return;
 }
 
 
@@ -558,8 +562,9 @@ void CTAB1::OnBnClickedResumePrinters()
 		OutputDebugString(L"PRINTER STATUS");
 		OutputDebugString(L"\n");
 		result = ResumePrinter(printer_name);
-		return;
 	}
+
+	return;
 }
 
 
@@ -573,8 +578,9 @@ void CTAB1::OnBnClickedPurgePrinters()
 		OutputDebugString(L"PRINTER STATUS");
 		OutputDebugString(L"\n");
 		result = PurgePrinter(printer_name);
-		return;
 	}
+
+	return;
 }
 
 
@@ -634,7 +640,6 @@ void CTAB1::OnPrintersSave()
 		FILE *log_file = _wfopen(filename, L"a+");
 		fwprintf(log_file, L"lpString: %s\n", L"aaaa");
 		fclose(log_file);
-		int a = 1;
 	}
 }
 
