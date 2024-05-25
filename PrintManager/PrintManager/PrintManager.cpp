@@ -9,9 +9,8 @@
 static char THIS_FILE[] = __FILE__;
 #endif
 
-FILE* g_fileApplication = NULL;  // Declared externally
-FILE* g_fileOutput = NULL;  // Declared externally
-
+FILE* g_fileSystem = NULL;  // Declared externally
+FILE* g_fileObjects = NULL;  // Declared externally
 
 
 /////////////////////////////////////////////////////////////////////////////
@@ -44,33 +43,59 @@ CPrintManagerApp theApp;
 
 BOOL CPrintManagerApp::InitInstance()
 {
-	char* base_path = getenv("USERPROFILE");
-	char path1[260];
-	char path2[260];
-	memset(&path1[0], 0, sizeof(path1));
-	memset(&path2[0], 0, sizeof(path1));
-	strcat(path1, base_path);
-	strcat(path1, "\\print_manager_system.txt");
-	strcat(path2, base_path);
-	strcat(path2, "\\print_manager_objects.txt");
-
-	g_fileApplication = fopen(path1, "a+");
-	g_fileOutput = fopen(path2, "a+");
-
-	fwprintf_s(g_fileApplication, L"\nSTART\n");
-	fwprintf_s(g_fileApplication, L"---------------------------------------\n\n");
-	fwprintf_s(g_fileOutput, L"\nSTART\n");
-	fwprintf_s(g_fileOutput, L"---------------------------------------\n\n");
-	fflush(g_fileApplication);
-	fflush(g_fileOutput);
+	// Start working with log files
+	OpenLogs();
+	StartLogs();
 	
 	CPrintManagerDlg dlg;
-
 	m_pMainWnd = &dlg;
-	
     dlg.DoModal();
 
-	// Since the dialog has been closed, return FALSE so that we exit the
-	//  application, rather than start the application's message pump.
+	// This code is not reached until the dialog is closed.
+	// Since the dialog has been closed, return FALSE so that the application
+	// exits, rather than starting the application's message pump.
 	return FALSE;
+}
+
+BOOL CPrintManagerApp::OpenLogs()
+{
+	// _dupenv_s is safer than getenv
+	char* base_path;
+	size_t len;
+	errno_t err = _dupenv_s(&base_path, &len, "USERPROFILE");
+	if (err) return FALSE;
+
+	// Build log paths
+	char str_SystemPath[260];
+	char str_ObjectsPath[260];
+	memset(&str_SystemPath[0], 0, sizeof(str_SystemPath));
+	memset(&str_ObjectsPath[0], 0, sizeof(str_ObjectsPath));
+	if (base_path)
+	{
+		strcat_s(str_SystemPath, 260, base_path);
+		strcat_s(str_SystemPath, 260, "\\print_manager_system.txt");
+		strcat_s(str_ObjectsPath, 260, base_path);
+		strcat_s(str_ObjectsPath, 260, "\\print_manager_objects.txt");
+	}
+	else
+	{
+		return FALSE;
+	}
+
+	// Open files
+	g_fileSystem = fopen(str_SystemPath, "a+");
+	g_fileObjects = fopen(str_ObjectsPath, "a+");
+
+	return TRUE;
+}
+
+BOOL CPrintManagerApp::StartLogs()
+{
+	fwprintf_s(g_fileSystem, L"\nSTART\n");
+	fwprintf_s(g_fileSystem, L"---------------------------------------\n\n");
+	fwprintf_s(g_fileObjects, L"\nSTART\n");
+	fwprintf_s(g_fileObjects, L"---------------------------------------\n\n");
+	fflush(g_fileSystem);
+	fflush(g_fileObjects);
+	return TRUE;
 }

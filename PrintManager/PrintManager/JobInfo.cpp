@@ -19,6 +19,12 @@ CJobInfo::CJobInfo( const int nJobId )
     m_strSecurityDescriptor = L"UNSUPPORTED";
     m_nStatusChanges = 0;
     m_nStatus = -1;
+    m_nStartTime = NULL;
+    m_nTime = NULL;
+    m_nUntilTime = NULL;
+    CJobInfo::m_devDevmode = NULL;
+    CJobInfo::m_nPosition = NULL;
+    CJobInfo::m_nPriority = NULL;
 
     // since m_mapJobStatus is used by all instances, we only want to populate it once
     if (m_mapJobStatus.IsEmpty())
@@ -363,6 +369,9 @@ LPCTSTR CJobInfo::GetSecurityDescriptor(void) const
 
 void CJobInfo::SetSecurityDescriptor(const PPRINTER_NOTIFY_INFO_DATA pNotifyData)
 {
+    // C4100 unreferenced formal parameter
+    pNotifyData;
+    
     m_strSecurityDescriptor = L"UNSUPPORTED";
     return;
 }

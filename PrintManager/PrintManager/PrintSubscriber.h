@@ -4,9 +4,6 @@
 #include "LogFile.h"
 #include <vector>
 
-//FILE* g_fileApplication = NULL;  // Declared externally
-//FILE* g_fileOutput = NULL;  // Declared externally
-//int written = 0;
 
 #pragma once
 class PrintSubscriber

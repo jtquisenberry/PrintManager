@@ -40,7 +40,12 @@ CTAB1::CTAB1(CWnd* pParent /*=nullptr*/)
 	CTAB1::m_hEventStopRequested = INVALID_HANDLE_VALUE;
 	CTAB1::m_hPrinter = INVALID_HANDLE_VALUE;
 	CTAB1::m_hWnd = 0x0;
-
+	CTAB1::m_pEventThreadDone = NULL;
+	CTAB1::m_pEventStopRequested = NULL;
+	CTAB1::m_PrintStack2 = NULL;
+	CTAB1::m_hEventThreadDone = NULL;
+	CTAB1::m_pWinThread = NULL;
+	CTAB1::m_pWinThread2 = NULL;
 
 
 	// Print thread ID
@@ -56,8 +61,8 @@ CTAB1::CTAB1(CWnd* pParent /*=nullptr*/)
 	OutputDebugString(buffer);
 	OutputDebugString(L"\n");
 	OutputDebugString(L"\n");
-	written2 = fwprintf_s(g_fileApplication, L"%- 70s %s", L"CTAB1::CTAB1: ", buffer);
-	fflush(g_fileApplication);
+	written2 = fwprintf_s(g_fileSystem, L"%- 70s %s", L"CTAB1::CTAB1: ", buffer);
+	fflush(g_fileSystem);
 }
 
 CTAB1::~CTAB1()
@@ -128,8 +133,8 @@ BOOL CTAB1::OnInitDialog()
 	OutputDebugString(buffer);
 	OutputDebugString(L"\n");
 	OutputDebugString(L"\n");
-	written2 = fwprintf_s(g_fileApplication, L"%- 70s %s", L"CTAB1::OnInitDialog: ", buffer);
-	fflush(g_fileApplication);
+	written2 = fwprintf_s(g_fileSystem, L"%- 70s %s", L"CTAB1::OnInitDialog: ", buffer);
+	fflush(g_fileSystem);
 
 	m_pEventThreadDone = new CEvent(TRUE, TRUE);     // signaled
 	m_pEventStopRequested = new CEvent(FALSE, TRUE); // non-signaled
@@ -237,6 +242,7 @@ void CTAB1::OnBnClickedRedirect()
 
 	// Source printer is `redirected_printer_name`
 	DWORD_PTR d = m_cbPrinters.GetItemData(redirected_printer_index);
+	d;
 	m_cbPrinters.GetLBText(redirected_printer_index, redirected_printer_name);
 
 	// Destination printers are `printer_names`
@@ -291,6 +297,7 @@ void CTAB1::GetSelectedPrinters()
 	printer_item_indexes.clear();
 
 	int nSelectedRows = m_lcPrinters.GetSelectedCount();
+	nSelectedRows;
 	int nColumns = m_lcPrinters.GetHeaderCtrl()->GetItemCount();
 
 	// pos is a 1-indexed hex value indicating the position in the list from the top.
@@ -330,7 +337,7 @@ void CTAB1::GetSelectedPrinters()
 		wchar_t buffer[100];
 		int cx;
 
-		cx = swprintf(buffer, 100, L"%- 40s %4lu %4d", (LPCWSTR)e, (unsigned long)p, idx);
+		cx = swprintf(buffer, 100, L"%- 40s %4lu %4d", (LPCWSTR)e, *(unsigned long*)&p, idx);
 		OutputDebugString(buffer);
 		OutputDebugString(L"\n");
 	}
@@ -408,6 +415,7 @@ int SetPrinterStatus(CString printer_name, int status)
 
 	DWORD dwNeeded = 0L;
 	DWORD dwReturned = 0L;
+	dwReturned;
 	PPRINTER_INFO_2 pInfo = NULL;
 
 	result = GetPrinter(pHandle, 2, NULL, 0, &dwNeeded);
@@ -457,6 +465,7 @@ int ReadPrinter(CString printer_name)
 
 	DWORD dwNeeded = 0L;
 	DWORD dwReturned;
+	dwReturned;
 	PPRINTER_INFO_2 pInfo = NULL;
 
 	result = GetPrinter(pHandle, 2, NULL, 0, &dwNeeded);
@@ -586,7 +595,9 @@ void CTAB1::OnBnClickedPurgePrinters()
 
 void CTAB1::OnContextMenu(CWnd* pWnd, CPoint point)
 {
-	// TODO: Add your message handler code here
+	// C4100 unreferenced formal parameter
+	pWnd;
+
 	// Load the desired menu
 	CMenu mnuPopupSubmit;
 	mnuPopupSubmit.LoadMenu(IDR_POPUP_PRINTERS);

@@ -28,25 +28,27 @@ CPrintManagerDlg::CPrintManagerDlg(CWnd* pParent /*=NULL*/)
 {
     //{{AFX_DATA_INIT(CPrintManagerDlg)
     //}}AFX_DATA_INIT
+
+    // UI Elements
     // Note that LoadIcon does not require a subsequent DestroyIcon in Win32
     m_hIcon = AfxGetApp()->LoadIcon(IDR_MAINFRAME);
-    aaa = 99999;
-    
-    
     m_rectOrig.SetRectEmpty();
 
-    
-    
-
-
+    // Thread Elements
     m_pEventThreadDone    = NULL;
     m_pEventStopRequested = NULL;
+
+    // Member variables initialization
+    m_nHeight = 0;
+    m_nWidth = 0;
+    m_pWinThread = NULL;
+
 
     // Print thread ID
     wchar_t buffer[100];
     int cx;
     std::thread::id this_id = std::this_thread::get_id();
-    cx = swprintf(buffer, 100, L"Thread ID: %d \n", this_id);
+    cx = swprintf(buffer, 100, L"Thread ID: %d \n", *(int*)&this_id);
     OutputDebugString(L"\n");
     OutputDebugString(L"\n");
     OutputDebugString(L"CPrintManagerDlg::CPrintManagerDlg\n");
@@ -55,7 +57,7 @@ CPrintManagerDlg::CPrintManagerDlg(CWnd* pParent /*=NULL*/)
     OutputDebugString(L"\n");
 
     int written2 = 0;
-    written2 = fwprintf_s(g_fileApplication, L"%- 70s %s", L"CPrintManagerDlg::CPrintManagerDlg: ", buffer);
+    written2 = fwprintf_s(g_fileSystem, L"%- 70s %s", L"CPrintManagerDlg::CPrintManagerDlg: ", buffer);
 
 
     char* base_path = getenv("USERPROFILE");
@@ -67,6 +69,12 @@ CPrintManagerDlg::CPrintManagerDlg(CWnd* pParent /*=NULL*/)
 
     HINSTANCE hError = ShellExecute(handle, NULL, wc, NULL, NULL, SW_SHOWNORMAL);
     INT_PTR pError = (INT_PTR)hError;  // If > 32, then success.
+    if (pError <= 32)
+    {
+        // Do something if an error occurs.
+        // However, it just means that the folder was not opened. So, the only 
+        // actions that make sense are to log it or try again.
+    }
 
 }
 
@@ -74,8 +82,8 @@ CPrintManagerDlg::~CPrintManagerDlg()
 {
     
 
-    fclose(g_fileApplication);
-    fclose(g_fileOutput);
+    fclose(g_fileSystem);
+    fclose(g_fileObjects);
 }
 
 
@@ -122,7 +130,7 @@ BOOL CPrintManagerDlg::OnInitDialog()
     wchar_t buffer[100];
     int cx;
     std::thread::id this_id = std::this_thread::get_id();
-    cx = swprintf(buffer, 100, L"Thread ID: %d \n", this_id);
+    cx = swprintf(buffer, 100, L"Thread ID: %d \n", *(int*)&this_id);
     OutputDebugString(L"\n");
     OutputDebugString(L"\n");
     OutputDebugString(L"CPrintManagerDlg::OnInitDialog\n");
@@ -131,7 +139,7 @@ BOOL CPrintManagerDlg::OnInitDialog()
     OutputDebugString(L"\n");
     
     int written2 = 0;
-    written2 = fwprintf_s(g_fileApplication, L"%- 70s %s", L"CPrintManagerDlg::OnInitDialog: ", buffer);
+    written2 = fwprintf_s(g_fileSystem, L"%- 70s %s", L"CPrintManagerDlg::OnInitDialog: ", buffer);
 
     // Add "About..." menu item to system menu.
 
@@ -284,7 +292,7 @@ void CPrintManagerDlg::EnumeratePrinters( void )
         p1++;
     }
     
-    delete lpBuffer;
+    delete[] lpBuffer;
 }
 
 
@@ -320,16 +328,8 @@ void CPrintManagerDlg::EnumerateDrivers(void)
         di++;
     }
 
-    delete lpBuffer;
+    delete[] lpBuffer;
 }
-
-
-
-
-
-
-
-
 
 
 UINT ThreadFunc( LPVOID pParam )
@@ -339,7 +339,7 @@ UINT ThreadFunc( LPVOID pParam )
     wchar_t buffer[100];
     int cx;
     std::thread::id this_id = std::this_thread::get_id();
-    cx = swprintf(buffer, 100, L"Thread ID: %d \n", this_id);
+    cx = swprintf(buffer, 100, L"Thread ID: %d \n", *(int*)&this_id);
     OutputDebugString(L"\n");
     OutputDebugString(L"\n");
     OutputDebugString(L"CPrintManagerDlg, UINT ThreadFunc(LPVOID pParam)\n");
@@ -348,15 +348,12 @@ UINT ThreadFunc( LPVOID pParam )
     OutputDebugString(L"\n");
 
     int written2 = 0;
-    written2 = fwprintf_s(g_fileApplication, L"%- 70s %s", L"CPrintManagerDlg, UINT ThreadFunc(LPVOID pParam): ", buffer);
+    written2 = fwprintf_s(g_fileSystem, L"%- 70s %s", L"CPrintManagerDlg, UINT ThreadFunc(LPVOID pParam): ", buffer);
     
     CPrintManagerDlg *pDlg = (CPrintManagerDlg *) pParam;
     
     return pDlg->ThreadFunc();
 }
-
-
-
 
 
 void CPrintManagerDlg::OnSelchangePrinters() 
@@ -428,7 +425,7 @@ UINT CPrintManagerDlg::ThreadFunc( void )
     wchar_t buffer[100];
     int cx;
     std::thread::id this_id = std::this_thread::get_id();
-    cx = swprintf(buffer, 100, L"Thread ID: %d \n", this_id);
+    cx = swprintf(buffer, 100, L"Thread ID: %d \n", *(int*)&this_id);
     OutputDebugString(L"\n");
     OutputDebugString(L"\n");
     OutputDebugString(L"CPrintManagerDlg, UINT CPrintManagerDlg::ThreadFunc( void )\n");
@@ -437,7 +434,7 @@ UINT CPrintManagerDlg::ThreadFunc( void )
     OutputDebugString(L"\n");
 
     int written2 = 0;
-    written2 = fwprintf_s(g_fileApplication, L"%- 70s %s", L"CPrintManagerDlg, UINT CPrintManagerDlg::ThreadFunc( void ): ", buffer);
+    written2 = fwprintf_s(g_fileSystem, L"%- 70s %s", L"CPrintManagerDlg, UINT CPrintManagerDlg::ThreadFunc( void ): ", buffer);
     
     
     
@@ -717,6 +714,9 @@ void CPrintManagerDlg::OnBnClickedCancel()
 
 void CPrintManagerDlg::OnTcnSelchangeTabcontrol(NMHDR* pNMHDR, LRESULT* pResult)
 {
+    // C4100, unreferenced formal parameter 
+    pNMHDR;   // Add a reference like this
+    
     *pResult = 0;
 
     int iSel = m_tabcontrol.GetCurSel();
@@ -741,12 +741,18 @@ void CPrintManagerDlg::OnTcnSelchangeTabcontrol(NMHDR* pNMHDR, LRESULT* pResult)
 
 void CPrintManagerDlg::OnTcnSelchangeIdPreviewPrev(NMHDR* pNMHDR, LRESULT* pResult)
 {
+    // C4100, unreferenced formal parameter 
+    pNMHDR;   // Add a reference like this
+
     *pResult = 0;
 }
 
 
 void CPrintManagerDlg::OnSelchangeTabcontrol(NMHDR* pNMHDR, LRESULT* pResult)
 {
+    // C4100, unreferenced formal parameter 
+    pNMHDR;   // Add a reference like this
+    
     *pResult = 0;
 
     int iSel = m_tabcontrol.GetCurSel();

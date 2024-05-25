@@ -1,8 +1,8 @@
 #pragma once
 
 extern int aaa;
-extern FILE* g_fileApplication;
-extern FILE* g_fileOutput;
+extern FILE* g_fileSystem;
+extern FILE* g_fileObjects;
 //char* docdir;
 
 

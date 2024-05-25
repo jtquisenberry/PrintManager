@@ -66,6 +66,9 @@ void PrintSubscriber::SetHwnd(HWND hWnd)
 
 UINT PrintSubscriber::Start(LPVOID pParam)
 {
+	// C4100 unreferenced formal parameter
+	pParam;
+
 	PPRINTER_NOTIFY_INFO pNotification = NULL;
 
 	WORD JobFields[] =
@@ -202,16 +205,17 @@ UINT PrintSubscriber::Start(LPVOID pParam)
 						OutputDebugString(L"***** END NEW JOB *******\n");
 						OutputDebugString(L"\n\n");						
 						
-						characters_written = fwprintf_s(g_fileApplication, L"\n\n");
-						characters_written = fwprintf_s(g_fileApplication, L"***** BEGIN NEW JOB *****\n");
-						characters_written = fwprintf_s(g_fileApplication, L"%s", (LPCWSTR)pJobInfo->GetString());
-						characters_written = fwprintf_s(g_fileApplication, L"***** END NEW JOB *******\n");
-						characters_written = fwprintf_s(g_fileApplication, L"\n\n");
-						fflush(g_fileApplication);
+						characters_written = fwprintf_s(g_fileSystem, L"\n\n");
+						characters_written = fwprintf_s(g_fileSystem, L"***** BEGIN NEW JOB *****\n");
+						characters_written = fwprintf_s(g_fileSystem, L"%s", (LPCWSTR)pJobInfo->GetString());
+						characters_written = fwprintf_s(g_fileSystem, L"***** END NEW JOB *******\n");
+						characters_written = fwprintf_s(g_fileSystem, L"\n\n");
+						fflush(g_fileSystem);
 
 						// Put JobId in stack
 						m_PrintStack->push_back(pJobInfo->GetJobId());
 						int debug_breakpoint = 0;
+						debug_breakpoint++;
 					}
 					else
 					{
@@ -219,10 +223,10 @@ UINT PrintSubscriber::Start(LPVOID pParam)
 						OutputDebugStringW(pJobInfo->GetString());
 						OutputDebugString(L"\n\n");
 						
-						characters_written = fwprintf_s(g_fileApplication, L"\n\n");
-						characters_written = fwprintf_s(g_fileApplication, L"%s", (LPCWSTR)pJobInfo->GetString());
-						characters_written = fwprintf_s(g_fileApplication, L"\n\n");
-						fflush(g_fileApplication);
+						characters_written = fwprintf_s(g_fileSystem, L"\n\n");
+						characters_written = fwprintf_s(g_fileSystem, L"%s", (LPCWSTR)pJobInfo->GetString());
+						characters_written = fwprintf_s(g_fileSystem, L"\n\n");
+						fflush(g_fileSystem);
 					}
 
 					ASSERT(pJobInfo != NULL);

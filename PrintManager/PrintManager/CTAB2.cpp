@@ -40,6 +40,8 @@ END_MESSAGE_MAP()
 void CTAB2::OnLvnItemchangedLcJobinfo2(NMHDR* pNMHDR, LRESULT* pResult)
 {
 	LPNMLISTVIEW pNMLV = reinterpret_cast<LPNMLISTVIEW>(pNMHDR);
+	pNMLV;
+
 	*pResult = 0;
 }
 

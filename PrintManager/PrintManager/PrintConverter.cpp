@@ -26,6 +26,9 @@ PrintConverter::~PrintConverter()
 
 UINT PrintConverter::Start(LPVOID pParam)
 {
+	// C4100 unreferenced formal parameter
+	pParam;
+
 	while (m_boolKeepRunning)
 	{
 		if (m_PrintStack->size() > 0)
