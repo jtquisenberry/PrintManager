@@ -13,7 +13,7 @@ PrintConverter::PrintConverter()
 	m_hEventStopRequested = INVALID_HANDLE_VALUE;
 	m_hEventThreadDone = INVALID_HANDLE_VALUE;
 	m_hWnd = NULL;
-
+	m_PrintStack = NULL;
 
 	return;
 }

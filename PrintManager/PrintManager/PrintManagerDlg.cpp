@@ -59,10 +59,10 @@ CPrintManagerDlg::CPrintManagerDlg(CWnd* pParent /*=NULL*/)
     int written2 = 0;
     written2 = fwprintf_s(g_fileSystem, L"%- 70s %s", L"CPrintManagerDlg::CPrintManagerDlg: ", buffer);
 
-
-    char* base_path = getenv("USERPROFILE");
+    char* base_path;
+    size_t len;
+    errno_t err = _dupenv_s(&base_path, &len, "USERPROFILE");
     wchar_t* wc = new wchar_t[260];
-    //std::wstring wc(260, L'#');
     mbstowcs(&wc[0], base_path, 260);
 
     HWND handle = GetSafeHwnd();
@@ -151,7 +151,8 @@ BOOL CPrintManagerDlg::OnInitDialog()
     if (pSysMenu != NULL)
     {
         CString strAboutMenu;
-        strAboutMenu.LoadString(IDS_ABOUTBOX);
+        int ret_val = strAboutMenu.LoadString(IDS_ABOUTBOX);
+        ret_val++;
         if (!strAboutMenu.IsEmpty())
         {
             pSysMenu->AppendMenu(MF_SEPARATOR);
@@ -574,10 +575,18 @@ LRESULT CPrintManagerDlg::OnUpdateJobList( WPARAM, LPARAM )
         CJobInfo *pJobInfo;
         m_mapJobInfo.GetNextAssoc(pos, nKey, pJobInfo);
 
-        ASSERT(pJobInfo != NULL);
+        // ASSERT(pJobInfo != NULL);
 
         CString strText;
-        strText.Format(_T("%03d"), pJobInfo->GetJobId());
+        if (pJobInfo)
+        {
+            strText.Format(_T("%03d"), pJobInfo->GetJobId());
+        }
+        else
+        {
+            return 999;
+        }
+
         int nItem = m_lcJobInfo.InsertItem(m_lcJobInfo.GetItemCount(), strText);
 
         m_lcJobInfo.SetItemText(nItem, 1, pJobInfo->GetUserName());

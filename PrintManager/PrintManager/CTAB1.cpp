@@ -181,7 +181,7 @@ void CTAB1::OnNMRClickLcJobinfo2(NMHDR* pNMHDR, LRESULT* pResult)
 		buffer_start_index += cx;
 	}
 
-	if (buffer_start_index < 500)
+	if (buffer_start_index < 500 && buffer_start_index >= 0)
 	{
 		buffer[buffer_start_index] = L'\0';
 	}
@@ -386,11 +386,14 @@ void ErrorMessage(LPCTSTR lpszFunction)
 
 	lpDisplayBuf = (LPVOID)LocalAlloc(LMEM_ZEROINIT,
 		(lstrlen((LPCTSTR)lpMsgBuf) + lstrlen((LPCTSTR)lpszFunction) + 40) * sizeof(TCHAR));
-	StringCchPrintf((LPTSTR)lpDisplayBuf,
-		LocalSize(lpDisplayBuf) / sizeof(TCHAR),
-		TEXT("%s failed with error %d: %s"),
-		lpszFunction, dw, lpMsgBuf);
-	MessageBox(NULL, (LPCTSTR)lpDisplayBuf, TEXT("Error"), MB_OK);
+	if (lpDisplayBuf)
+	{
+		StringCchPrintf((LPTSTR)lpDisplayBuf,
+			LocalSize(lpDisplayBuf) / sizeof(TCHAR),
+			TEXT("%s failed with error %d: %s"),
+			lpszFunction, dw, lpMsgBuf);
+		MessageBox(NULL, (LPCTSTR)lpDisplayBuf, TEXT("Error"), MB_OK);
+	}
 
 	//LocalFree(lpMsgBuf);
 	//LocalFree(lpDisplayBuf);
@@ -398,31 +401,31 @@ void ErrorMessage(LPCTSTR lpszFunction)
 }
 
 
-int SetPrinterStatus(CString printer_name, int status)
+int SetPrinterStatus(CString printer_name, int Command)
 {
 	// Initialize for output
 	wchar_t buffer[100];
 	int cx;
 
 	// Initialize for printer access.
-	HANDLE pHandle;
+	HANDLE hPrinter;
 	PRINTER_DEFAULTS* pAll = new PRINTER_DEFAULTS();
 	pAll->DesiredAccess = PRINTER_ALL_ACCESS;
 	BOOL result = 0;
 
 	// OpenPrinter in all-access mode
-	result = OpenPrinter((LPWSTR)(LPCWSTR)printer_name, &pHandle, pAll);
+	result = OpenPrinter((LPWSTR)(LPCWSTR)printer_name, &hPrinter, pAll);
 
 	DWORD dwNeeded = 0L;
 	DWORD dwReturned = 0L;
 	dwReturned;
 	PPRINTER_INFO_2 pInfo = NULL;
 
-	result = GetPrinter(pHandle, 2, NULL, 0, &dwNeeded);
+	result = GetPrinter(hPrinter, 2, NULL, 0, &dwNeeded);
 	if (!dwNeeded)
 	{
 		fprintf(stderr, "[FATAL] GetPrinter() failed: %lu\n", GetLastError());
-		ClosePrinter(pHandle);
+		ClosePrinter(hPrinter);
 		return EXIT_FAILURE;
 	}
 
@@ -430,21 +433,41 @@ int SetPrinterStatus(CString printer_name, int status)
 	if (pInfo == NULL)
 	{
 		fprintf(stderr, "[FATAL] HeapAlloc() failed: %lu\n", GetLastError());
-		ClosePrinter(pHandle);
+		ClosePrinter(hPrinter);
 		return EXIT_FAILURE;
 	}
 
-	result = GetPrinter(pHandle, 2, (LPBYTE)pInfo, dwNeeded, &dwNeeded);
+	result = GetPrinter(hPrinter, 2, (LPBYTE)pInfo, dwNeeded, &dwNeeded);
 	cx = swprintf(buffer, 100, L"%40s Status: %4d\n", (LPCWSTR)printer_name, pInfo->Status);
 	OutputDebugString(buffer);
 
-	result = SetPrinter(pHandle, 0, NULL, status);
+	// BOOL SetPrinter(
+	//  _In_ HANDLE hPrinter,
+	//	_In_ DWORD  Level,
+	//	_In_ LPBYTE pPrinter,
+	//	_In_ DWORD  Command
+	//	);
+	// 
+	// hPrinter: A handle to the printer.
+	// 
+	// Level: If the Command parameter is not equal to zero, the Level parameter must be zero.
+	// 
+	// pPrinter: If Level is 0, but the Command parameter is not PRINTER_CONTROL_SET_STATUS, 
+	// pPrinter must be NULL.
+	// 
+	// Command possibilities
+	// PRINTER_CONTROL_PAUSE;        // 1
+	// PRINTER_CONTROL_PURGE;        // 3
+	// PRINTER_CONTROL_RESUME;       // 2
+	// PRINTER_CONTROL_SET_STATUS;   // 4
+	// https://learn.microsoft.com/en-us/windows/win32/printdocs/setprinter
+	result = SetPrinter(hPrinter, 0, NULL, Command);
 	if (!result)
 	{
 		ErrorMessage(TEXT("SetPrinter"));
 	}
 
-	result = GetPrinter(pHandle, 2, (LPBYTE)pInfo, dwNeeded, &dwNeeded);
+	result = GetPrinter(hPrinter, 2, (LPBYTE)pInfo, dwNeeded, &dwNeeded);
 	cx = swprintf(buffer, 100, L"%40s Status: %4d\n", (LPCWSTR)printer_name, pInfo->Status);
 	OutputDebugString(buffer);
 	return 0;
@@ -648,9 +671,13 @@ void CTAB1::OnPrintersSave()
 	if (FileDlg.DoModal() == IDOK)
 	{
 		CString filename = FileDlg.GetPathName();
-		FILE *log_file = _wfopen(filename, L"a+");
-		fwprintf(log_file, L"lpString: %s\n", L"aaaa");
-		fclose(log_file);
+		FILE* log_file;
+        _wfopen_s(&log_file, filename, L"a+");
+		if (log_file)
+		{
+			fwprintf(log_file, L"lpString: %s\n", L"aaaa");
+			fclose(log_file);
+		}
 	}
 }
 

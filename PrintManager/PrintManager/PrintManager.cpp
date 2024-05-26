@@ -83,8 +83,10 @@ BOOL CPrintManagerApp::OpenLogs()
 	}
 
 	// Open files
-	g_fileSystem = fopen(str_SystemPath, "a+");
-	g_fileObjects = fopen(str_ObjectsPath, "a+");
+	// g_fileSystem = fopen(str_SystemPath, "a+");
+	// g_fileObjects = fopen(str_ObjectsPath, "a+");
+	fopen_s(&g_fileSystem, str_SystemPath, "a+");
+	fopen_s(&g_fileObjects, str_ObjectsPath, "a+");
 
 	return TRUE;
 }
