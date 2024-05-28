@@ -36,7 +36,6 @@ public:
 
 	// Function declarations
 	void GetSelectedPrinters();
-	UINT ThreadFunc2(void);
 	void StartWorkerThread();
 	void StopWorkerThread();	
 

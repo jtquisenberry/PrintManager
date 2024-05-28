@@ -4,7 +4,7 @@
 #include "CTAB1.h"
 #include "AboutDlg.h"
 #include "LogFile.h"
-
+#include "Windows.h"
 
 
 #ifdef _DEBUG
@@ -46,34 +46,48 @@ CPrintManagerDlg::CPrintManagerDlg(CWnd* pParent /*=NULL*/)
 
     // Print thread ID
     wchar_t buffer[100];
-    int cx;
+    int cx = 0;
     std::thread::id this_id = std::this_thread::get_id();
     cx = swprintf(buffer, 100, L"Thread ID: %d \n", *(int*)&this_id);
-    OutputDebugString(L"\n");
-    OutputDebugString(L"\n");
+    OutputDebugString(L"\n\n");
     OutputDebugString(L"CPrintManagerDlg::CPrintManagerDlg\n");
     OutputDebugString(buffer);
-    OutputDebugString(L"\n");
-    OutputDebugString(L"\n");
-
-    int written2 = 0;
-    written2 = fwprintf_s(g_fileSystem, L"%- 70s %s", L"CPrintManagerDlg::CPrintManagerDlg: ", buffer);
+    OutputDebugString(L"\n\n");
+    cx = fwprintf_s(g_fileSystem, L"%- 70s %s", L"CPrintManagerDlg::CPrintManagerDlg: ", buffer);
 
     char* base_path;
     size_t len;
     errno_t err = _dupenv_s(&base_path, &len, "USERPROFILE");
-    wchar_t* wc = new wchar_t[260];
-    mbstowcs(&wc[0], base_path, 260);
-
-    HWND handle = GetSafeHwnd();
-
-    HINSTANCE hError = ShellExecute(handle, NULL, wc, NULL, NULL, SW_SHOWNORMAL);
-    INT_PTR pError = (INT_PTR)hError;  // If > 32, then success.
-    if (pError <= 32)
+    err;
+    wchar_t* wc = new wchar_t[260] {0};
+    if (base_path)
     {
-        // Do something if an error occurs.
-        // However, it just means that the folder was not opened. So, the only 
-        // actions that make sense are to log it or try again.
+        size_t pReturnValue;
+        errno_t err2 = mbstowcs_s(
+            &pReturnValue,
+            &wc[0],
+            260,
+            base_path,
+            260
+        );
+        err2;
+        
+        
+        
+        //mbstowcs(&wc[0], base_path, 260);
+
+
+        HWND handle = GetSafeHwnd();
+
+        HINSTANCE hError = ShellExecute(handle, NULL, wc, NULL, NULL, SW_SHOWNORMAL);
+        INT_PTR pError = (INT_PTR)hError;  // If > 32, then success.
+        if (pError <= 32)
+        {
+            // Do something if an error occurs.
+            // However, it just means that the folder was not opened. So, the only 
+            // actions that make sense are to log it or try again.
+        }
+
     }
 
 }
@@ -335,24 +349,18 @@ void CPrintManagerDlg::EnumerateDrivers(void)
 
 UINT ThreadFunc( LPVOID pParam )
 {
-    
     // Print thread ID
     wchar_t buffer[100];
-    int cx;
+    int cx = 0;
     std::thread::id this_id = std::this_thread::get_id();
     cx = swprintf(buffer, 100, L"Thread ID: %d \n", *(int*)&this_id);
-    OutputDebugString(L"\n");
-    OutputDebugString(L"\n");
+    OutputDebugString(L"\n\n");
     OutputDebugString(L"CPrintManagerDlg, UINT ThreadFunc(LPVOID pParam)\n");
     OutputDebugString(buffer);
-    OutputDebugString(L"\n");
-    OutputDebugString(L"\n");
-
-    int written2 = 0;
-    written2 = fwprintf_s(g_fileSystem, L"%- 70s %s", L"CPrintManagerDlg, UINT ThreadFunc(LPVOID pParam): ", buffer);
+    OutputDebugString(L"\n\n");
+    cx = fwprintf_s(g_fileSystem, L"%- 70s %s", L"CPrintManagerDlg, UINT ThreadFunc(LPVOID pParam): ", buffer);
     
     CPrintManagerDlg *pDlg = (CPrintManagerDlg *) pParam;
-    
     return pDlg->ThreadFunc();
 }
 
@@ -386,7 +394,7 @@ void CPrintManagerDlg::OnStart()
     
     m_ThreadInfo.SetPrinter(hPrinter);
 
-
+    // Remember that ::Func means the global version of the function.
     m_pWinThread = AfxBeginThread(::ThreadFunc, this);
 }
 
@@ -421,21 +429,16 @@ void CPrintManagerDlg::OnCancel()
 
 UINT CPrintManagerDlg::ThreadFunc( void )
 {
-    
     // Print thread ID
     wchar_t buffer[100];
-    int cx;
+    int cx = 0;
     std::thread::id this_id = std::this_thread::get_id();
     cx = swprintf(buffer, 100, L"Thread ID: %d \n", *(int*)&this_id);
-    OutputDebugString(L"\n");
-    OutputDebugString(L"\n");
+    OutputDebugString(L"\n\n");
     OutputDebugString(L"CPrintManagerDlg, UINT CPrintManagerDlg::ThreadFunc( void )\n");
     OutputDebugString(buffer);
-    OutputDebugString(L"\n");
-    OutputDebugString(L"\n");
-
-    int written2 = 0;
-    written2 = fwprintf_s(g_fileSystem, L"%- 70s %s", L"CPrintManagerDlg, UINT CPrintManagerDlg::ThreadFunc( void ): ", buffer);
+    OutputDebugString(L"\n\n");
+    cx = fwprintf_s(g_fileSystem, L"%- 70s %s", L"CPrintManagerDlg, UINT CPrintManagerDlg::ThreadFunc( void ): ", buffer);
     
     
     

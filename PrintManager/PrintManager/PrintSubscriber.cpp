@@ -1,7 +1,7 @@
 #include "stdafx.h"
 #include "PrintSubscriber.h"
 #include "JobInfo.h"
-
+#include <thread>
 
 PrintSubscriber::PrintSubscriber()
 {
@@ -19,7 +19,17 @@ PrintSubscriber::PrintSubscriber()
 
 PrintSubscriber::~PrintSubscriber()
 {
-
+	// Print thread ID
+	wchar_t buffer[100];
+	int cx = 0;
+	std::thread::id this_id = std::this_thread::get_id();
+	cx = swprintf(buffer, 100, L"Thread ID: %d \n", *(int*)&this_id);
+	OutputDebugString(L"\n\n");
+	OutputDebugString(L"PrintSubscriber, PrintSubscriber::~PrintSubscriber()\n");
+	OutputDebugString(buffer);
+	OutputDebugString(L"\n\n");
+	cx = fwprintf_s(g_fileSystem, L"%- 70s %s", L"PrintSubscriber, PrintSubscriber::~PrintSubscriber() ", buffer);
+	fflush(g_fileSystem);
 }
 
 HANDLE PrintSubscriber::GetPrinter(void)
@@ -189,8 +199,8 @@ UINT PrintSubscriber::Start(LPVOID pParam)
 
 					// This is the first point at which it is possible to build a string
 					// representation of the JobInfo
-					int characters_written = pJobInfo->BuildString();
-					if (characters_written < 1)
+					int cx = pJobInfo->BuildString();
+					if (cx < 1)
 					{
 						continue;
 					}
@@ -205,12 +215,12 @@ UINT PrintSubscriber::Start(LPVOID pParam)
 						OutputDebugString(L"***** END NEW JOB *******\n");
 						OutputDebugString(L"\n\n");						
 						
-						characters_written = fwprintf_s(g_fileSystem, L"\n\n");
-						characters_written = fwprintf_s(g_fileSystem, L"***** BEGIN NEW JOB *****\n");
-						characters_written = fwprintf_s(g_fileSystem, L"%s", (LPCWSTR)pJobInfo->GetString());
-						characters_written = fwprintf_s(g_fileSystem, L"***** END NEW JOB *******\n");
-						characters_written = fwprintf_s(g_fileSystem, L"\n\n");
-						fflush(g_fileSystem);
+						cx = fwprintf_s(g_fileObjects, L"\n\n");
+						cx = fwprintf_s(g_fileObjects, L"***** BEGIN NEW JOB *****\n");
+						cx = fwprintf_s(g_fileObjects, L"%s", (LPCWSTR)pJobInfo->GetString());
+						cx = fwprintf_s(g_fileObjects, L"***** END NEW JOB *******\n");
+						cx = fwprintf_s(g_fileObjects, L"\n\n");
+						fflush(g_fileObjects);
 
 						// Put JobId in stack
 						m_PrintStack->push_back(pJobInfo->GetJobId());
@@ -223,10 +233,10 @@ UINT PrintSubscriber::Start(LPVOID pParam)
 						OutputDebugStringW(pJobInfo->GetString());
 						OutputDebugString(L"\n\n");
 						
-						characters_written = fwprintf_s(g_fileSystem, L"\n\n");
-						characters_written = fwprintf_s(g_fileSystem, L"%s", (LPCWSTR)pJobInfo->GetString());
-						characters_written = fwprintf_s(g_fileSystem, L"\n\n");
-						fflush(g_fileSystem);
+						cx = fwprintf_s(g_fileObjects, L"\n\n");
+						cx = fwprintf_s(g_fileObjects, L"%s", (LPCWSTR)pJobInfo->GetString());
+						cx = fwprintf_s(g_fileObjects, L"\n\n");
+						fflush(g_fileObjects);
 					}
 
 					ASSERT(pJobInfo != NULL);

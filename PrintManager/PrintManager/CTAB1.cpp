@@ -55,13 +55,11 @@ CTAB1::CTAB1(CWnd* pParent /*=nullptr*/)
 
 	// Convert thread::id to int
 	cx = swprintf(buffer, 100, L"Thread ID: %d \n", *(int*)&this_id);
-	OutputDebugString(L"\n");
-	OutputDebugString(L"\n");
+	OutputDebugString(L"\n\n");
 	OutputDebugString(L"CTAB1::CTAB1\n");
 	OutputDebugString(buffer);
-	OutputDebugString(L"\n");
-	OutputDebugString(L"\n");
-	written2 = fwprintf_s(g_fileSystem, L"%- 70s %s", L"CTAB1::CTAB1: ", buffer);
+	OutputDebugString(L"\n\n");
+	cx = fwprintf_s(g_fileSystem, L"%- 70s %s", L"CTAB1::CTAB1: ", buffer);
 	fflush(g_fileSystem);
 }
 
@@ -124,16 +122,14 @@ BOOL CTAB1::OnInitDialog()
 
 	// Print thread ID
 	wchar_t buffer[100];
-	int cx;
+	int cx = 0;
 	std::thread::id this_id = std::this_thread::get_id();
 	cx = swprintf(buffer, 100, L"Thread ID: %d \n", *(int*)&this_id);
-	OutputDebugString(L"\n");
-	OutputDebugString(L"\n");
+	OutputDebugString(L"\n\n");
 	OutputDebugString(L"CTAB1::OnInitDialog\n");
 	OutputDebugString(buffer);
-	OutputDebugString(L"\n");
-	OutputDebugString(L"\n");
-	written2 = fwprintf_s(g_fileSystem, L"%- 70s %s", L"CTAB1::OnInitDialog: ", buffer);
+	OutputDebugString(L"\n\n");
+	cx = fwprintf_s(g_fileSystem, L"%- 70s %s", L"CTAB1::OnInitDialog: ", buffer);
 	fflush(g_fileSystem);
 
 	m_pEventThreadDone = new CEvent(TRUE, TRUE);     // signaled
@@ -199,29 +195,45 @@ void CTAB1::OnBnClickedCancelRedirect()
 }
 
 
-UINT StartPrintSubscriber(LPVOID pParam)
+UINT StartPrintSubscriberThread(LPVOID pParam)
 {
+	// Print thread ID
+	wchar_t buffer[100];
+	int cx = 0;
+	std::thread::id this_id = std::this_thread::get_id();
+	cx = swprintf(buffer, 100, L"Thread ID: %d \n", *(int*)&this_id);
+	OutputDebugString(L"\n\n");
+	OutputDebugString(L"CTAB1, UINT StartPrintSubscriberThread(LPVOID pParam)\n");
+	OutputDebugString(buffer);
+	OutputDebugString(L"\n\n");
+	cx = fwprintf_s(g_fileSystem, L"%- 70s %s", L"CTAB1, UINT StartPrintSubscriberThread(LPVOID pParam) ", buffer);
+	fflush(g_fileSystem);
+	
 	CTAB1* ctab1 = (CTAB1*)pParam;
 	ctab1->pPs.Start(0);
 	return 0;
 }
 
 
-UINT StartPrintConverter(LPVOID pParam)
+UINT StartPrintConverterThread(LPVOID pParam)
 {
+	// Print thread ID
+	wchar_t buffer[100];
+	int cx = 0;
+	std::thread::id this_id = std::this_thread::get_id();
+	cx = swprintf(buffer, 100, L"Thread ID: %d \n", *(int*)&this_id);
+	OutputDebugString(L"\n\n");
+	OutputDebugString(L"CTAB1, StartPrintConverterThread(LPVOID pParam)\n");
+	OutputDebugString(buffer);
+	OutputDebugString(L"\n\n");
+	cx = fwprintf_s(g_fileSystem, L"%- 70s %s", L"CTAB1, StartPrintConverterThread(LPVOID pParam) ", buffer);
+	fflush(g_fileSystem);
+	
 	CTAB1* ctab1 = (CTAB1*)pParam;
 	ctab1->pPc.Start(0);
 	return 0;
 }
 
-
-/*
-UINT ThreadFunc2(LPVOID pParam)
-{
-	PrintSubscriber* pPs = (PrintSubscriber*)pParam;
-	return pPs->Start(0);
-}
-*/
 
 void CTAB1::OnBnClickedRedirect()
 {
@@ -284,8 +296,8 @@ void CTAB1::OnBnClickedRedirect()
 	m_PrintStack2->push_back(-66666666);
 
 	// Monitor thread
-	m_pWinThread = AfxBeginThread(::StartPrintSubscriber, this);
-	m_pWinThread2 = AfxBeginThread(::StartPrintConverter, this);
+	m_pWinThread = AfxBeginThread(::StartPrintSubscriberThread, this);
+	m_pWinThread2 = AfxBeginThread(::StartPrintConverterThread, this);
 	
 	return;
 }
@@ -369,7 +381,7 @@ void ErrorMessage(LPCTSTR lpszFunction)
 	// Retrieve the system error message for the last-error code
 
 	LPVOID lpMsgBuf;
-	LPVOID lpDisplayBuf;
+	//LPVOID lpDisplayBuf;
 	DWORD dw = GetLastError();
 
 	FormatMessage(
@@ -384,6 +396,15 @@ void ErrorMessage(LPCTSTR lpszFunction)
 
 	// Display the error message and exit the process
 
+	CString s;
+	wchar_t* error_buffer = new wchar_t[300] {0};
+	int cx;
+	cx = swprintf(error_buffer, 300, L"%s failed with error %d: %s", lpszFunction, dw, (LPCTSTR)lpMsgBuf);
+	s = (CString)error_buffer;
+	s;
+	MessageBox(NULL, (LPCTSTR)error_buffer, TEXT("Error"), MB_OK);
+
+	/*
 	lpDisplayBuf = (LPVOID)LocalAlloc(LMEM_ZEROINIT,
 		(lstrlen((LPCTSTR)lpMsgBuf) + lstrlen((LPCTSTR)lpszFunction) + 40) * sizeof(TCHAR));
 	if (lpDisplayBuf)
@@ -394,6 +415,7 @@ void ErrorMessage(LPCTSTR lpszFunction)
 			lpszFunction, dw, lpMsgBuf);
 		MessageBox(NULL, (LPCTSTR)lpDisplayBuf, TEXT("Error"), MB_OK);
 	}
+	*/
 
 	//LocalFree(lpMsgBuf);
 	//LocalFree(lpDisplayBuf);
@@ -676,6 +698,7 @@ void CTAB1::OnPrintersSave()
 		if (log_file)
 		{
 			fwprintf(log_file, L"lpString: %s\n", L"aaaa");
+			fflush(log_file);
 			fclose(log_file);
 		}
 	}
