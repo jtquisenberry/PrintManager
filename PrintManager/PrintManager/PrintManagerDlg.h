@@ -39,6 +39,9 @@ public:
 	CListCtrl	m_lcJobInfo;
 	//}}AFX_DATA
 
+	PrintSubscriber* pPs;
+
+
 	// ClassWizard generated virtual function overrides
 	//{{AFX_VIRTUAL(CPrintManagerDlg)
 	protected:

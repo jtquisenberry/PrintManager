@@ -12,7 +12,9 @@ PrintSubscriber::PrintSubscriber()
 	m_hEventStopRequested = INVALID_HANDLE_VALUE;
 	m_hEventThreadDone = INVALID_HANDLE_VALUE;
 	m_hWnd = NULL;
-	
+	m_boolPostMessage = FALSE;
+	m_boolPushMap = TRUE;
+
 	return;
 }
 
@@ -72,6 +74,11 @@ void PrintSubscriber::SetThreadDoneEvent(HANDLE hEventThreadDone)
 void PrintSubscriber::SetHwnd(HWND hWnd)
 {
 	m_hWnd = hWnd;
+}
+
+void PrintSubscriber::SetWindowsMessage(UINT nWindowsMessage)
+{
+	m_nWindowsMessage = nWindowsMessage;
 }
 
 UINT PrintSubscriber::Start(LPVOID pParam)
@@ -185,6 +192,8 @@ UINT PrintSubscriber::Start(LPVOID pParam)
 
 					ASSERT(pJobInfo != NULL);
 					pJobInfo->UpdateInfo(&pNotification->aData[x]);
+
+					::PostMessage(this->GetHwnd(), m_nWindowsMessage, 0, 0);
 				}
 
 				// Iterate over the members of the CMap. At this point, the 

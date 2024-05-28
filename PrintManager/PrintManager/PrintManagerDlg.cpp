@@ -15,10 +15,6 @@ static char THIS_FILE[] = __FILE__;
 
 static const UINT UDM_UPDATE_JOB_LIST = RegisterWindowMessage(_T("UDM_UPDATE_JOB_LIST"));
 
-int aaa=777;
-//FILE* file1 = NULL;  // Declared externally
-//FILE* file2 = NULL;  // Declared externally
-//int written = 0;
 
 /////////////////////////////////////////////////////////////////////////////
 // CPrintManagerDlg dialog
@@ -42,7 +38,7 @@ CPrintManagerDlg::CPrintManagerDlg(CWnd* pParent /*=NULL*/)
     m_nHeight = 0;
     m_nWidth = 0;
     m_pWinThread = NULL;
-
+    CPrintManagerDlg::pPs = new PrintSubscriber();
 
     // Print thread ID
     wchar_t buffer[100];
@@ -198,9 +194,20 @@ BOOL CPrintManagerDlg::OnInitDialog()
     m_pEventThreadDone = new CEvent(TRUE, TRUE);     // signaled
     m_pEventStopRequested = new CEvent(FALSE, TRUE); // non-signaled
 
-    m_ThreadInfo.SetStopRequestedEvent(m_pEventStopRequested->m_hObject);
-    m_ThreadInfo.SetThreadDoneEvent(m_pEventThreadDone->m_hObject);
-    m_ThreadInfo.SetHwnd(GetSafeHwnd());
+    
+    
+    
+    pPs->SetStopRequestedEvent(m_pEventStopRequested->m_hObject);
+    pPs->SetThreadDoneEvent(m_pEventThreadDone->m_hObject);
+    pPs->SetHwnd(GetSafeHwnd());
+    pPs->SetWindowsMessage(UDM_UPDATE_JOB_LIST);
+    pPs->m_boolPostMessage = TRUE;
+    pPs->m_boolPushMap = FALSE;
+
+
+    // m_ThreadInfo.SetStopRequestedEvent(m_pEventStopRequested->m_hObject);
+    // m_ThreadInfo.SetThreadDoneEvent(m_pEventThreadDone->m_hObject);
+    // m_ThreadInfo.SetHwnd(GetSafeHwnd());
 
     
         
@@ -362,6 +369,9 @@ UINT ThreadFunc( LPVOID pParam )
     
     CPrintManagerDlg *pDlg = (CPrintManagerDlg *) pParam;
     return pDlg->ThreadFunc();
+
+    CPrintManagerDlg* print_manager = (CPrintManagerDlg*)pParam;
+    return print_manager->pPs->Start(0);
 }
 
 
@@ -392,7 +402,8 @@ void CPrintManagerDlg::OnStart()
     m_cbPrinters.GetWindowText(strPrinter);
     OpenPrinter((LPTSTR) (LPCTSTR) strPrinter, &hPrinter, NULL);
     
-    m_ThreadInfo.SetPrinter(hPrinter);
+    pPs->SetPrinter(hPrinter);
+    //m_ThreadInfo.SetPrinter(hPrinter);
 
     // Remember that ::Func means the global version of the function.
     m_pWinThread = AfxBeginThread(::ThreadFunc, this);
@@ -405,9 +416,15 @@ void CPrintManagerDlg::OnStop()
     m_pEventStopRequested->SetEvent();
     WaitForSingleObject(m_pEventThreadDone->m_hObject, 8000U);
 
-    if (m_ThreadInfo.GetPrinter() != INVALID_HANDLE_VALUE)
-        ClosePrinter(m_ThreadInfo.GetPrinter());
+    // if (m_ThreadInfo.GetPrinter() != INVALID_HANDLE_VALUE)
+    //     ClosePrinter(m_ThreadInfo.GetPrinter());
     
+    if (pPs->GetPrinter() != INVALID_HANDLE_VALUE)
+        ClosePrinter(pPs->GetPrinter());
+
+    //pPs->
+
+
     m_btnStart.EnableWindow(TRUE);
     m_btnStop.EnableWindow(FALSE);
     m_cbPrinters.EnableWindow(TRUE);
@@ -491,15 +508,24 @@ UINT CPrintManagerDlg::ThreadFunc( void )
     };
 
     // get a handle to a printer change notification object.
-    HANDLE hChange = FindFirstPrinterChangeNotification(m_ThreadInfo.GetPrinter(),
-                                                        PRINTER_CHANGE_ALL,
-                                                        0, 
-                                                        &NotificationOptions);
+    // HANDLE hChange = FindFirstPrinterChangeNotification(m_ThreadInfo.GetPrinter(),
+    //                                                     PRINTER_CHANGE_ALL,
+    //                                                     0, 
+    //                                                     &NotificationOptions);
+
+    HANDLE hChange = FindFirstPrinterChangeNotification(pPs->GetPrinter(),
+        PRINTER_CHANGE_ALL,
+        0,
+        &NotificationOptions);
+
+    // pPs->
+
 
     DWORD dwChange;
     HANDLE aHandles[2];
     aHandles[0] = hChange;
-    aHandles[1] = m_ThreadInfo.GetStopRequestedEvent();
+    // aHandles[1] = m_ThreadInfo.GetStopRequestedEvent();
+    aHandles[1] = pPs->GetStopRequestedEvent();
 
     while (hChange != INVALID_HANDLE_VALUE)
     {
@@ -546,14 +572,20 @@ UINT CPrintManagerDlg::ThreadFunc( void )
                     ASSERT(pJobInfo != NULL);
                     pJobInfo->UpdateInfo(&pNotification->aData[x]);
 
-                    ::PostMessage(m_ThreadInfo.GetHwnd(), UDM_UPDATE_JOB_LIST, 0, 0);
+                    // ::PostMessage(m_ThreadInfo.GetHwnd(), UDM_UPDATE_JOB_LIST, 0, 0);
+                    ::PostMessage(pPs->GetHwnd(), UDM_UPDATE_JOB_LIST, 0, 0);
+                    //pPs->
                 }
             }
 
             FreePrinterNotifyInfo(pNotification);
             pNotification = NULL;
         }
-        else if (WaitForSingleObject(m_ThreadInfo.GetStopRequestedEvent(), 0U) == WAIT_OBJECT_0)
+
+        // pPs->
+
+        else if (WaitForSingleObject(pPs->GetStopRequestedEvent(), 0U) == WAIT_OBJECT_0)
+        // else if (WaitForSingleObject(m_ThreadInfo.GetStopRequestedEvent(), 0U) == WAIT_OBJECT_0)
         {
             FindClosePrinterChangeNotification(hChange);
             hChange = INVALID_HANDLE_VALUE;
@@ -561,7 +593,9 @@ UINT CPrintManagerDlg::ThreadFunc( void )
     }
 
     // Signal the event to let the primary thread know that this thread is done
-    SetEvent(m_ThreadInfo.GetThreadDoneEvent());
+    
+    SetEvent(pPs->GetThreadDoneEvent());
+    //SetEvent(m_ThreadInfo.GetThreadDoneEvent());
 
     return 0;
 }

@@ -26,12 +26,16 @@ public:
 	void PrintSubscriber::SetStopRequestedEvent(HANDLE hEventStopRequested);
 	void PrintSubscriber::SetThreadDoneEvent(HANDLE hEventThreadDone);
 	void PrintSubscriber::SetHwnd(HWND hWnd);
+	void PrintSubscriber::SetWindowsMessage(UINT nWindowsMessage);
 
 	
     HANDLE m_hPrinter;
     HANDLE m_hEventStopRequested;
     HANDLE m_hEventThreadDone;
     HWND m_hWnd;
+	UINT m_nWindowsMessage;
+	BOOL m_boolPostMessage;
+	BOOL m_boolPushMap;
 
 	std::vector<int>* m_PrintStack;
 
