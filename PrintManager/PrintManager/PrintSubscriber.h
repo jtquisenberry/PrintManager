@@ -34,8 +34,10 @@ public:
     HANDLE m_hEventThreadDone;
     HWND m_hWnd;
 	UINT m_nWindowsMessage;
-	BOOL m_boolPostMessage;
-	BOOL m_boolPushMap;
+	BOOL m_boolNotifyWindow;
+	BOOL m_boolOutputJobInfo;
+	BOOL m_boolSetForConversion;
+
 
 	std::vector<int>* m_PrintStack;
 

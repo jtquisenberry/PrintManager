@@ -295,6 +295,10 @@ void CTAB1::OnBnClickedRedirect()
 	m_PrintStack2 = new std::vector<int>(100);
 	m_PrintStack2->push_back(-66666666);
 
+	pPs.m_boolNotifyWindow = FALSE;
+	pPs.m_boolOutputJobInfo = TRUE;
+	pPs.m_boolSetForConversion = TRUE;
+
 	// Monitor thread
 	m_pWinThread = AfxBeginThread(::StartPrintSubscriberThread, this);
 	m_pWinThread2 = AfxBeginThread(::StartPrintConverterThread, this);

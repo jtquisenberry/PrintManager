@@ -77,6 +77,7 @@ private:
     CThreadInfo m_ThreadInfo;    
     
     CMapEx<int, int, CJobInfo*, CJobInfo*> m_mapJobInfo;
+	CMapEx<int, int, CJobInfo*, CJobInfo*>* m_pmapJobInfo;
 
     enum AnchorFlags 
     {

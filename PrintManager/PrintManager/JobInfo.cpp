@@ -325,6 +325,7 @@ int CJobInfo::GetStatus(void) const
 
 int CJobInfo::GetStatusChanges(void) const
 {
+    // Hom many times the status changed in a set of notifications.
     return m_nStatusChanges;
 }
 

@@ -12,8 +12,9 @@ PrintSubscriber::PrintSubscriber()
 	m_hEventStopRequested = INVALID_HANDLE_VALUE;
 	m_hEventThreadDone = INVALID_HANDLE_VALUE;
 	m_hWnd = NULL;
-	m_boolPostMessage = FALSE;
-	m_boolPushMap = TRUE;
+	m_boolNotifyWindow = FALSE;
+	m_boolOutputJobInfo = TRUE;
+	m_boolSetForConversion = TRUE;
 
 	return;
 }
@@ -193,7 +194,10 @@ UINT PrintSubscriber::Start(LPVOID pParam)
 					ASSERT(pJobInfo != NULL);
 					pJobInfo->UpdateInfo(&pNotification->aData[x]);
 
-					::PostMessage(this->GetHwnd(), m_nWindowsMessage, 0, 0);
+					if (m_boolNotifyWindow)
+					{
+						::PostMessage(this->GetHwnd(), m_nWindowsMessage, 0, 0);
+					}
 				}
 
 				// Iterate over the members of the CMap. At this point, the 
@@ -214,39 +218,51 @@ UINT PrintSubscriber::Start(LPVOID pParam)
 						continue;
 					}
 										
-
-					// Output JobInfo strings to debug and to file.
-					if (pJobInfo->GetStatusChanges() > 0) 
+					if (m_boolOutputJobInfo)
 					{
-						OutputDebugString(L"\n\n");
-						OutputDebugString(L"***** BEGIN NEW JOB *****\n");
-						OutputDebugStringW(pJobInfo->GetString());
-						OutputDebugString(L"***** END NEW JOB *******\n");
-						OutputDebugString(L"\n\n");						
-						
-						cx = fwprintf_s(g_fileObjects, L"\n\n");
-						cx = fwprintf_s(g_fileObjects, L"***** BEGIN NEW JOB *****\n");
-						cx = fwprintf_s(g_fileObjects, L"%s", (LPCWSTR)pJobInfo->GetString());
-						cx = fwprintf_s(g_fileObjects, L"***** END NEW JOB *******\n");
-						cx = fwprintf_s(g_fileObjects, L"\n\n");
-						fflush(g_fileObjects);
+						// Output JobInfo strings to debug and to file.
+						if ((pJobInfo->GetStatusChanges() > 0) && (pJobInfo->GetStatus() == JOB_STATUS_PRINTED))
+						{
+							OutputDebugString(L"\n\n");
+							OutputDebugString(L"***** BEGIN NEW JOB *****\n");
+							OutputDebugStringW(pJobInfo->GetString());
+							OutputDebugString(L"***** END NEW JOB *******\n");
+							OutputDebugString(L"\n\n");
 
-						// Put JobId in stack
-						m_PrintStack->push_back(pJobInfo->GetJobId());
-						int debug_breakpoint = 0;
-						debug_breakpoint++;
+							cx = fwprintf_s(g_fileObjects, L"\n\n");
+							cx = fwprintf_s(g_fileObjects, L"***** BEGIN NEW JOB *****\n");
+							cx = fwprintf_s(g_fileObjects, L"%s", (LPCWSTR)pJobInfo->GetString());
+							cx = fwprintf_s(g_fileObjects, L"***** END NEW JOB *******\n");
+							cx = fwprintf_s(g_fileObjects, L"\n\n");
+							fflush(g_fileObjects);
+						}
+						else
+						{
+							OutputDebugString(L"\n\n");
+							OutputDebugStringW(pJobInfo->GetString());
+							OutputDebugString(L"\n\n");
+
+							cx = fwprintf_s(g_fileObjects, L"\n\n");
+							cx = fwprintf_s(g_fileObjects, L"%s", (LPCWSTR)pJobInfo->GetString());
+							cx = fwprintf_s(g_fileObjects, L"\n\n");
+							fflush(g_fileObjects);
+						}
 					}
-					else
+
+					if (m_boolSetForConversion)
 					{
-						OutputDebugString(L"\n\n");
-						OutputDebugStringW(pJobInfo->GetString());
-						OutputDebugString(L"\n\n");
-						
-						cx = fwprintf_s(g_fileObjects, L"\n\n");
-						cx = fwprintf_s(g_fileObjects, L"%s", (LPCWSTR)pJobInfo->GetString());
-						cx = fwprintf_s(g_fileObjects, L"\n\n");
-						fflush(g_fileObjects);
+						if ((pJobInfo->GetStatusChanges() > 0) && (pJobInfo->GetStatus() == JOB_STATUS_PRINTED))
+						{
+							// Put JobId in stack
+							m_PrintStack->push_back(pJobInfo->GetJobId());
+							int debug_breakpoint = 0;
+							debug_breakpoint++;
+						}
 					}
+
+
+
+
 
 					ASSERT(pJobInfo != NULL);
 

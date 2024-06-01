@@ -201,8 +201,7 @@ BOOL CPrintManagerDlg::OnInitDialog()
     pPs->SetThreadDoneEvent(m_pEventThreadDone->m_hObject);
     pPs->SetHwnd(GetSafeHwnd());
     pPs->SetWindowsMessage(UDM_UPDATE_JOB_LIST);
-    pPs->m_boolPostMessage = TRUE;
-    pPs->m_boolPushMap = FALSE;
+    
 
 
     // m_ThreadInfo.SetStopRequestedEvent(m_pEventStopRequested->m_hObject);
@@ -367,8 +366,8 @@ UINT ThreadFunc( LPVOID pParam )
     OutputDebugString(L"\n\n");
     cx = fwprintf_s(g_fileSystem, L"%- 70s %s", L"CPrintManagerDlg, UINT ThreadFunc(LPVOID pParam): ", buffer);
     
-    CPrintManagerDlg *pDlg = (CPrintManagerDlg *) pParam;
-    return pDlg->ThreadFunc();
+    // CPrintManagerDlg *pDlg = (CPrintManagerDlg *) pParam;
+    // return pDlg->ThreadFunc();
 
     CPrintManagerDlg* print_manager = (CPrintManagerDlg*)pParam;
     return print_manager->pPs->Start(0);
@@ -403,7 +402,15 @@ void CPrintManagerDlg::OnStart()
     OpenPrinter((LPTSTR) (LPCTSTR) strPrinter, &hPrinter, NULL);
     
     pPs->SetPrinter(hPrinter);
+    pPs->m_boolNotifyWindow = TRUE;
+    pPs->m_boolOutputJobInfo = FALSE;
+    pPs->m_boolSetForConversion = FALSE;
     //m_ThreadInfo.SetPrinter(hPrinter);
+
+    //m_mapJobInfo = (pPs->m_mapJobInfo);
+    //m_mapJobInfo;
+    m_pmapJobInfo = &(pPs->m_mapJobInfo);
+    
 
     // Remember that ::Func means the global version of the function.
     m_pWinThread = AfxBeginThread(::ThreadFunc, this);
@@ -605,12 +612,12 @@ LRESULT CPrintManagerDlg::OnUpdateJobList( WPARAM, LPARAM )
 {
     m_lcJobInfo.DeleteAllItems();
 
-    POSITION pos = m_mapJobInfo.GetStartPosition();
+    POSITION pos = m_pmapJobInfo->GetStartPosition();
     while (pos != NULL)
     {
         int nKey;
         CJobInfo *pJobInfo;
-        m_mapJobInfo.GetNextAssoc(pos, nKey, pJobInfo);
+        m_pmapJobInfo->GetNextAssoc(pos, nKey, pJobInfo);
 
         // ASSERT(pJobInfo != NULL);
 
