@@ -192,6 +192,8 @@ void CTAB1::OnNMRClickLcJobinfo2(NMHDR* pNMHDR, LRESULT* pResult)
 void CTAB1::OnBnClickedCancelRedirect()
 {
 	// TODO: Add your control notification handler code here
+	int a = 1;
+	a++;
 }
 
 
@@ -709,8 +711,34 @@ void CTAB1::OnPrintersSave()
 }
 
 
+void CTAB1::OnStop()
+{
+	// signal and wait for ThreadFunc() to end 
+	m_pEventStopRequested->SetEvent();
+	WaitForSingleObject(m_pEventThreadDone->m_hObject, 8000U);
+
+	if (pPs.GetPrinter() != INVALID_HANDLE_VALUE)
+		ClosePrinter(pPs.GetPrinter());
+
+	// Enable Redirect button
+	m_btnRedirect.EnableWindow(TRUE);
+
+	// Disable Cancel Redirect button
+	m_btnCancelRedirect.EnableWindow(FALSE);
+
+}
+
+
+
+
+
+
 void CTAB1::OnBnClickedCancelRedirect2()
 {
+	
+	OnStop();
+	
+	
 	// Return if redirected printer has not been set.
 	if (redirected_printer_name.GetLength() <= 0)
 	{
@@ -733,10 +761,10 @@ void CTAB1::OnBnClickedCancelRedirect2()
 	redirected_printer_name = "";
 
 	// Enable Redirect button
-	m_btnRedirect.EnableWindow(TRUE);
+	//m_btnRedirect.EnableWindow(TRUE);
 
-	// Disable Cancel button
-	m_btnCancelRedirect.EnableWindow(FALSE);
+	// Disable Cancel Redirect button
+	//m_btnCancelRedirect.EnableWindow(FALSE);
 
 	is_redirected = FALSE;
 

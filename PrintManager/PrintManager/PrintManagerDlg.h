@@ -27,7 +27,7 @@ class CPrintManagerDlg : public CDialogEx
 public:
 	CPrintManagerDlg(CWnd* pParent = NULL);	// standard constructor
 
-    UINT ThreadFunc( void );
+    // UINT ThreadFunc( void );
 
 // Dialog Data
 	//{{AFX_DATA(CPrintManagerDlg)

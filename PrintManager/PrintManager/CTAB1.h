@@ -70,6 +70,7 @@ public:
 	afx_msg void OnPrintersDebug();
 	afx_msg void OnPrintersSave();
 	afx_msg void OnBnClickedCancelRedirect2();
+	afx_msg void OnStop();
 
 private:
 	CEvent* m_pEventThreadDone;
