@@ -38,7 +38,7 @@ CPrintManagerDlg::CPrintManagerDlg(CWnd* pParent /*=NULL*/)
     m_nHeight = 0;
     m_nWidth = 0;
     m_pWinThread = NULL;
-    CPrintManagerDlg::pPs = new PrintSubscriber();
+    CPrintManagerDlg::m_ppsPrintSubscriber = new PrintSubscriber();
 
     // Print thread ID
     wchar_t buffer[100];
@@ -197,10 +197,10 @@ BOOL CPrintManagerDlg::OnInitDialog()
     
     
     
-    pPs->SetStopRequestedEvent(m_pEventStopRequested->m_hObject);
-    pPs->SetThreadDoneEvent(m_pEventThreadDone->m_hObject);
-    pPs->SetHwnd(GetSafeHwnd());
-    pPs->SetWindowsMessage(UDM_UPDATE_JOB_LIST);
+    m_ppsPrintSubscriber->SetStopRequestedEvent(m_pEventStopRequested->m_hObject);
+    m_ppsPrintSubscriber->SetThreadDoneEvent(m_pEventThreadDone->m_hObject);
+    m_ppsPrintSubscriber->SetHwnd(GetSafeHwnd());
+    m_ppsPrintSubscriber->SetWindowsMessage(UDM_UPDATE_JOB_LIST);
     
 
 
@@ -370,7 +370,7 @@ UINT ThreadFunc( LPVOID pParam )
     // return pDlg->ThreadFunc();
 
     CPrintManagerDlg* print_manager = (CPrintManagerDlg*)pParam;
-    return print_manager->pPs->Start(0);
+    return print_manager->m_ppsPrintSubscriber->Start(0);
 }
 
 
@@ -401,15 +401,15 @@ void CPrintManagerDlg::OnStart()
     m_cbPrinters.GetWindowText(strPrinter);
     OpenPrinter((LPTSTR) (LPCTSTR) strPrinter, &hPrinter, NULL);
     
-    pPs->SetPrinter(hPrinter);
-    pPs->m_boolNotifyWindow = TRUE;
-    pPs->m_boolOutputJobInfo = FALSE;
-    pPs->m_boolSetForConversion = FALSE;
+    m_ppsPrintSubscriber->SetPrinter(hPrinter);
+    m_ppsPrintSubscriber->m_boolNotifyWindow = TRUE;
+    m_ppsPrintSubscriber->m_boolOutputJobInfo = FALSE;
+    m_ppsPrintSubscriber->m_boolSetForConversion = FALSE;
     //m_ThreadInfo.SetPrinter(hPrinter);
 
     //m_mapJobInfo = (pPs->m_mapJobInfo);
     //m_mapJobInfo;
-    m_pmapJobInfo = &(pPs->m_mapJobInfo);
+    m_pmapJobInfo = &(m_ppsPrintSubscriber->m_mapJobInfo);
     
 
     // Remember that ::Func means the global version of the function.
@@ -426,8 +426,8 @@ void CPrintManagerDlg::OnStop()
     // if (m_ThreadInfo.GetPrinter() != INVALID_HANDLE_VALUE)
     //     ClosePrinter(m_ThreadInfo.GetPrinter());
     
-    if (pPs->GetPrinter() != INVALID_HANDLE_VALUE)
-        ClosePrinter(pPs->GetPrinter());
+    if (m_ppsPrintSubscriber->GetPrinter() != INVALID_HANDLE_VALUE)
+        ClosePrinter(m_ppsPrintSubscriber->GetPrinter());
 
     //pPs->
 

@@ -15,7 +15,6 @@ class CTAB1 : public CDialogEx
 	DECLARE_DYNAMIC(CTAB1)
 
 public:
-	//CEdit m_ctab1_cedit;
 	CComboBox	m_cbPrinters;
 	CListCtrl  m_lcPrinters;
 
@@ -31,20 +30,25 @@ public:
 	HANDLE m_hEventThreadDone;
 	HWND m_hWnd;
 
-	PrintSubscriber pPs;
-	PrintConverter pPc;
+	PrintSubscriber *m_ppsPrintSubscriber;
+	PrintConverter *m_ppcPrintConverter;
 
 	// Function declarations
 	void GetSelectedPrinters();
-	void StartWorkerThread();
-	void StopWorkerThread();	
+	void StopWorkerThread();
+	//void OutputThreadId(CString);
+	int UnsetRedirectedPrinter();
+	int ReadPrinter(CString);
 
 	std::vector<int> m_PrintStack;
 	std::vector<int>* m_PrintStack2;
-
-
-	
-
+	std::vector<CString> m_vectPrinterNames;
+	std::vector<POSITION> m_vectPrinterPositions;
+	std::vector<int> m_vectPrinterItemIndices;
+	std::vector<CString> m_vectPrinterProperties;
+	CString m_strPrinterName;
+	BOOL m_boolIsRedirected;
+	int m_nSelectedPrinterIndex;
 
 	CTAB1(CWnd* pParent = nullptr);   // standard constructor
 	virtual ~CTAB1();
@@ -61,7 +65,7 @@ protected:
 public:
 	afx_msg void OnBnClickedOk();
 	afx_msg void OnNMRClickLcJobinfo2(NMHDR* pNMHDR, LRESULT* pResult);
-	afx_msg void OnBnClickedCancelRedirect();
+	// afx_msg void OnBnClickedCancelRedirect();
 	afx_msg void OnBnClickedRedirect();
 	afx_msg void OnBnClickedPausePrinters();
 	afx_msg void OnBnClickedResumePrinters();
@@ -71,6 +75,10 @@ public:
 	afx_msg void OnPrintersSave();
 	afx_msg void OnBnClickedCancelRedirect2();
 	afx_msg void OnStop();
+
+
+
+
 
 private:
 	CEvent* m_pEventThreadDone;

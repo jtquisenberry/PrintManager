@@ -14,29 +14,19 @@
 #include <strsafe.h>
 
 
-std::vector<CString> printer_names;
-std::vector<POSITION> printer_positions;
-std::vector<int> printer_item_indexes;
-std::vector<CString> printer_properties;
-CString redirected_printer_name = "";
-BOOL is_redirected = FALSE;
-int written2 = 0;
-//void GetSelectedPrinters();
-
-
-
 // CTAB1 dialog
-
 IMPLEMENT_DYNAMIC(CTAB1, CDialogEx)
 
 
-int selected_printer_index = -1;
+// Non-class function definitions
+void OutputThreadId(CString);
 
 
+// Constructor
 CTAB1::CTAB1(CWnd* pParent /*=nullptr*/)
 	: CDialogEx(IDD_TAB1, pParent)
 {
-
+	// Initializations
 	CTAB1::m_hEventStopRequested = INVALID_HANDLE_VALUE;
 	CTAB1::m_hPrinter = INVALID_HANDLE_VALUE;
 	CTAB1::m_hWnd = 0x0;
@@ -46,27 +36,32 @@ CTAB1::CTAB1(CWnd* pParent /*=nullptr*/)
 	CTAB1::m_hEventThreadDone = NULL;
 	CTAB1::m_pWinThread = NULL;
 	CTAB1::m_pWinThread2 = NULL;
+	CTAB1::m_strPrinterName = "";
+	CTAB1::m_boolIsRedirected = FALSE;
+	CTAB1::m_nSelectedPrinterIndex = -1;
+	CTAB1::m_vectPrinterItemIndices.clear();
+	CTAB1::m_vectPrinterNames.clear();
+	CTAB1::m_vectPrinterPositions.clear();
+	CTAB1::m_vectPrinterProperties.clear();
 
+	// Initialize custom objects
+	CTAB1::m_ppsPrintSubscriber = new PrintSubscriber();
+	CTAB1::m_ppcPrintConverter = new PrintConverter();
 
-	// Print thread ID
-	wchar_t buffer[100];
-	int cx = 0;
-	std::thread::id this_id = std::this_thread::get_id();
-
-	// Convert thread::id to int
-	cx = swprintf(buffer, 100, L"Thread ID: %d \n", *(int*)&this_id);
-	OutputDebugString(L"\n\n");
-	OutputDebugString(L"CTAB1::CTAB1\n");
-	OutputDebugString(buffer);
-	OutputDebugString(L"\n\n");
-	cx = fwprintf_s(g_fileSystem, L"%- 70s %s", L"CTAB1::CTAB1: ", buffer);
-	fflush(g_fileSystem);
+	// Output thread ID
+	OutputThreadId(L"CTAB1::CTAB1");
 }
 
+
+// Destructor
 CTAB1::~CTAB1()
 {
+	// Output thread ID
+	OutputThreadId(L"CTAB1::~CTAB1");
 }
 
+
+// Map UI elements to variables.
 void CTAB1::DoDataExchange(CDataExchange* pDX)
 {
 	CDialogEx::DoDataExchange(pDX);
@@ -81,26 +76,8 @@ void CTAB1::DoDataExchange(CDataExchange* pDX)
 	DDX_Control(pDX, IDC_PURGE_PRINTERS, m_btnPurgePrinters);
 }
 
-void CTAB1::StartWorkerThread()
-{
 
-
-}
-
-void CTAB1::StopWorkerThread()
-{
-	// signal and wait for ThreadFunc() to end 
-	m_pEventStopRequested->SetEvent();
-	WaitForSingleObject(m_pEventThreadDone->m_hObject, 8000U);
-
-	// if (m_ThreadInfo.GetPrinter() != INVALID_HANDLE_VALUE)
-	//	ClosePrinter(m_ThreadInfo.GetPrinter());
-}
-
-
-
-
-
+// Message map
 BEGIN_MESSAGE_MAP(CTAB1, CDialogEx)
 	ON_BN_CLICKED(IDOK, &CTAB1::OnBnClickedOk)
 	ON_NOTIFY(NM_RCLICK, IDC_LC_JOBINFO2, &CTAB1::OnNMRClickLcJobinfo2)
@@ -120,31 +97,28 @@ BOOL CTAB1::OnInitDialog()
 {
 	CDialogEx::OnInitDialog();
 
+	OutputThreadId(L"CTAB1::OnInitDialog");
+
+	m_pEventThreadDone = new CEvent(TRUE, TRUE);     // signaled
+	m_pEventStopRequested = new CEvent(FALSE, TRUE); // non-signaled
+	
+	return TRUE;
+}
+
+void OutputThreadId(CString strFunctionName)
+{
 	// Print thread ID
 	wchar_t buffer[100];
 	int cx = 0;
 	std::thread::id this_id = std::this_thread::get_id();
 	cx = swprintf(buffer, 100, L"Thread ID: %d \n", *(int*)&this_id);
 	OutputDebugString(L"\n\n");
-	OutputDebugString(L"CTAB1::OnInitDialog\n");
+	OutputDebugString(strFunctionName + "\n");
 	OutputDebugString(buffer);
 	OutputDebugString(L"\n\n");
-	cx = fwprintf_s(g_fileSystem, L"%- 70s %s", L"CTAB1::OnInitDialog: ", buffer);
+	cx = fwprintf_s(g_fileSystem, L"%- 70s %s", (LPCWSTR)strFunctionName, buffer);
 	fflush(g_fileSystem);
-
-	m_pEventThreadDone = new CEvent(TRUE, TRUE);     // signaled
-	m_pEventStopRequested = new CEvent(FALSE, TRUE); // non-signaled
-
-	// CThreadInfo
-	// m_ThreadInfo.SetStopRequestedEvent(m_pEventStopRequested->m_hObject);
-	// m_ThreadInfo.SetThreadDoneEvent(m_pEventThreadDone->m_hObject);
-	// m_ThreadInfo.SetHwnd(GetSafeHwnd());
-	
-	return TRUE;
 }
-
-
-
 
 
 void CTAB1::OnBnClickedOk()
@@ -159,7 +133,7 @@ void CTAB1::OnNMRClickLcJobinfo2(NMHDR* pNMHDR, LRESULT* pResult)
 	// Right-click m_lcPrinters	
 	LPNMITEMACTIVATE pNMItemActivate = reinterpret_cast<LPNMITEMACTIVATE>(pNMHDR);
 	int right_clicked_item_index = pNMItemActivate->iItem;
-	selected_printer_index = right_clicked_item_index;
+	m_nSelectedPrinterIndex = right_clicked_item_index;
 	int nColumns = m_lcPrinters.GetHeaderCtrl()->GetItemCount();
 
 	wchar_t buffer[5000];
@@ -189,16 +163,9 @@ void CTAB1::OnNMRClickLcJobinfo2(NMHDR* pNMHDR, LRESULT* pResult)
 }
 
 
-void CTAB1::OnBnClickedCancelRedirect()
-{
-	// TODO: Add your control notification handler code here
-	int a = 1;
-	a++;
-}
-
-
 UINT StartPrintSubscriberThread(LPVOID pParam)
 {
+	/*
 	// Print thread ID
 	wchar_t buffer[100];
 	int cx = 0;
@@ -210,15 +177,18 @@ UINT StartPrintSubscriberThread(LPVOID pParam)
 	OutputDebugString(L"\n\n");
 	cx = fwprintf_s(g_fileSystem, L"%- 70s %s", L"CTAB1, UINT StartPrintSubscriberThread(LPVOID pParam) ", buffer);
 	fflush(g_fileSystem);
-	
+	*/
+
+	OutputThreadId(L"global in CTAB1, StartPrintSubscriberThread");
 	CTAB1* ctab1 = (CTAB1*)pParam;
-	ctab1->pPs.Start(0);
+	ctab1->m_ppsPrintSubscriber->Start(0);
 	return 0;
 }
 
 
 UINT StartPrintConverterThread(LPVOID pParam)
 {
+	/*
 	// Print thread ID
 	wchar_t buffer[100];
 	int cx = 0;
@@ -230,9 +200,11 @@ UINT StartPrintConverterThread(LPVOID pParam)
 	OutputDebugString(L"\n\n");
 	cx = fwprintf_s(g_fileSystem, L"%- 70s %s", L"CTAB1, StartPrintConverterThread(LPVOID pParam) ", buffer);
 	fflush(g_fileSystem);
+	*/
 	
+	OutputThreadId(L"global in CTAB1, StartPrintConverterThread");
 	CTAB1* ctab1 = (CTAB1*)pParam;
-	ctab1->pPc.Start(0);
+	ctab1->m_ppcPrintConverter->Start(0);
 	return 0;
 }
 
@@ -257,7 +229,7 @@ void CTAB1::OnBnClickedRedirect()
 	// Source printer is `redirected_printer_name`
 	DWORD_PTR d = m_cbPrinters.GetItemData(redirected_printer_index);
 	d;
-	m_cbPrinters.GetLBText(redirected_printer_index, redirected_printer_name);
+	m_cbPrinters.GetLBText(redirected_printer_index, m_strPrinterName);
 
 	// Destination printers are `printer_names`
 	GetSelectedPrinters();
@@ -265,7 +237,7 @@ void CTAB1::OnBnClickedRedirect()
 
 	// PausePrinter(redirected_printer_name);
 
-	is_redirected = TRUE;
+	m_boolIsRedirected = TRUE;
 
 
 	/* Subscribe to printer status messages.*/
@@ -277,29 +249,29 @@ void CTAB1::OnBnClickedRedirect()
 
 	// Open printer
 	HANDLE hPrinter;
-	OpenPrinter((LPTSTR)(LPCTSTR)redirected_printer_name, &hPrinter, NULL);
+	OpenPrinter((LPTSTR)(LPCTSTR)m_strPrinterName, &hPrinter, NULL);
 
 	// Setup thread
 	// m_ThreadInfo.SetPrinter(hPrinter);
 
 
 	//PrintSubscriber* ps = new PrintSubscriber();
-	pPs.SetPrinter(hPrinter);
-	pPs.SetStopRequestedEvent(m_pEventStopRequested->m_hObject);
-	pPs.SetThreadDoneEvent(m_pEventThreadDone->m_hObject);
-	pPs.SetHwnd(GetSafeHwnd());
+	m_ppsPrintSubscriber->SetPrinter(hPrinter);
+	m_ppsPrintSubscriber->SetStopRequestedEvent(m_pEventStopRequested->m_hObject);
+	m_ppsPrintSubscriber->SetThreadDoneEvent(m_pEventThreadDone->m_hObject);
+	m_ppsPrintSubscriber->SetHwnd(GetSafeHwnd());
 
-	pPs.m_PrintStack = &m_PrintStack;
-	pPc.m_PrintStack = &m_PrintStack;
+	m_ppsPrintSubscriber->m_PrintStack = &m_PrintStack;
+	m_ppcPrintConverter->m_PrintStack = &m_PrintStack;
 
 	m_PrintStack.push_back(-77777777);
 	//m_PrintStack2 =  (std::vector<int>*)malloc(100 * sizeof(std::vector<int>));
 	m_PrintStack2 = new std::vector<int>(100);
 	m_PrintStack2->push_back(-66666666);
 
-	pPs.m_boolNotifyWindow = FALSE;
-	pPs.m_boolOutputJobInfo = TRUE;
-	pPs.m_boolSetForConversion = TRUE;
+	m_ppsPrintSubscriber->m_boolNotifyWindow = FALSE;
+	m_ppsPrintSubscriber->m_boolOutputJobInfo = TRUE;
+	m_ppsPrintSubscriber->m_boolSetForConversion = TRUE;
 
 	// Monitor thread
 	m_pWinThread = AfxBeginThread(::StartPrintSubscriberThread, this);
@@ -310,9 +282,9 @@ void CTAB1::OnBnClickedRedirect()
 
 void CTAB1::GetSelectedPrinters()
 {
-	printer_names.clear();
-	printer_positions.clear();
-	printer_item_indexes.clear();
+	m_vectPrinterNames.clear();
+	m_vectPrinterPositions.clear();
+	m_vectPrinterItemIndices.clear();
 
 	int nSelectedRows = m_lcPrinters.GetSelectedCount();
 	nSelectedRows;
@@ -320,7 +292,7 @@ void CTAB1::GetSelectedPrinters()
 
 	// pos is a 1-indexed hex value indicating the position in the list from the top.
 	POSITION pos = m_lcPrinters.GetFirstSelectedItemPosition();
-	printer_positions.push_back(pos);
+	m_vectPrinterPositions.push_back(pos);
 	int nItem = -1;
 	if (pos != NULL)
 	{
@@ -328,15 +300,15 @@ void CTAB1::GetSelectedPrinters()
 		{
 			// nItem is a 0-indexed value indicating the position in the list from the top.
 			nItem = m_lcPrinters.GetNextSelectedItem(pos);
-			printer_positions.push_back(pos);
-			printer_item_indexes.push_back(nItem);
+			m_vectPrinterPositions.push_back(pos);
+			m_vectPrinterItemIndices.push_back(nItem);
 
 			for (int i = 0; i < nColumns; i++)
 			{
 				CString sItem = m_lcPrinters.GetItemText(nItem, i);
 				if (i == 0)
 				{
-					printer_names.push_back(sItem);
+					m_vectPrinterNames.push_back(sItem);
 				}
 			}
 		}
@@ -347,11 +319,11 @@ void CTAB1::GetSelectedPrinters()
 	OutputDebugString(L"SELECTED PRINTERS");
 	OutputDebugString(L"\n");
 
-	for (int i = 0; i < printer_names.size(); i++)
+	for (int i = 0; i < m_vectPrinterNames.size(); i++)
 	{
-		CString e = printer_names[i];
-		POSITION p = printer_positions[i];
-		int idx = printer_item_indexes[i];
+		CString e = m_vectPrinterNames[i];
+		POSITION p = m_vectPrinterPositions[i];
+		int idx = m_vectPrinterItemIndices[i];
 		wchar_t buffer[100];
 		int cx;
 
@@ -362,7 +334,7 @@ void CTAB1::GetSelectedPrinters()
 
 	OutputDebugString(L"\n");
 
-	for (CString element : printer_names)
+	for (CString element : m_vectPrinterNames)
 	{
 		OutputDebugString(element);
 		OutputDebugString(L"\n");
@@ -503,7 +475,7 @@ int SetPrinterStatus(CString printer_name, int Command)
 
 
 
-int ReadPrinter(CString printer_name)
+int CTAB1::ReadPrinter(CString printer_name)
 {
 	// Initialize for printer access.
 	HANDLE pHandle;
@@ -542,25 +514,25 @@ int ReadPrinter(CString printer_name)
 	int cx;
 	cx = swprintf(buffer, 100, L"Printer Name: %40s", (LPCWSTR)pInfo->pPrinterName);
 	s = (CString)buffer;
-	printer_properties.push_back(s);
+	m_vectPrinterProperties.push_back(s);
 	cx = swprintf(buffer, 100, L"Printer Name: %40s", (LPCWSTR)pInfo->pDriverName);
 	s = (CString)buffer;
-	printer_properties.push_back(s);
+	m_vectPrinterProperties.push_back(s);
 	cx = swprintf(buffer, 100, L"Printer Name: %40s", (LPCWSTR)pInfo->pPortName);
 	s = (CString)buffer;
-	printer_properties.push_back(s);
+	m_vectPrinterProperties.push_back(s);
 	cx = swprintf(buffer, 100, L"Printer Name: %40s", (LPCWSTR)pInfo->pPrintProcessor);
 	s = (CString)buffer;
-	printer_properties.push_back(s);
+	m_vectPrinterProperties.push_back(s);
 	cx = swprintf(buffer, 100, L"Printer Name: %40s", (LPCWSTR)pInfo->pServerName);
 	s = (CString)buffer;
-	printer_properties.push_back(s);
+	m_vectPrinterProperties.push_back(s);
 	cx = swprintf(buffer, 100, L"Printer Name: %40s", (LPCWSTR)pInfo->pShareName);
 	s = (CString)buffer;
-	printer_properties.push_back(s);
+	m_vectPrinterProperties.push_back(s);
 	cx = swprintf(buffer, 100, L"Printer Name: %40d", pInfo->AveragePPM);
 	s = (CString)buffer;
-	printer_properties.push_back(s);
+	m_vectPrinterProperties.push_back(s);
 	
 	return 0;
 }
@@ -599,7 +571,7 @@ int PurgePrinter(CString printer_name)
 void CTAB1::OnBnClickedPausePrinters()
 {
 	CTAB1::GetSelectedPrinters();
-	for (CString printer_name : printer_names)
+	for (CString printer_name : m_vectPrinterNames)
 	{
 		BOOL result = 0;
 		OutputDebugString(L"\n");
@@ -615,7 +587,7 @@ void CTAB1::OnBnClickedPausePrinters()
 void CTAB1::OnBnClickedResumePrinters()
 {
 	CTAB1::GetSelectedPrinters();
-	for (CString printer_name : printer_names)
+	for (CString printer_name : m_vectPrinterNames)
 	{
 		BOOL result = 0;
 		OutputDebugString(L"\n");
@@ -631,7 +603,7 @@ void CTAB1::OnBnClickedResumePrinters()
 void CTAB1::OnBnClickedPurgePrinters()
 {
 	CTAB1::GetSelectedPrinters();
-	for (CString printer_name : printer_names)
+	for (CString printer_name : m_vectPrinterNames)
 	{
 		BOOL result = 0;
 		OutputDebugString(L"\n");
@@ -683,12 +655,12 @@ void CTAB1::OnPrintersDebug()
 
 void CTAB1::OnPrintersSave()
 {
-	if (selected_printer_index < 0)
+	if (m_nSelectedPrinterIndex < 0)
 	{
 		return;
 	}
 
-	CString printer_name = m_lcPrinters.GetItemText(selected_printer_index, 0);
+	CString printer_name = m_lcPrinters.GetItemText(m_nSelectedPrinterIndex, 0);
 
 
 	CFileDialog FileDlg(FALSE, CString(".txt"), NULL, OFN_HIDEREADONLY | OFN_OVERWRITEPROMPT, CString(L"*.*"));
@@ -717,8 +689,8 @@ void CTAB1::OnStop()
 	m_pEventStopRequested->SetEvent();
 	WaitForSingleObject(m_pEventThreadDone->m_hObject, 8000U);
 
-	if (pPs.GetPrinter() != INVALID_HANDLE_VALUE)
-		ClosePrinter(pPs.GetPrinter());
+	if (m_ppsPrintSubscriber->GetPrinter() != INVALID_HANDLE_VALUE)
+		ClosePrinter(m_ppsPrintSubscriber->GetPrinter());
 
 	// Enable Redirect button
 	m_btnRedirect.EnableWindow(TRUE);
@@ -730,45 +702,40 @@ void CTAB1::OnStop()
 
 
 
+int CTAB1::UnsetRedirectedPrinter()
+{
+	// Unset redirected printer.
+	int result = 0;
+	if (m_strPrinterName.GetLength() > 0)
+	{
+		result = ResumePrinter(m_strPrinterName);
+	}
 
+	// Reset redirected printer to zero-length string
+	m_strPrinterName = "";
+	m_boolIsRedirected = FALSE;
+
+	return result;
+}
+
+
+void CTAB1::StopWorkerThread()
+{
+	// signal and wait for ThreadFunc() to end 
+	m_pEventStopRequested->SetEvent();
+	WaitForSingleObject(m_pEventThreadDone->m_hObject, 8000U);
+
+	// if (m_ThreadInfo.GetPrinter() != INVALID_HANDLE_VALUE)
+	//	ClosePrinter(m_ThreadInfo.GetPrinter());
+}
 
 
 void CTAB1::OnBnClickedCancelRedirect2()
 {
-	
 	OnStop();
-	
-	
-	// Return if redirected printer has not been set.
-	if (redirected_printer_name.GetLength() <= 0)
-	{
-		return;
-	}
-
-	int result = 0;
-
-	// Set printer to resume (un-pause)
-	result = ResumePrinter(redirected_printer_name);
-	if (result <= 0)
-	{
-		return;
-	}
+	UnsetRedirectedPrinter();
 
 	// Clear application data.
-
-
-	// Reset redirected printer to zero-length string
-	redirected_printer_name = "";
-
-	// Enable Redirect button
-	//m_btnRedirect.EnableWindow(TRUE);
-
-	// Disable Cancel Redirect button
-	//m_btnCancelRedirect.EnableWindow(FALSE);
-
-	is_redirected = FALSE;
-
-
 	// Stop thread
 	StopWorkerThread();
 
@@ -777,7 +744,6 @@ void CTAB1::OnBnClickedCancelRedirect2()
 
 	m_mapJobInfo.Cleanup();
 
-	CDialogEx::OnCancel();
-
-
+	// This line closes the tab dialog.
+	// CDialogEx::OnCancel();
 }

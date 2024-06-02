@@ -39,7 +39,7 @@ public:
 	CListCtrl	m_lcJobInfo;
 	//}}AFX_DATA
 
-	PrintSubscriber* pPs;
+	PrintSubscriber* m_ppsPrintSubscriber;
 
 
 	// ClassWizard generated virtual function overrides
