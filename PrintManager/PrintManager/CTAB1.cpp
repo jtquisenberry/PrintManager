@@ -12,6 +12,7 @@
 #include <stdio.h>
 #include <windows.h>
 #include <strsafe.h>
+#include "ThreadUtils.h"
 
 
 // CTAB1 dialog
@@ -58,6 +59,8 @@ CTAB1::~CTAB1()
 {
 	// Output thread ID
 	OutputThreadId(L"CTAB1::~CTAB1");
+	OutputDebugString(L"CTAB1::~CTAB1");
+	ThreadUtils::OutputThreadId(L"CTAB1::~CTAB1", g_fileSystem);
 }
 
 
@@ -179,7 +182,7 @@ UINT StartPrintSubscriberThread(LPVOID pParam)
 	fflush(g_fileSystem);
 	*/
 
-	OutputThreadId(L"global in CTAB1, StartPrintSubscriberThread");
+	ThreadUtils::OutputThreadId(L"global in CTAB1, StartPrintSubscriberThread", g_fileSystem);
 	CTAB1* ctab1 = (CTAB1*)pParam;
 	ctab1->m_ppsPrintSubscriber->Start(0);
 	return 0;
@@ -202,7 +205,7 @@ UINT StartPrintConverterThread(LPVOID pParam)
 	fflush(g_fileSystem);
 	*/
 	
-	OutputThreadId(L"global in CTAB1, StartPrintConverterThread");
+	ThreadUtils::OutputThreadId(L"global in CTAB1, StartPrintConverterThread", g_fileSystem);
 	CTAB1* ctab1 = (CTAB1*)pParam;
 	ctab1->m_ppcPrintConverter->Start(0);
 	return 0;

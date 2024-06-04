@@ -20,8 +20,10 @@ class CPrintManagerApp : public CWinApp
 {
 public:
 	CPrintManagerApp();
+	~CPrintManagerApp();
 	BOOL OpenLogs();
 	BOOL StartLogs();
+	BOOL CloseLogs();
 
 // Overrides
 	// ClassWizard generated virtual function overrides

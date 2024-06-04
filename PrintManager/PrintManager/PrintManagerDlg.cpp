@@ -4,6 +4,7 @@
 #include "CTAB1.h"
 #include "AboutDlg.h"
 #include "LogFile.h"
+#include "ThreadUtils.h"
 #include "Windows.h"
 
 
@@ -90,10 +91,8 @@ CPrintManagerDlg::CPrintManagerDlg(CWnd* pParent /*=NULL*/)
 
 CPrintManagerDlg::~CPrintManagerDlg()
 {
-    
-
-    fclose(g_fileSystem);
-    fclose(g_fileObjects);
+    // delete m_tab1;
+    ThreadUtils::OutputThreadId(L"CPrintManagerDlg::~CPrintManagerDlg", g_fileSystem);
 }
 
 
