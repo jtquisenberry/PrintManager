@@ -1,6 +1,7 @@
 #include "stdafx.h"
 #include "PrintConverter.h"
 #include <thread>
+#include "ThreadUtils.h"
 
 
 PrintConverter::PrintConverter()
@@ -22,32 +23,13 @@ PrintConverter::PrintConverter()
 PrintConverter::~PrintConverter()
 {
 	// Print thread ID
-	wchar_t buffer[100];
-	int cx = 0;
-	std::thread::id this_id = std::this_thread::get_id();
-	cx = swprintf(buffer, 100, L"Thread ID: %d \n", *(int*)&this_id);
-	OutputDebugString(L"\n\n");
-	OutputDebugString(L"PrintConverter, PrintConverter::~PrintConverter()\n");
-	OutputDebugString(buffer);
-	OutputDebugString(L"\n\n");
-	cx = fwprintf_s(g_fileSystem, L"%- 70s %s", L"PrintConverter, PrintConverter::~PrintConverter() ", buffer);
-	fflush(g_fileSystem);
+	ThreadUtils::OutputThreadId(L"PrintConverter::~PrintConverter", g_fileSystem);
 }
 
 UINT PrintConverter::Start(LPVOID pParam)
 {
 	// Print thread ID
-	wchar_t buffer[100];
-	int cx = 0;
-	std::thread::id this_id = std::this_thread::get_id();
-	cx = swprintf(buffer, 100, L"Thread ID: %d \n", *(int*)&this_id);
-	OutputDebugString(L"\n\n");
-	OutputDebugString(L"CTAB1, StartPrintConverterThread(LPVOID pParam)\n");
-	OutputDebugString(buffer);
-	OutputDebugString(L"\n\n");
-	cx = fwprintf_s(g_fileSystem, L"%- 70s %s", L"CTAB1, StartPrintConverterThread(LPVOID pParam) ", buffer);
-	fflush(g_fileSystem);
-	
+	ThreadUtils::OutputThreadId(L"PrintConverter::Start", g_fileSystem);
 	
 	// C4100 unreferenced formal parameter
 	pParam;

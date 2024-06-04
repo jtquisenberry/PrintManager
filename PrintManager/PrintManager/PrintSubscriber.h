@@ -1,6 +1,7 @@
 #include "MapEx.h"
 #include "JobInfo.h"
 #include "ThreadInfo.h"
+#include "ThreadUtils.h"
 #include "LogFile.h"
 #include <vector>
 

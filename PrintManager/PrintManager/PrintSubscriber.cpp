@@ -84,6 +84,9 @@ void PrintSubscriber::SetWindowsMessage(UINT nWindowsMessage)
 
 UINT PrintSubscriber::Start(LPVOID pParam)
 {
+	// Print thread ID
+	ThreadUtils::OutputThreadId(L"PrintSubscriber::Start", g_fileSystem);
+	
 	// C4100 unreferenced formal parameter
 	pParam;
 
