@@ -33,6 +33,9 @@ PrintSubscriber::~PrintSubscriber()
 	OutputDebugString(L"\n\n");
 	cx = fwprintf_s(g_fileSystem, L"%- 70s %s", L"PrintSubscriber, PrintSubscriber::~PrintSubscriber() ", buffer);
 	fflush(g_fileSystem);
+
+	delete m_pEventThreadDone;
+	delete m_pEventStopRequested;
 }
 
 HANDLE PrintSubscriber::GetPrinter(void)

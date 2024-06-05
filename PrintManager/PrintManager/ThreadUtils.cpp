@@ -16,3 +16,12 @@ void ThreadUtils::OutputThreadId(CString strFunctionName, FILE* log_file)
 	int error = GetLastError();
 	fflush(log_file);
 }
+
+
+void ThreadUtils::OutputAddress(void* variable)
+{
+	wchar_t buffer[100];
+	int cx = 0;
+	cx = swprintf(buffer, 100, L"XXXXXXXXXXXXXXXXXXX: %p \n", variable);
+	OutputDebugString(buffer);
+}

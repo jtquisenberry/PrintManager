@@ -58,9 +58,10 @@ CTAB1::CTAB1(CWnd* pParent /*=nullptr*/)
 CTAB1::~CTAB1()
 {
 	// Output thread ID
-	OutputThreadId(L"CTAB1::~CTAB1");
-	OutputDebugString(L"CTAB1::~CTAB1");
 	ThreadUtils::OutputThreadId(L"CTAB1::~CTAB1", g_fileSystem);
+
+	delete m_pEventStopRequested;
+	delete m_pEventThreadDone;
 }
 
 

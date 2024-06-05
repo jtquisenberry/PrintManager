@@ -24,6 +24,9 @@ PrintConverter::~PrintConverter()
 {
 	// Print thread ID
 	ThreadUtils::OutputThreadId(L"PrintConverter::~PrintConverter", g_fileSystem);
+
+	delete m_pEventThreadDone;
+	delete m_pEventStopRequested;
 }
 
 UINT PrintConverter::Start(LPVOID pParam)

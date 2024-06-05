@@ -87,12 +87,24 @@ CPrintManagerDlg::CPrintManagerDlg(CWnd* pParent /*=NULL*/)
 
     }
 
+    //delete pReturnValue;
+    delete wc;
+    delete base_path;
+
 }
 
 CPrintManagerDlg::~CPrintManagerDlg()
 {
-    // delete m_tab1;
     ThreadUtils::OutputThreadId(L"CPrintManagerDlg::~CPrintManagerDlg", g_fileSystem);
+
+    ThreadUtils::OutputAddress(m_pEventStopRequested);
+    ThreadUtils::OutputAddress(m_pEventThreadDone);
+
+    delete m_pEventStopRequested;
+    delete m_pEventThreadDone;
+
+    
+
 }
 
 
@@ -441,8 +453,17 @@ void CPrintManagerDlg::OnCancel()
 {
     OnStop();
 
+
+
+    //printf("%p\n", (void*)&m_pEventStopRequested);
+    
+    ThreadUtils::OutputAddress(m_pEventStopRequested);
+
     delete m_pEventStopRequested;
     delete m_pEventThreadDone;
+    free(m_pEventStopRequested);
+    free(m_pEventThreadDone);
+
 
     m_mapJobInfo.Cleanup();
 
