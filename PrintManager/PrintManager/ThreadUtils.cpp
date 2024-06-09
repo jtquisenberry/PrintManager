@@ -18,10 +18,10 @@ void ThreadUtils::OutputThreadId(CString strFunctionName, FILE* log_file)
 }
 
 
-void ThreadUtils::OutputAddress(void* variable)
+void ThreadUtils::OutputAddress(void* variable, CString text)
 {
-	wchar_t buffer[100];
+	wchar_t buffer[150];
 	int cx = 0;
-	cx = swprintf(buffer, 100, L"XXXXXXXXXXXXXXXXXXX: %p \n", variable);
+	cx = swprintf(buffer, 150, L"%s: %p \n", text, variable);
 	OutputDebugString(buffer);
 }

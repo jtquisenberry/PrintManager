@@ -76,7 +76,7 @@ CPrintManagerDlg::CPrintManagerDlg(CWnd* pParent /*=NULL*/)
 
         HWND handle = GetSafeHwnd();
 
-        HINSTANCE hError = ShellExecute(handle, NULL, wc, NULL, NULL, SW_SHOWNORMAL);
+        HINSTANCE hError = ShellExecute(handle, NULL, wc, NULL, NULL, SW_SHOWMINIMIZED);
         INT_PTR pError = (INT_PTR)hError;  // If > 32, then success.
         if (pError <= 32)
         {
@@ -88,8 +88,9 @@ CPrintManagerDlg::CPrintManagerDlg(CWnd* pParent /*=NULL*/)
     }
 
     //delete pReturnValue;
-    delete wc;
+    delete[] wc;
     delete base_path;
+    // delete m_ppsPrintSubscriber;
 
 }
 
@@ -97,14 +98,9 @@ CPrintManagerDlg::~CPrintManagerDlg()
 {
     ThreadUtils::OutputThreadId(L"CPrintManagerDlg::~CPrintManagerDlg", g_fileSystem);
 
-    ThreadUtils::OutputAddress(m_pEventStopRequested);
-    ThreadUtils::OutputAddress(m_pEventThreadDone);
-
     delete m_pEventStopRequested;
     delete m_pEventThreadDone;
-
-    
-
+    delete m_ppsPrintSubscriber;
 }
 
 
@@ -205,8 +201,8 @@ BOOL CPrintManagerDlg::OnInitDialog()
     m_pEventThreadDone = new CEvent(TRUE, TRUE);     // signaled
     m_pEventStopRequested = new CEvent(FALSE, TRUE); // non-signaled
 
-    
-    
+    // Print thread ID
+    ThreadUtils::OutputThreadId(L"CPrintManagerDlg::OnInitDialog", g_fileSystem);
     
     m_ppsPrintSubscriber->SetStopRequestedEvent(m_pEventStopRequested->m_hObject);
     m_ppsPrintSubscriber->SetThreadDoneEvent(m_pEventThreadDone->m_hObject);
@@ -451,19 +447,13 @@ void CPrintManagerDlg::OnStop()
 
 void CPrintManagerDlg::OnCancel() 
 {
-    OnStop();
-
-
-
-    //printf("%p\n", (void*)&m_pEventStopRequested);
+    int yyy = 0;
+    yyy++;
     
-    ThreadUtils::OutputAddress(m_pEventStopRequested);
+    OnStop();
 
     delete m_pEventStopRequested;
     delete m_pEventThreadDone;
-    free(m_pEventStopRequested);
-    free(m_pEventThreadDone);
-
 
     m_mapJobInfo.Cleanup();
 

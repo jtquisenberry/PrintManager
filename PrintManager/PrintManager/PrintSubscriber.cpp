@@ -1,12 +1,18 @@
 #include "stdafx.h"
 #include "PrintSubscriber.h"
 #include "JobInfo.h"
+#include "ThreadUtils.h"
 #include <thread>
 
 PrintSubscriber::PrintSubscriber()
 {
-	m_pEventThreadDone = new CEvent(TRUE, TRUE);     // signaled
-	m_pEventStopRequested = new CEvent(FALSE, TRUE); // non-signaled
+	// m_pEventThreadDone = new CEvent(TRUE, TRUE);     // signaled
+	// m_pEventStopRequested = new CEvent(FALSE, TRUE); // non-signaled
+
+	// Print thread ID
+	ThreadUtils::OutputThreadId(L"PrintSubscriber::PrintSubscriber", g_fileSystem);
+	// ThreadUtils::OutputAddress(m_pEventThreadDone);
+	// ThreadUtils::OutputAddress(m_pEventStopRequested);
 
 	m_hPrinter = INVALID_HANDLE_VALUE;
 	m_hEventStopRequested = INVALID_HANDLE_VALUE;
@@ -22,6 +28,7 @@ PrintSubscriber::PrintSubscriber()
 
 PrintSubscriber::~PrintSubscriber()
 {
+	/*
 	// Print thread ID
 	wchar_t buffer[100];
 	int cx = 0;
@@ -33,9 +40,35 @@ PrintSubscriber::~PrintSubscriber()
 	OutputDebugString(L"\n\n");
 	cx = fwprintf_s(g_fileSystem, L"%- 70s %s", L"PrintSubscriber, PrintSubscriber::~PrintSubscriber() ", buffer);
 	fflush(g_fileSystem);
+	*/
 
-	delete m_pEventThreadDone;
-	delete m_pEventStopRequested;
+	ThreadUtils::OutputThreadId(L"PrintSubscriber::~PrintSubscriber", g_fileSystem);
+	// ThreadUtils::OutputAddress(m_pEventThreadDone);
+	// ThreadUtils::OutputAddress(m_pEventStopRequested);
+	
+	int c = m_mapJobInfo.GetCount();
+
+	if (c > 0)
+	{
+		POSITION pos = m_mapJobInfo.GetStartPosition();
+		while (pos != NULL)
+		{
+			int nKey;
+			CJobInfo* pJobInfo;
+			m_mapJobInfo.GetNextAssoc(pos, nKey, pJobInfo);
+			delete pJobInfo;
+		}
+
+		// m_mapJobInfo.Cleanup();
+	}
+
+
+
+
+	
+	
+	// delete m_pEventThreadDone;
+	// delete m_pEventStopRequested;
 }
 
 HANDLE PrintSubscriber::GetPrinter(void)
@@ -87,6 +120,7 @@ void PrintSubscriber::SetWindowsMessage(UINT nWindowsMessage)
 
 UINT PrintSubscriber::Start(LPVOID pParam)
 {
+
 	// Print thread ID
 	ThreadUtils::OutputThreadId(L"PrintSubscriber::Start", g_fileSystem);
 	
@@ -121,6 +155,7 @@ UINT PrintSubscriber::Start(LPVOID pParam)
 		JOB_NOTIFY_FIELD_TOTAL_BYTES,          // 0x16
 		JOB_NOTIFY_FIELD_BYTES_PRINTED         // 0x17
 	};
+	
 	PRINTER_NOTIFY_OPTIONS_TYPE	Notifications[1] =
 	{
 		{
@@ -140,7 +175,7 @@ UINT PrintSubscriber::Start(LPVOID pParam)
 		Notifications
 	};
 
-
+	
 	// Get a handle to a change notification object associated with the 
 	// specified printer or print server.	
 	HANDLE hChange = FindFirstPrinterChangeNotification(GetPrinter(),
@@ -212,9 +247,16 @@ UINT PrintSubscriber::Start(LPVOID pParam)
 				while (pos != NULL)
 				{
 					int nKey;
-					CJobInfo* pJobInfo = new CJobInfo(NULL);
+					//CJobInfo* pJobInfo = new CJobInfo(NULL);
+					CJobInfo* pJobInfo;
+
+					
 
 					m_mapJobInfo.GetNextAssoc(pos, nKey, pJobInfo);
+					ThreadUtils::OutputAddress(pJobInfo, L"pJobInfo 2");
+
+					
+
 
 					// This is the first point at which it is possible to build a string
 					// representation of the JobInfo
@@ -272,6 +314,7 @@ UINT PrintSubscriber::Start(LPVOID pParam)
 
 					ASSERT(pJobInfo != NULL);
 
+
 				}
 
 			}
@@ -285,9 +328,15 @@ UINT PrintSubscriber::Start(LPVOID pParam)
 			hChange = INVALID_HANDLE_VALUE;
 		}
 	}
+	
+
+
+	
 
 	// Signal the event to let the primary thread know that this thread is done
 	SetEvent(GetThreadDoneEvent());
+
+	
 
 	return 0;
 }

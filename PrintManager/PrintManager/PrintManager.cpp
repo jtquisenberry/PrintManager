@@ -30,6 +30,12 @@ END_MESSAGE_MAP()
 
 CPrintManagerApp::CPrintManagerApp()
 {
+
+	// Debug memory leak on normal block # value in parentheses
+	// _CrtSetDbgFlag(_CRTDBG_ALLOC_MEM_DF | _CRTDBG_LEAK_CHECK_DF);
+	// _CrtSetBreakAlloc(1546);
+	// _CrtSetBreakAlloc(3551);
+
 	// TODO: add construction code here,
 	// Place all significant initialization in InitInstance
 	OpenLogs();
@@ -68,6 +74,8 @@ BOOL CPrintManagerApp::InitInstance()
 
 BOOL CPrintManagerApp::OpenLogs()
 {
+	
+	
 	// _dupenv_s is safer than getenv
 	char* base_path;
 	size_t len;
@@ -96,6 +104,8 @@ BOOL CPrintManagerApp::OpenLogs()
 	// g_fileObjects = fopen(str_ObjectsPath, "a+");
 	fopen_s(&g_fileSystem, str_SystemPath, "a+");
 	fopen_s(&g_fileObjects, str_ObjectsPath, "a+");
+
+	delete base_path;
 
 	return TRUE;
 }

@@ -8,6 +8,10 @@ PrintConverter::PrintConverter()
 {
 	m_pEventThreadDone = new CEvent(TRUE, TRUE);     // signaled
 	m_pEventStopRequested = new CEvent(FALSE, TRUE); // non-signaled
+
+	// Print thread ID
+	ThreadUtils::OutputThreadId(L"PrintConverter::PrintConverter", g_fileSystem);
+
 	m_boolKeepRunning = true;
 
 	m_hPrinter = INVALID_HANDLE_VALUE;
@@ -31,12 +35,18 @@ PrintConverter::~PrintConverter()
 
 UINT PrintConverter::Start(LPVOID pParam)
 {
+	
 	// Print thread ID
 	ThreadUtils::OutputThreadId(L"PrintConverter::Start", g_fileSystem);
 	
 	// C4100 unreferenced formal parameter
 	pParam;
 
+	
+	// If m_boolKeepRunning is never set to false, the while clause
+	// produces a memory leak.
+	// D:\a\_work\1\s\src\vctools\VC7Libs\Ship\ATLMFC\Src\MFC\thrdcore.cpp(306) : {1357} client block at 0x0000017BE0A29E10, subtype c0, 136 bytes long.
+    // D:\a\_work\1\s\src\vctools\VC7Libs\Ship\ATLMFC\Src\MFC\dumpcont.cpp(23) : atlTraceGeneral - a CWinThread object at $0000017BE0A29E10, 136 bytes long
 	while (m_boolKeepRunning)
 	{
 		if (m_PrintStack->size() > 0)
@@ -53,7 +63,8 @@ UINT PrintConverter::Start(LPVOID pParam)
 		}
 
 		Sleep(2000);
-	}
 
+	}
+	
 	return 0;
 }

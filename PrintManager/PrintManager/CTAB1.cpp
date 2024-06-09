@@ -60,8 +60,12 @@ CTAB1::~CTAB1()
 	// Output thread ID
 	ThreadUtils::OutputThreadId(L"CTAB1::~CTAB1", g_fileSystem);
 
+	// Delete pointers initialized with new
+	delete CTAB1::m_ppsPrintSubscriber;
+	delete CTAB1::m_ppcPrintConverter;
 	delete m_pEventStopRequested;
 	delete m_pEventThreadDone;
+	delete m_PrintStack2;
 }
 
 
@@ -209,6 +213,9 @@ UINT StartPrintConverterThread(LPVOID pParam)
 	ThreadUtils::OutputThreadId(L"global in CTAB1, StartPrintConverterThread", g_fileSystem);
 	CTAB1* ctab1 = (CTAB1*)pParam;
 	ctab1->m_ppcPrintConverter->Start(0);
+	
+
+
 	return 0;
 }
 
@@ -277,7 +284,7 @@ void CTAB1::OnBnClickedRedirect()
 	m_ppsPrintSubscriber->m_boolOutputJobInfo = TRUE;
 	m_ppsPrintSubscriber->m_boolSetForConversion = TRUE;
 
-	// Monitor thread
+	// Start threads
 	m_pWinThread = AfxBeginThread(::StartPrintSubscriberThread, this);
 	m_pWinThread2 = AfxBeginThread(::StartPrintConverterThread, this);
 	
@@ -386,6 +393,10 @@ void ErrorMessage(LPCTSTR lpszFunction)
 	s;
 	MessageBox(NULL, (LPCTSTR)error_buffer, TEXT("Error"), MB_OK);
 
+
+	//delete error_buffer;
+
+
 	/*
 	lpDisplayBuf = (LPVOID)LocalAlloc(LMEM_ZEROINIT,
 		(lstrlen((LPCTSTR)lpMsgBuf) + lstrlen((LPCTSTR)lpszFunction) + 40) * sizeof(TCHAR));
@@ -474,6 +485,9 @@ int SetPrinterStatus(CString printer_name, int Command)
 	result = GetPrinter(hPrinter, 2, (LPBYTE)pInfo, dwNeeded, &dwNeeded);
 	cx = swprintf(buffer, 100, L"%40s Status: %4d\n", (LPCWSTR)printer_name, pInfo->Status);
 	OutputDebugString(buffer);
+
+	delete pAll;
+
 	return 0;
 }
 
@@ -558,6 +572,8 @@ int PausePrinter(CString printer_name)
 
 int ResumePrinter(CString printer_name)
 {
+	
+	
 	BOOL result = 0;
 	result = SetPrinterStatus(printer_name, PRINTER_CONTROL_RESUME);
 	return result;
@@ -689,6 +705,7 @@ void CTAB1::OnPrintersSave()
 
 void CTAB1::OnStop()
 {
+	
 	// signal and wait for ThreadFunc() to end 
 	m_pEventStopRequested->SetEvent();
 	WaitForSingleObject(m_pEventThreadDone->m_hObject, 8000U);
@@ -708,6 +725,7 @@ void CTAB1::OnStop()
 
 int CTAB1::UnsetRedirectedPrinter()
 {
+
 	// Unset redirected printer.
 	int result = 0;
 	if (m_strPrinterName.GetLength() > 0)
@@ -739,13 +757,10 @@ void CTAB1::OnBnClickedCancelRedirect2()
 	OnStop();
 	UnsetRedirectedPrinter();
 
-	// Clear application data.
 	// Stop thread
+	// TODO: Add Stop PrintConverter thread.
 	StopWorkerThread();
-
-	delete m_pEventStopRequested;
-	delete m_pEventThreadDone;
-
+	
 	m_mapJobInfo.Cleanup();
 
 	// This line closes the tab dialog.

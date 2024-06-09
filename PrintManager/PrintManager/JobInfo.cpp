@@ -49,6 +49,12 @@ CMap<int, int, LPCTSTR, LPCTSTR> CJobInfo::m_mapJobStatus;
 
 //=================================================================
 
+CJobInfo::~CJobInfo()
+{
+
+}
+
+
 CString CJobInfo::GetString()
 {
     return m_strAllProperties;
@@ -118,6 +124,13 @@ int CJobInfo::BuildString()
 
     CString m_strAllProperties_temp(buffer);
     m_strAllProperties = m_strAllProperties_temp;
+
+    delete[] buffer;
+
+
+    ThreadUtils::OutputAddress((void*)&m_strStatusString, L"m_nStatus");
+
+
 
     return cx;
 }
@@ -436,7 +449,7 @@ void CJobInfo::SetSubmitted(const PPRINTER_NOTIFY_INFO_DATA pNotifyData)
     CString m_strSubmittedA(buffer);
     m_strSubmitted = m_strSubmittedA;
     
-
+    delete[] buffer;
 
     // str4{ wstr.c_str() };
     
