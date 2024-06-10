@@ -28,26 +28,9 @@ PrintSubscriber::PrintSubscriber()
 
 PrintSubscriber::~PrintSubscriber()
 {
-	/*
-	// Print thread ID
-	wchar_t buffer[100];
-	int cx = 0;
-	std::thread::id this_id = std::this_thread::get_id();
-	cx = swprintf(buffer, 100, L"Thread ID: %d \n", *(int*)&this_id);
-	OutputDebugString(L"\n\n");
-	OutputDebugString(L"PrintSubscriber, PrintSubscriber::~PrintSubscriber()\n");
-	OutputDebugString(buffer);
-	OutputDebugString(L"\n\n");
-	cx = fwprintf_s(g_fileSystem, L"%- 70s %s", L"PrintSubscriber, PrintSubscriber::~PrintSubscriber() ", buffer);
-	fflush(g_fileSystem);
-	*/
-
 	ThreadUtils::OutputThreadId(L"PrintSubscriber::~PrintSubscriber", g_fileSystem);
-	// ThreadUtils::OutputAddress(m_pEventThreadDone);
-	// ThreadUtils::OutputAddress(m_pEventStopRequested);
 	
-	int c = m_mapJobInfo.GetCount();
-
+	int c = (int)m_mapJobInfo.GetCount();
 	if (c > 0)
 	{
 		POSITION pos = m_mapJobInfo.GetStartPosition();
@@ -61,11 +44,6 @@ PrintSubscriber::~PrintSubscriber()
 
 		// m_mapJobInfo.Cleanup();
 	}
-
-
-
-
-	
 	
 	// delete m_pEventThreadDone;
 	// delete m_pEventStopRequested;

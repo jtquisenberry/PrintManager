@@ -26,8 +26,10 @@ public:
 	CButton m_btnPurgePrinters;
 
 	HANDLE m_hPrinter;
-	HANDLE m_hEventStopRequested;
-	HANDLE m_hEventThreadDone;
+	HANDLE m_hEventSubscriberStopRequested;
+	HANDLE m_hEventSubscriberThreadDone;
+	HANDLE m_hEventConverterStopRequested;
+	HANDLE m_hEventConverterThreadDone;
 	HWND m_hWnd;
 
 	PrintSubscriber *m_ppsPrintSubscriber;
@@ -81,10 +83,12 @@ public:
 
 
 private:
-	CEvent* m_pEventThreadDone;
-	CEvent* m_pEventStopRequested;
-	CWinThread* m_pWinThread;
-	CWinThread* m_pWinThread2;
+	CEvent* m_pEventSubscriberThreadDone;
+	CEvent* m_pEventSubscriberStopRequested;
+	CEvent* m_pEventConverterThreadDone;
+	CEvent* m_pEventConverterStopRequested;
+	CWinThread* m_pWinThreadSubscriber;
+	CWinThread* m_pWinThreadConverter;
 	// CThreadInfo m_ThreadInfo;
 
 	CMapEx<int, int, CJobInfo*, CJobInfo*> m_mapJobInfo;

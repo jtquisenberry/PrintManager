@@ -20,23 +20,30 @@ IMPLEMENT_DYNAMIC(CTAB1, CDialogEx)
 
 
 // Non-class function definitions
-void OutputThreadId(CString);
+//void OutputThreadId(CString);
 
 
 // Constructor
 CTAB1::CTAB1(CWnd* pParent /*=nullptr*/)
 	: CDialogEx(IDD_TAB1, pParent)
 {
-	// Initializations
-	CTAB1::m_hEventStopRequested = INVALID_HANDLE_VALUE;
+	/* Initializations */
+	// Thread control events
+	CTAB1::m_hEventSubscriberStopRequested = INVALID_HANDLE_VALUE;
+	CTAB1::m_hEventSubscriberThreadDone = INVALID_HANDLE_VALUE;
+	CTAB1::m_pEventSubscriberStopRequested = NULL;
+	CTAB1::m_pEventSubscriberThreadDone = NULL;
+	CTAB1::m_hEventConverterStopRequested = INVALID_HANDLE_VALUE;
+	CTAB1::m_hEventConverterThreadDone = INVALID_HANDLE_VALUE;
+	CTAB1::m_pEventConverterStopRequested = NULL;
+	CTAB1::m_pEventConverterThreadDone = NULL;	
+
+
 	CTAB1::m_hPrinter = INVALID_HANDLE_VALUE;
-	CTAB1::m_hWnd = 0x0;
-	CTAB1::m_pEventThreadDone = NULL;
-	CTAB1::m_pEventStopRequested = NULL;
-	CTAB1::m_PrintStack2 = NULL;
-	CTAB1::m_hEventThreadDone = NULL;
-	CTAB1::m_pWinThread = NULL;
-	CTAB1::m_pWinThread2 = NULL;
+	CTAB1::m_hWnd = 0x0;	
+	CTAB1::m_PrintStack2 = NULL;	
+	CTAB1::m_pWinThreadSubscriber = NULL;
+	CTAB1::m_pWinThreadConverter = NULL;
 	CTAB1::m_strPrinterName = "";
 	CTAB1::m_boolIsRedirected = FALSE;
 	CTAB1::m_nSelectedPrinterIndex = -1;
@@ -50,7 +57,7 @@ CTAB1::CTAB1(CWnd* pParent /*=nullptr*/)
 	CTAB1::m_ppcPrintConverter = new PrintConverter();
 
 	// Output thread ID
-	OutputThreadId(L"CTAB1::CTAB1");
+	ThreadUtils::OutputThreadId(L"CTAB1::CTAB1", g_fileSystem);
 }
 
 
@@ -63,8 +70,8 @@ CTAB1::~CTAB1()
 	// Delete pointers initialized with new
 	delete CTAB1::m_ppsPrintSubscriber;
 	delete CTAB1::m_ppcPrintConverter;
-	delete m_pEventStopRequested;
-	delete m_pEventThreadDone;
+	delete m_pEventSubscriberStopRequested;
+	delete m_pEventSubscriberThreadDone;
 	delete m_PrintStack2;
 }
 
@@ -105,28 +112,16 @@ BOOL CTAB1::OnInitDialog()
 {
 	CDialogEx::OnInitDialog();
 
-	OutputThreadId(L"CTAB1::OnInitDialog");
+	ThreadUtils::OutputThreadId(L"CTAB1::OnInitDialog", g_fileSystem);
 
-	m_pEventThreadDone = new CEvent(TRUE, TRUE);     // signaled
-	m_pEventStopRequested = new CEvent(FALSE, TRUE); // non-signaled
+	m_pEventSubscriberThreadDone = new CEvent(TRUE, TRUE);     // Signaled
+	m_pEventSubscriberStopRequested = new CEvent(FALSE, TRUE); // Non-signaled
+	m_pEventConverterThreadDone = new CEvent(TRUE, TRUE);      // Signaled
+	m_pEventConverterStopRequested = new CEvent(FALSE, TRUE);  // Non-signaled
 	
 	return TRUE;
 }
 
-void OutputThreadId(CString strFunctionName)
-{
-	// Print thread ID
-	wchar_t buffer[100];
-	int cx = 0;
-	std::thread::id this_id = std::this_thread::get_id();
-	cx = swprintf(buffer, 100, L"Thread ID: %d \n", *(int*)&this_id);
-	OutputDebugString(L"\n\n");
-	OutputDebugString(strFunctionName + "\n");
-	OutputDebugString(buffer);
-	OutputDebugString(L"\n\n");
-	cx = fwprintf_s(g_fileSystem, L"%- 70s %s", (LPCWSTR)strFunctionName, buffer);
-	fflush(g_fileSystem);
-}
 
 
 void CTAB1::OnBnClickedOk()
@@ -173,21 +168,8 @@ void CTAB1::OnNMRClickLcJobinfo2(NMHDR* pNMHDR, LRESULT* pResult)
 
 UINT StartPrintSubscriberThread(LPVOID pParam)
 {
-	/*
-	// Print thread ID
-	wchar_t buffer[100];
-	int cx = 0;
-	std::thread::id this_id = std::this_thread::get_id();
-	cx = swprintf(buffer, 100, L"Thread ID: %d \n", *(int*)&this_id);
-	OutputDebugString(L"\n\n");
-	OutputDebugString(L"CTAB1, UINT StartPrintSubscriberThread(LPVOID pParam)\n");
-	OutputDebugString(buffer);
-	OutputDebugString(L"\n\n");
-	cx = fwprintf_s(g_fileSystem, L"%- 70s %s", L"CTAB1, UINT StartPrintSubscriberThread(LPVOID pParam) ", buffer);
-	fflush(g_fileSystem);
-	*/
-
 	ThreadUtils::OutputThreadId(L"global in CTAB1, StartPrintSubscriberThread", g_fileSystem);
+
 	CTAB1* ctab1 = (CTAB1*)pParam;
 	ctab1->m_ppsPrintSubscriber->Start(0);
 	return 0;
@@ -196,26 +178,10 @@ UINT StartPrintSubscriberThread(LPVOID pParam)
 
 UINT StartPrintConverterThread(LPVOID pParam)
 {
-	/*
-	// Print thread ID
-	wchar_t buffer[100];
-	int cx = 0;
-	std::thread::id this_id = std::this_thread::get_id();
-	cx = swprintf(buffer, 100, L"Thread ID: %d \n", *(int*)&this_id);
-	OutputDebugString(L"\n\n");
-	OutputDebugString(L"CTAB1, StartPrintConverterThread(LPVOID pParam)\n");
-	OutputDebugString(buffer);
-	OutputDebugString(L"\n\n");
-	cx = fwprintf_s(g_fileSystem, L"%- 70s %s", L"CTAB1, StartPrintConverterThread(LPVOID pParam) ", buffer);
-	fflush(g_fileSystem);
-	*/
-	
 	ThreadUtils::OutputThreadId(L"global in CTAB1, StartPrintConverterThread", g_fileSystem);
+
 	CTAB1* ctab1 = (CTAB1*)pParam;
 	ctab1->m_ppcPrintConverter->Start(0);
-	
-
-
 	return 0;
 }
 
@@ -245,51 +211,49 @@ void CTAB1::OnBnClickedRedirect()
 	// Destination printers are `printer_names`
 	GetSelectedPrinters();
 
-
+	// Pause redirected printer
 	// PausePrinter(redirected_printer_name);
 
 	m_boolIsRedirected = TRUE;
 
-
-	/* Subscribe to printer status messages.*/
+	// Remove any JobInfo objects that may be in the map.
 	m_mapJobInfo.Cleanup();
 
-	// set the events to non-signaled
-	m_pEventStopRequested->ResetEvent();
-	m_pEventThreadDone->ResetEvent();
+	// Set the events to non-signaled
+	m_pEventSubscriberStopRequested->ResetEvent();
+	m_pEventSubscriberThreadDone->ResetEvent();
+	m_pEventConverterStopRequested->ResetEvent();
+	m_pEventConverterThreadDone->ResetEvent();
 
-	// Open printer
+	// Open redirected printer
 	HANDLE hPrinter;
 	OpenPrinter((LPTSTR)(LPCTSTR)m_strPrinterName, &hPrinter, NULL);
 
-	// Setup thread
-	// m_ThreadInfo.SetPrinter(hPrinter);
-
-
-	//PrintSubscriber* ps = new PrintSubscriber();
+	// Setup Print Subscriber object and thread
 	m_ppsPrintSubscriber->SetPrinter(hPrinter);
-	m_ppsPrintSubscriber->SetStopRequestedEvent(m_pEventStopRequested->m_hObject);
-	m_ppsPrintSubscriber->SetThreadDoneEvent(m_pEventThreadDone->m_hObject);
+	m_ppsPrintSubscriber->SetStopRequestedEvent(m_pEventSubscriberStopRequested->m_hObject);
+	m_ppsPrintSubscriber->SetThreadDoneEvent(m_pEventSubscriberThreadDone->m_hObject);
 	m_ppsPrintSubscriber->SetHwnd(GetSafeHwnd());
-
 	m_ppsPrintSubscriber->m_PrintStack = &m_PrintStack;
-	m_ppcPrintConverter->m_PrintStack = &m_PrintStack;
-
-	m_PrintStack.push_back(-77777777);
-	//m_PrintStack2 =  (std::vector<int>*)malloc(100 * sizeof(std::vector<int>));
-	m_PrintStack2 = new std::vector<int>(100);
-	m_PrintStack2->push_back(-66666666);
-
 	m_ppsPrintSubscriber->m_boolNotifyWindow = FALSE;
 	m_ppsPrintSubscriber->m_boolOutputJobInfo = TRUE;
 	m_ppsPrintSubscriber->m_boolSetForConversion = TRUE;
 
+	// Setup Print Converter object and thread
+	m_ppcPrintConverter->m_PrintStack = &m_PrintStack;
+	m_ppcPrintConverter->SetStopRequestedEvent(m_pEventConverterStopRequested->m_hObject);
+	m_ppcPrintConverter->SetThreadDoneEvent(m_pEventConverterThreadDone->m_hObject);
+
+	// Setup Print Stack to pass information between threads
+	m_PrintStack2 = new std::vector<int>(100);
+
 	// Start threads
-	m_pWinThread = AfxBeginThread(::StartPrintSubscriberThread, this);
-	m_pWinThread2 = AfxBeginThread(::StartPrintConverterThread, this);
+	m_pWinThreadSubscriber = AfxBeginThread(::StartPrintSubscriberThread, this);
+	m_pWinThreadConverter = AfxBeginThread(::StartPrintConverterThread, this);
 	
 	return;
 }
+
 
 void CTAB1::GetSelectedPrinters()
 {
@@ -363,14 +327,11 @@ void GetClickedPrinter()
 }
 
 
-
-
 void ErrorMessage(LPCTSTR lpszFunction)
 {
 	// Retrieve the system error message for the last-error code
 
 	LPVOID lpMsgBuf;
-	//LPVOID lpDisplayBuf;
 	DWORD dw = GetLastError();
 
 	FormatMessage(
@@ -492,7 +453,6 @@ int SetPrinterStatus(CString printer_name, int Command)
 }
 
 
-
 int CTAB1::ReadPrinter(CString printer_name)
 {
 	// Initialize for printer access.
@@ -556,12 +516,6 @@ int CTAB1::ReadPrinter(CString printer_name)
 }
 
 
-
-
-
-
-
-
 int PausePrinter(CString printer_name)
 {
 	BOOL result = 0;
@@ -572,8 +526,6 @@ int PausePrinter(CString printer_name)
 
 int ResumePrinter(CString printer_name)
 {
-	
-	
 	BOOL result = 0;
 	result = SetPrinterStatus(printer_name, PRINTER_CONTROL_RESUME);
 	return result;
@@ -681,12 +633,8 @@ void CTAB1::OnPrintersSave()
 	}
 
 	CString printer_name = m_lcPrinters.GetItemText(m_nSelectedPrinterIndex, 0);
-
-
 	CFileDialog FileDlg(FALSE, CString(".txt"), NULL, OFN_HIDEREADONLY | OFN_OVERWRITEPROMPT, CString(L"*.*"));
-
 	ReadPrinter(printer_name);
-
 
 	if (FileDlg.DoModal() == IDOK)
 	{
@@ -705,22 +653,23 @@ void CTAB1::OnPrintersSave()
 
 void CTAB1::OnStop()
 {
-	
-	// signal and wait for ThreadFunc() to end 
-	m_pEventStopRequested->SetEvent();
-	WaitForSingleObject(m_pEventThreadDone->m_hObject, 8000U);
+	// Signal and wait for Subscriber to end 
+	m_pEventSubscriberStopRequested->SetEvent();
+	WaitForSingleObject(m_pEventSubscriberThreadDone->m_hObject, 8000U);
 
 	if (m_ppsPrintSubscriber->GetPrinter() != INVALID_HANDLE_VALUE)
 		ClosePrinter(m_ppsPrintSubscriber->GetPrinter());
+
+	// Signal and wait for Converter to end 
+	m_pEventConverterStopRequested->SetEvent();
+	WaitForSingleObject(m_pEventConverterThreadDone->m_hObject, 8000U);
 
 	// Enable Redirect button
 	m_btnRedirect.EnableWindow(TRUE);
 
 	// Disable Cancel Redirect button
 	m_btnCancelRedirect.EnableWindow(FALSE);
-
 }
-
 
 
 int CTAB1::UnsetRedirectedPrinter()
@@ -744,8 +693,8 @@ int CTAB1::UnsetRedirectedPrinter()
 void CTAB1::StopWorkerThread()
 {
 	// signal and wait for ThreadFunc() to end 
-	m_pEventStopRequested->SetEvent();
-	WaitForSingleObject(m_pEventThreadDone->m_hObject, 8000U);
+	m_pEventSubscriberStopRequested->SetEvent();
+	WaitForSingleObject(m_pEventSubscriberThreadDone->m_hObject, 8000U);
 
 	// if (m_ThreadInfo.GetPrinter() != INVALID_HANDLE_VALUE)
 	//	ClosePrinter(m_ThreadInfo.GetPrinter());

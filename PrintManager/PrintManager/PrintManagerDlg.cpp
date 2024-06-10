@@ -32,13 +32,13 @@ CPrintManagerDlg::CPrintManagerDlg(CWnd* pParent /*=NULL*/)
     m_rectOrig.SetRectEmpty();
 
     // Thread Elements
-    m_pEventThreadDone    = NULL;
-    m_pEventStopRequested = NULL;
+    m_pEventSubscriberThreadDone    = NULL;
+    m_pEventSubscriberStopRequested = NULL;
 
     // Member variables initialization
     m_nHeight = 0;
     m_nWidth = 0;
-    m_pWinThread = NULL;
+    m_pWinThreadSubscriber = NULL;
     CPrintManagerDlg::m_ppsPrintSubscriber = new PrintSubscriber();
 
     // Print thread ID
@@ -98,8 +98,8 @@ CPrintManagerDlg::~CPrintManagerDlg()
 {
     ThreadUtils::OutputThreadId(L"CPrintManagerDlg::~CPrintManagerDlg", g_fileSystem);
 
-    delete m_pEventStopRequested;
-    delete m_pEventThreadDone;
+    delete m_pEventSubscriberStopRequested;
+    delete m_pEventSubscriberThreadDone;
     delete m_ppsPrintSubscriber;
 }
 
@@ -198,14 +198,14 @@ BOOL CPrintManagerDlg::OnInitDialog()
 
     
 
-    m_pEventThreadDone = new CEvent(TRUE, TRUE);     // signaled
-    m_pEventStopRequested = new CEvent(FALSE, TRUE); // non-signaled
+    m_pEventSubscriberThreadDone = new CEvent(TRUE, TRUE);     // signaled
+    m_pEventSubscriberStopRequested = new CEvent(FALSE, TRUE); // non-signaled
 
     // Print thread ID
     ThreadUtils::OutputThreadId(L"CPrintManagerDlg::OnInitDialog", g_fileSystem);
     
-    m_ppsPrintSubscriber->SetStopRequestedEvent(m_pEventStopRequested->m_hObject);
-    m_ppsPrintSubscriber->SetThreadDoneEvent(m_pEventThreadDone->m_hObject);
+    m_ppsPrintSubscriber->SetStopRequestedEvent(m_pEventSubscriberStopRequested->m_hObject);
+    m_ppsPrintSubscriber->SetThreadDoneEvent(m_pEventSubscriberThreadDone->m_hObject);
     m_ppsPrintSubscriber->SetHwnd(GetSafeHwnd());
     m_ppsPrintSubscriber->SetWindowsMessage(UDM_UPDATE_JOB_LIST);
     
@@ -398,8 +398,8 @@ void CPrintManagerDlg::OnStart()
     m_mapJobInfo.Cleanup();
     
     // set the events to non-signaled
-    m_pEventStopRequested->ResetEvent();
-    m_pEventThreadDone->ResetEvent();
+    m_pEventSubscriberStopRequested->ResetEvent();
+    m_pEventSubscriberThreadDone->ResetEvent();
 
 
     HANDLE hPrinter;
@@ -420,15 +420,15 @@ void CPrintManagerDlg::OnStart()
     
 
     // Remember that ::Func means the global version of the function.
-    m_pWinThread = AfxBeginThread(::ThreadFunc, this);
+    m_pWinThreadSubscriber = AfxBeginThread(::ThreadFunc, this);
 }
 
 
 void CPrintManagerDlg::OnStop() 
 {
     // signal and wait for ThreadFunc() to end 
-    m_pEventStopRequested->SetEvent();
-    WaitForSingleObject(m_pEventThreadDone->m_hObject, 8000U);
+    m_pEventSubscriberStopRequested->SetEvent();
+    WaitForSingleObject(m_pEventSubscriberThreadDone->m_hObject, 8000U);
 
     // if (m_ThreadInfo.GetPrinter() != INVALID_HANDLE_VALUE)
     //     ClosePrinter(m_ThreadInfo.GetPrinter());
@@ -452,8 +452,8 @@ void CPrintManagerDlg::OnCancel()
     
     OnStop();
 
-    delete m_pEventStopRequested;
-    delete m_pEventThreadDone;
+    delete m_pEventSubscriberStopRequested;
+    delete m_pEventSubscriberThreadDone;
 
     m_mapJobInfo.Cleanup();
 

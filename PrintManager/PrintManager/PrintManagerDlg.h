@@ -71,9 +71,9 @@ private:
     int m_nWidth;
     int m_nHeight;
 
-    CEvent *m_pEventThreadDone;
-    CEvent *m_pEventStopRequested;
-    CWinThread *m_pWinThread;
+    CEvent* m_pEventSubscriberThreadDone;
+    CEvent* m_pEventSubscriberStopRequested;
+    CWinThread *m_pWinThreadSubscriber;
     CThreadInfo m_ThreadInfo;    
     
     CMapEx<int, int, CJobInfo*, CJobInfo*> m_mapJobInfo;

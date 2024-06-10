@@ -14,18 +14,22 @@ public:
 	PrintConverter();   // standard constructor
 	virtual ~PrintConverter();
 	UINT Start(LPVOID pParam);
-	CEvent* m_pEventThreadDone;
-	CEvent* m_pEventStopRequested;
-	// CThreadInfo m_ThreadInfo;
-	CMapEx<int, int, CJobInfo*, CJobInfo*> m_mapJobInfo;
-	std::vector<int>* m_PrintStack;
+	void PrintConverter::SetStopRequestedEvent(HANDLE hEventStopRequested);
+	void PrintConverter::SetThreadDoneEvent(HANDLE hEventThreadDone);
+	HANDLE PrintConverter::GetStopRequestedEvent(void);
+	HANDLE PrintConverter::GetThreadDoneEvent(void);
 	
-
-	HANDLE m_hPrinter;
+	// Thread control
+	CEvent* m_pEventSubscriberThreadDone;
+	CEvent* m_pEventSubscriberStopRequested;
 	HANDLE m_hEventStopRequested;
 	HANDLE m_hEventThreadDone;
-	HWND m_hWnd;
 
+	// Other objects
+	CMapEx<int, int, CJobInfo*, CJobInfo*> m_mapJobInfo;
+	std::vector<int>* m_PrintStack;
+	HANDLE m_hPrinter;
+	HWND m_hWnd;
 	bool m_boolKeepRunning;
 
 };
