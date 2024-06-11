@@ -43,7 +43,7 @@ public:
 	int ReadPrinter(CString);
 
 	std::vector<int> m_PrintStack;
-	std::vector<int>* m_PrintStack2;
+	// std::vector<int>* m_PrintStack2;
 	std::vector<CString> m_vectPrinterNames;
 	std::vector<POSITION> m_vectPrinterPositions;
 	std::vector<int> m_vectPrinterItemIndices;

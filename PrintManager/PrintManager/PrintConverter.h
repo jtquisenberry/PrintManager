@@ -20,8 +20,8 @@ public:
 	HANDLE PrintConverter::GetThreadDoneEvent(void);
 	
 	// Thread control
-	CEvent* m_pEventSubscriberThreadDone;
-	CEvent* m_pEventSubscriberStopRequested;
+	//CEvent* m_pEventSubscriberThreadDone;
+	//CEvent* m_pEventSubscriberStopRequested;
 	HANDLE m_hEventStopRequested;
 	HANDLE m_hEventThreadDone;
 

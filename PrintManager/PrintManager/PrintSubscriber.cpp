@@ -11,8 +11,6 @@ PrintSubscriber::PrintSubscriber()
 
 	// Print thread ID
 	ThreadUtils::OutputThreadId(L"PrintSubscriber::PrintSubscriber", g_fileSystem);
-	// ThreadUtils::OutputAddress(m_pEventThreadDone);
-	// ThreadUtils::OutputAddress(m_pEventStopRequested);
 
 	m_hPrinter = INVALID_HANDLE_VALUE;
 	m_hEventStopRequested = INVALID_HANDLE_VALUE;
@@ -21,6 +19,8 @@ PrintSubscriber::PrintSubscriber()
 	m_boolNotifyWindow = FALSE;
 	m_boolOutputJobInfo = TRUE;
 	m_boolSetForConversion = TRUE;
+	m_PrintStack = NULL;
+	m_nWindowsMessage = NULL;
 
 	return;
 }

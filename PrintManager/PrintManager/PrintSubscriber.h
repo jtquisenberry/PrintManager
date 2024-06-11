@@ -14,9 +14,8 @@ public:
 	PrintSubscriber(void);   // standard constructor
 	virtual ~PrintSubscriber();
 	UINT Start(LPVOID pParam);
-	CEvent* m_pEventSubscriberThreadDone;
-	CEvent* m_pEventSubscriberStopRequested;
-	// CThreadInfo m_ThreadInfo;
+	//CEvent* m_pEventSubscriberThreadDone;
+	//CEvent* m_pEventSubscriberStopRequested;
 	CMapEx<int, int, CJobInfo*, CJobInfo*> m_mapJobInfo;
 
 	HANDLE GetPrinter(void);

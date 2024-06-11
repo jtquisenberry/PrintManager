@@ -41,7 +41,7 @@ CTAB1::CTAB1(CWnd* pParent /*=nullptr*/)
 
 	CTAB1::m_hPrinter = INVALID_HANDLE_VALUE;
 	CTAB1::m_hWnd = 0x0;	
-	CTAB1::m_PrintStack2 = NULL;	
+	// CTAB1::m_PrintStack2 = NULL;	
 	CTAB1::m_pWinThreadSubscriber = NULL;
 	CTAB1::m_pWinThreadConverter = NULL;
 	CTAB1::m_strPrinterName = "";
@@ -72,7 +72,7 @@ CTAB1::~CTAB1()
 	delete CTAB1::m_ppcPrintConverter;
 	delete m_pEventSubscriberStopRequested;
 	delete m_pEventSubscriberThreadDone;
-	delete m_PrintStack2;
+	// delete m_PrintStack2;
 }
 
 
@@ -245,7 +245,7 @@ void CTAB1::OnBnClickedRedirect()
 	m_ppcPrintConverter->SetThreadDoneEvent(m_pEventConverterThreadDone->m_hObject);
 
 	// Setup Print Stack to pass information between threads
-	m_PrintStack2 = new std::vector<int>(100);
+	// m_PrintStack2 = new std::vector<int>(100);
 
 	// Start threads
 	m_pWinThreadSubscriber = AfxBeginThread(::StartPrintSubscriberThread, this);
@@ -327,56 +327,6 @@ void GetClickedPrinter()
 }
 
 
-void ErrorMessage(LPCTSTR lpszFunction)
-{
-	// Retrieve the system error message for the last-error code
-
-	LPVOID lpMsgBuf;
-	DWORD dw = GetLastError();
-
-	FormatMessage(
-		FORMAT_MESSAGE_ALLOCATE_BUFFER |
-		FORMAT_MESSAGE_FROM_SYSTEM |
-		FORMAT_MESSAGE_IGNORE_INSERTS,
-		NULL,
-		dw,
-		MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT),
-		(LPTSTR)&lpMsgBuf,
-		0, NULL);
-
-	// Display the error message and exit the process
-
-	CString s;
-	wchar_t* error_buffer = new wchar_t[300] {0};
-	int cx;
-	cx = swprintf(error_buffer, 300, L"%s failed with error %d: %s", lpszFunction, dw, (LPCTSTR)lpMsgBuf);
-	s = (CString)error_buffer;
-	s;
-	MessageBox(NULL, (LPCTSTR)error_buffer, TEXT("Error"), MB_OK);
-
-
-	//delete error_buffer;
-
-
-	/*
-	lpDisplayBuf = (LPVOID)LocalAlloc(LMEM_ZEROINIT,
-		(lstrlen((LPCTSTR)lpMsgBuf) + lstrlen((LPCTSTR)lpszFunction) + 40) * sizeof(TCHAR));
-	if (lpDisplayBuf)
-	{
-		StringCchPrintf((LPTSTR)lpDisplayBuf,
-			LocalSize(lpDisplayBuf) / sizeof(TCHAR),
-			TEXT("%s failed with error %d: %s"),
-			lpszFunction, dw, lpMsgBuf);
-		MessageBox(NULL, (LPCTSTR)lpDisplayBuf, TEXT("Error"), MB_OK);
-	}
-	*/
-
-	//LocalFree(lpMsgBuf);
-	//LocalFree(lpDisplayBuf);
-	//ExitProcess(dw);
-}
-
-
 int SetPrinterStatus(CString printer_name, int Command)
 {
 	// Initialize for output
@@ -440,7 +390,7 @@ int SetPrinterStatus(CString printer_name, int Command)
 	result = SetPrinter(hPrinter, 0, NULL, Command);
 	if (!result)
 	{
-		ErrorMessage(TEXT("SetPrinter"));
+		ThreadUtils::ErrorMessage(TEXT("SetPrinter"));
 	}
 
 	result = GetPrinter(hPrinter, 2, (LPBYTE)pInfo, dwNeeded, &dwNeeded);

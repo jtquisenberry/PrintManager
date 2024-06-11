@@ -6,8 +6,8 @@
 
 PrintConverter::PrintConverter()
 {
-	m_pEventSubscriberThreadDone = new CEvent(TRUE, TRUE);     // signaled
-	m_pEventSubscriberStopRequested = new CEvent(FALSE, TRUE); // non-signaled
+	// m_pEventSubscriberThreadDone = new CEvent(TRUE, TRUE);     // signaled
+	// m_pEventSubscriberStopRequested = new CEvent(FALSE, TRUE); // non-signaled
 
 	// Print thread ID
 	ThreadUtils::OutputThreadId(L"PrintConverter::PrintConverter", g_fileSystem);
@@ -29,8 +29,8 @@ PrintConverter::~PrintConverter()
 	// Print thread ID
 	ThreadUtils::OutputThreadId(L"PrintConverter::~PrintConverter", g_fileSystem);
 
-	delete m_pEventSubscriberThreadDone;
-	delete m_pEventSubscriberStopRequested;
+	// delete m_pEventSubscriberThreadDone;
+	// delete m_pEventSubscriberStopRequested;
 }
 
 
