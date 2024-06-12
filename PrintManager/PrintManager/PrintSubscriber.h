@@ -1,6 +1,7 @@
 #include "MapEx.h"
 #include "JobInfo.h"
 #include "ThreadInfo.h"
+#include "ThreadUtils.h"
 #include "LogFile.h"
 #include <vector>
 
@@ -13,9 +14,8 @@ public:
 	PrintSubscriber(void);   // standard constructor
 	virtual ~PrintSubscriber();
 	UINT Start(LPVOID pParam);
-	CEvent* m_pEventThreadDone;
-	CEvent* m_pEventStopRequested;
-	// CThreadInfo m_ThreadInfo;
+	//CEvent* m_pEventSubscriberThreadDone;
+	//CEvent* m_pEventSubscriberStopRequested;
 	CMapEx<int, int, CJobInfo*, CJobInfo*> m_mapJobInfo;
 
 	HANDLE GetPrinter(void);
@@ -26,12 +26,18 @@ public:
 	void PrintSubscriber::SetStopRequestedEvent(HANDLE hEventStopRequested);
 	void PrintSubscriber::SetThreadDoneEvent(HANDLE hEventThreadDone);
 	void PrintSubscriber::SetHwnd(HWND hWnd);
+	void PrintSubscriber::SetWindowsMessage(UINT nWindowsMessage);
 
 	
     HANDLE m_hPrinter;
     HANDLE m_hEventStopRequested;
     HANDLE m_hEventThreadDone;
     HWND m_hWnd;
+	UINT m_nWindowsMessage;
+	BOOL m_boolNotifyWindow;
+	BOOL m_boolOutputJobInfo;
+	BOOL m_boolSetForConversion;
+
 
 	std::vector<int>* m_PrintStack;
 

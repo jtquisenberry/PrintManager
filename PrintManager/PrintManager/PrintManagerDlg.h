@@ -27,7 +27,7 @@ class CPrintManagerDlg : public CDialogEx
 public:
 	CPrintManagerDlg(CWnd* pParent = NULL);	// standard constructor
 
-    UINT ThreadFunc( void );
+    // UINT ThreadFunc( void );
 
 // Dialog Data
 	//{{AFX_DATA(CPrintManagerDlg)
@@ -38,6 +38,9 @@ public:
 	CButton	m_btnCancel;
 	CListCtrl	m_lcJobInfo;
 	//}}AFX_DATA
+
+	PrintSubscriber* m_ppsPrintSubscriber;
+
 
 	// ClassWizard generated virtual function overrides
 	//{{AFX_VIRTUAL(CPrintManagerDlg)
@@ -68,12 +71,13 @@ private:
     int m_nWidth;
     int m_nHeight;
 
-    CEvent *m_pEventThreadDone;
-    CEvent *m_pEventStopRequested;
-    CWinThread *m_pWinThread;
+    CEvent* m_pEventSubscriberThreadDone;
+    CEvent* m_pEventSubscriberStopRequested;
+    CWinThread *m_pWinThreadSubscriber;
     CThreadInfo m_ThreadInfo;    
     
     CMapEx<int, int, CJobInfo*, CJobInfo*> m_mapJobInfo;
+	CMapEx<int, int, CJobInfo*, CJobInfo*>* m_pmapJobInfo;
 
     enum AnchorFlags 
     {

@@ -1,12 +1,17 @@
 #include "stdafx.h"
 #include "PrintConverter.h"
 #include <thread>
+#include "ThreadUtils.h"
 
 
 PrintConverter::PrintConverter()
 {
-	m_pEventThreadDone = new CEvent(TRUE, TRUE);     // signaled
-	m_pEventStopRequested = new CEvent(FALSE, TRUE); // non-signaled
+	// m_pEventSubscriberThreadDone = new CEvent(TRUE, TRUE);     // signaled
+	// m_pEventSubscriberStopRequested = new CEvent(FALSE, TRUE); // non-signaled
+
+	// Print thread ID
+	ThreadUtils::OutputThreadId(L"PrintConverter::PrintConverter", g_fileSystem);
+
 	m_boolKeepRunning = true;
 
 	m_hPrinter = INVALID_HANDLE_VALUE;
@@ -22,44 +27,60 @@ PrintConverter::PrintConverter()
 PrintConverter::~PrintConverter()
 {
 	// Print thread ID
-	wchar_t buffer[100];
-	int cx = 0;
-	std::thread::id this_id = std::this_thread::get_id();
-	cx = swprintf(buffer, 100, L"Thread ID: %d \n", *(int*)&this_id);
-	OutputDebugString(L"\n\n");
-	OutputDebugString(L"PrintConverter, PrintConverter::~PrintConverter()\n");
-	OutputDebugString(buffer);
-	OutputDebugString(L"\n\n");
-	cx = fwprintf_s(g_fileSystem, L"%- 70s %s", L"PrintConverter, PrintConverter::~PrintConverter() ", buffer);
-	fflush(g_fileSystem);
+	ThreadUtils::OutputThreadId(L"PrintConverter::~PrintConverter", g_fileSystem);
+
+	// delete m_pEventSubscriberThreadDone;
+	// delete m_pEventSubscriberStopRequested;
 }
+
+
+void PrintConverter::SetStopRequestedEvent(HANDLE hEventStopRequested)
+{
+	m_hEventStopRequested = hEventStopRequested;
+}
+
+
+void PrintConverter::SetThreadDoneEvent(HANDLE hEventThreadDone)
+{
+	m_hEventThreadDone = hEventThreadDone;
+}
+
+
+HANDLE PrintConverter::GetStopRequestedEvent(void)
+{
+	return m_hEventStopRequested;
+}
+
+
+HANDLE PrintConverter::GetThreadDoneEvent(void)
+{
+	return m_hEventThreadDone;
+}
+
+
 
 UINT PrintConverter::Start(LPVOID pParam)
 {
-	// Print thread ID
-	wchar_t buffer[100];
-	int cx = 0;
-	std::thread::id this_id = std::this_thread::get_id();
-	cx = swprintf(buffer, 100, L"Thread ID: %d \n", *(int*)&this_id);
-	OutputDebugString(L"\n\n");
-	OutputDebugString(L"CTAB1, StartPrintConverterThread(LPVOID pParam)\n");
-	OutputDebugString(buffer);
-	OutputDebugString(L"\n\n");
-	cx = fwprintf_s(g_fileSystem, L"%- 70s %s", L"CTAB1, StartPrintConverterThread(LPVOID pParam) ", buffer);
-	fflush(g_fileSystem);
 	
+	// Print thread ID
+	ThreadUtils::OutputThreadId(L"PrintConverter::Start", g_fileSystem);
 	
 	// C4100 unreferenced formal parameter
 	pParam;
 
-	while (m_boolKeepRunning)
+	
+	// If GetStopRequestedEvent is never set to true, the while clause
+	// produces a memory leak.
+	// D:\a\_work\1\s\src\vctools\VC7Libs\Ship\ATLMFC\Src\MFC\thrdcore.cpp(306) : {1357} client block at 0x0000017BE0A29E10, subtype c0, 136 bytes long.
+    // D:\a\_work\1\s\src\vctools\VC7Libs\Ship\ATLMFC\Src\MFC\dumpcont.cpp(23) : atlTraceGeneral - a CWinThread object at $0000017BE0A29E10, 136 bytes long
+	while (WaitForSingleObject(GetStopRequestedEvent(), 0U) != WAIT_OBJECT_0)
 	{
 		if (m_PrintStack->size() > 0)
 		{
 			int job_id = 0;
 			job_id = m_PrintStack->back();
 
-			// Print thread ID
+			// Print Job ID
 			wchar_t buffer[100];
 			int cx;
 			cx = swprintf(buffer, 100, L"job_id ID: %d \n", job_id);
@@ -68,7 +89,11 @@ UINT PrintConverter::Start(LPVOID pParam)
 		}
 
 		Sleep(2000);
+
 	}
+	
+	// Signal the event to let the primary thread know that this thread is done
+	SetEvent(GetThreadDoneEvent());
 
 	return 0;
 }

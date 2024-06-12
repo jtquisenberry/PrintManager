@@ -272,6 +272,7 @@
     </ClCompile>
     <ClCompile Include="PrintManager.cpp" />
     <ClCompile Include="PrintManagerDlg.cpp" />
+    <ClCompile Include="ThreadUtils.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="PrintManager.rc" />
@@ -291,6 +292,7 @@
     <ClInclude Include="ThreadInfo.h" />
     <ClInclude Include="PrintManager.h" />
     <ClInclude Include="PrintManagerDlg.h" />
+    <ClInclude Include="ThreadUtils.h" />
   </ItemGroup>
   <ItemGroup>
     <Image Include="res\PrintManager.ico" />

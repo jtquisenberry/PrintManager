@@ -2,10 +2,15 @@
 #pragma once
 #endif // _MSC_VER > 1000
 
+#include "ThreadUtils.h"
+
+
+
 class CJobInfo
 {
 public:
     CJobInfo( const int nJobId );
+    ~CJobInfo();
 
     //=================================================================
 
