@@ -72,6 +72,8 @@ CTAB1::~CTAB1()
 	delete CTAB1::m_ppcPrintConverter;
 	delete m_pEventSubscriberStopRequested;
 	delete m_pEventSubscriberThreadDone;
+	delete m_pEventConverterStopRequested;
+	delete m_pEventConverterThreadDone;
 	// delete m_PrintStack2;
 }
 
@@ -642,12 +644,18 @@ int CTAB1::UnsetRedirectedPrinter()
 
 void CTAB1::StopWorkerThread()
 {
-	// signal and wait for ThreadFunc() to end 
-	m_pEventSubscriberStopRequested->SetEvent();
-	WaitForSingleObject(m_pEventSubscriberThreadDone->m_hObject, 8000U);
+	int nWaitReturn = -1;
+	int nWaitReturn2 = -1;
 
-	// if (m_ThreadInfo.GetPrinter() != INVALID_HANDLE_VALUE)
-	//	ClosePrinter(m_ThreadInfo.GetPrinter());
+	// signal and wait for thread to end 
+	m_pEventSubscriberStopRequested->SetEvent();
+	nWaitReturn = WaitForSingleObject(m_pEventSubscriberThreadDone->m_hObject, 8000U);
+
+	// signal and wait for thread to end 
+	m_pEventConverterStopRequested->SetEvent();
+	nWaitReturn2 = WaitForSingleObject(m_pEventConverterThreadDone->m_hObject, 8000U);
+
+	return;
 }
 
 
