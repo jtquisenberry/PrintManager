@@ -18,6 +18,9 @@ public:
 	void PrintConverter::SetThreadDoneEvent(HANDLE hEventThreadDone);
 	HANDLE PrintConverter::GetStopRequestedEvent(void);
 	HANDLE PrintConverter::GetThreadDoneEvent(void);
+	int PrintConverter::ConvertMain();
+	void PrintConverter::GetSpoolDirectory();
+	void PrintConverter::GetSpoolFileString(int);
 	
 	// Thread control
 	//CEvent* m_pEventSubscriberThreadDone;
@@ -31,5 +34,7 @@ public:
 	HANDLE m_hPrinter;
 	HWND m_hWnd;
 	bool m_boolKeepRunning;
-
+	CString m_strSpoolDirectory;
+	CString m_strSpoolFile;
+	CString m_strFqSpoolFile;
 };
