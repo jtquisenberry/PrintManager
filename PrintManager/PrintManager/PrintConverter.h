@@ -20,7 +20,7 @@ public:
 	HANDLE PrintConverter::GetThreadDoneEvent(void);
 	int PrintConverter::ConvertMain();
 	void PrintConverter::GetSpoolDirectory();
-	void PrintConverter::GetSpoolFileString(int);
+	void PrintConverter::SetSpoolFileString(int);
 	
 	// Thread control
 	//CEvent* m_pEventSubscriberThreadDone;
@@ -37,4 +37,5 @@ public:
 	CString m_strSpoolDirectory;
 	CString m_strSpoolFile;
 	CString m_strFqSpoolFile;
+	CString m_strOutputDirectory;
 };

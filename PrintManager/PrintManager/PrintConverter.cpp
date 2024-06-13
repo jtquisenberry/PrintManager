@@ -2,6 +2,8 @@
 #include "PrintConverter.h"
 #include <thread>
 #include "ThreadUtils.h"
+#include <cstdio>
+#include <ctime>
 
 #ifdef __cplusplus
 extern "C" {
@@ -19,6 +21,7 @@ typedef struct
 	/* What input file? should this worker use? */
 	char* in_file;
 	/* Somewhere to store the thread id */
+	char* out_dir;
 	HANDLE thread;
 	/* exit code for the thread */
 	int code;
@@ -59,6 +62,7 @@ PrintConverter::PrintConverter()
 	m_strSpoolDirectory = L"";
 	m_strSpoolFile = L"";
 	m_strFqSpoolFile = L"";
+	m_strOutputDirectory = L"D:\\w\\prints\\";
 
 	return;
 }
@@ -108,8 +112,9 @@ UINT PrintConverter::Start(LPVOID pParam)
 	// C4100 unreferenced formal parameter
 	pParam;
 
-	m_strSpoolDirectory = GetSpoolDirectory();
-	
+	// Compute spool directory
+	GetSpoolDirectory();
+
 	// If GetStopRequestedEvent is never set to true, the while clause
 	// produces a memory leak.
 	// D:\a\_work\1\s\src\vctools\VC7Libs\Ship\ATLMFC\Src\MFC\thrdcore.cpp(306) : {1357} client block at 0x0000017BE0A29E10, subtype c0, 136 bytes long.
@@ -128,6 +133,7 @@ UINT PrintConverter::Start(LPVOID pParam)
 			OutputDebugString(buffer);
 
 			// Perform conversion
+			SetSpoolFileString(job_id);
 			ConvertMain();
 
 			m_PrintStack->pop_back();
@@ -156,15 +162,17 @@ void PrintConverter::GetSpoolDirectory()
 	}
 	else
 	{
-		m_strSpoolDirectory = (CString)base_path + "\\System32\\Spool\\Printers\\";
+		m_strSpoolDirectory = (CString)base_path + L"\\System32\\Spool\\Printers\\";
+		int xxx = 0;
+		xxx++;
 	}
 }
 
 
-void PrintConverter::GetSpoolFileString(int JobId)
+void PrintConverter::SetSpoolFileString(int JobId)
 {
 	wchar_t buffer[100];
-	swprintf(buffer, 100, L"%05.SPL", JobId);
+	swprintf(buffer, 100, L"%05d.SPL", JobId);
 	m_strSpoolFile = (CString)buffer;
 	m_strFqSpoolFile = m_strSpoolDirectory + m_strSpoolFile;
 }
@@ -174,33 +182,43 @@ int PrintConverter::ConvertMain()
 {
 	int failed = 0;
 	int code;
-	int i;
-	thread_data td[NUM_WORKERS];
+	thread_data td;
 
 	CT2A asciiSpoolFile(m_strFqSpoolFile);
 
+	std::time_t rawtime;
+	std::tm* timeinfo;
+	char buffer[80];
+	std::time(&rawtime);
+	timeinfo = std::localtime(&rawtime);
+	std::strftime(buffer, 80, "%Y-%m-%d-%H-%M-%S", timeinfo);
+	std::puts(buffer);
 
-	/* Start NUM_WORKERS threads */
-	for (i = 0; i < NUM_WORKERS; i++)
-	{
-		td[i].in_file = (char*)in_files[i % NUM_INPUTS];
-		td[i].thread_num = i;
-		td[i].thread = CreateThread(NULL, 0, worker, &td[i], 0, NULL);
-	}
+	CString o = m_strOutputDirectory + buffer + ".png";
+	CT2A asciiOutFile(o);
+	td.out_dir = asciiOutFile;
 
-	/* Wait for them all to finish */
-	for (i = 0; i < NUM_WORKERS; i++)
-	{
-		void* status = NULL;
 
-		WaitForSingleObject(td[i].thread, INFINITE);
 
-		/* All the threads should return with 0 */
-		if (td[i].code != 0)
-			failed = 1;
-		fprintf(stderr, "Thread %d finished with %d\n", i, td[i].code);
-	}
 
+
+
+	td.in_file = asciiSpoolFile;
+	td.thread_num = 0;
+	td.thread = CreateThread(NULL, 0, worker, &td, 0, NULL);
+	
+	
+	void* status = NULL;
+	WaitForSingleObject(td.thread, INFINITE);
+
+	/* All the threads should return with 0 */
+	if (td.code != 0)
+		failed = 1;
+	
+	OutputDebugString(L"CONVERSION DONE");
+	
+	fprintf(stderr, "Thread %d finished with %d\n", 0, td.code);
+	
 	return failed;
 }
 
@@ -219,12 +237,13 @@ static DWORD WINAPI worker(void* td_)
 	int argc = 0;
 	const char* argv[10];
 
-	sprintf(out, "multi_out_%d_", td->thread_num);
-	strcat(out, "%d.png");
+	//sprintf(out, "multi_out_%d_", td->thread_num);
+	//strcat(out, "%d.png");
+	//sprintf(out, "d:\\w\\multi_out_%d.png", td->thread_num);
 	argv[argc++] = "gpdl";
 	argv[argc++] = "-sDEVICE=png16m";
 	argv[argc++] = "-o";
-	argv[argc++] = out;
+	argv[argc++] = td->out_dir;
 	argv[argc++] = "-r100";
 	argv[argc++] = td->in_file;
 
