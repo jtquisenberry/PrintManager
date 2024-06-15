@@ -21,7 +21,8 @@ typedef struct
 	/* What input file? should this worker use? */
 	char* in_file;
 	/* Somewhere to store the thread id */
-	char* out_dir;
+	char* out_file;
+	char* printer_name;
 	HANDLE thread;
 	/* exit code for the thread */
 	int code;
@@ -63,6 +64,8 @@ PrintConverter::PrintConverter()
 	m_strSpoolFile = L"";
 	m_strFqSpoolFile = L"";
 	m_strOutputDirectory = L"D:\\w\\prints\\";
+	m_strOutputFile = L"";
+	m_strFqOutputFile = L"";
 
 	return;
 }
@@ -102,7 +105,6 @@ HANDLE PrintConverter::GetThreadDoneEvent(void)
 }
 
 
-
 UINT PrintConverter::Start(LPVOID pParam)
 {
 	
@@ -113,7 +115,7 @@ UINT PrintConverter::Start(LPVOID pParam)
 	pParam;
 
 	// Compute spool directory
-	GetSpoolDirectory();
+	SetSpoolDirectory();
 
 	// If GetStopRequestedEvent is never set to true, the while clause
 	// produces a memory leak.
@@ -150,7 +152,7 @@ UINT PrintConverter::Start(LPVOID pParam)
 }
 
 
-void PrintConverter::GetSpoolDirectory()
+void PrintConverter::SetSpoolDirectory()
 {
 	// _dupenv_s is safer than getenv
 	char* base_path;
@@ -169,56 +171,72 @@ void PrintConverter::GetSpoolDirectory()
 }
 
 
-void PrintConverter::SetSpoolFileString(int JobId)
+void PrintConverter::SetConverterFiles(int JobId)
 {
 	wchar_t buffer[100];
 	swprintf(buffer, 100, L"%05d.SPL", JobId);
 	m_strSpoolFile = (CString)buffer;
 	m_strFqSpoolFile = m_strSpoolDirectory + m_strSpoolFile;
+	swprintf(buffer, 100, L"%05d.pdf", JobId);
+	m_strFqOutputFile = m_strOutputDirectory + m_strFqOutputFile;
 }
 
 
-int PrintConverter::ConvertMain()
+void PrintConverter::SetOutputPrinters(std::vector<CString> vectOutputPrinters)
 {
-	int failed = 0;
-	int code;
-	thread_data td;
+	m_vectOutputPrinters = vectOutputPrinters;
+}
 
-	CT2A asciiSpoolFile(m_strFqSpoolFile);
 
+CString PrintConverter::TimeToString()
+{
 	std::time_t rawtime;
 	std::tm* timeinfo;
 	char buffer[80];
 	std::time(&rawtime);
 	timeinfo = std::localtime(&rawtime);
 	std::strftime(buffer, 80, "%Y-%m-%d-%H-%M-%S", timeinfo);
-	std::puts(buffer);
-
-	CString o = m_strOutputDirectory + buffer + ".png";
-	CT2A asciiOutFile(o);
-	td.out_dir = asciiOutFile;
+	CString strTime = (CString)buffer;
+}
 
 
+int PrintConverter::ConvertMain()
+{
+	// Convert CString to char*
+	CT2A asciiFqSpoolFile(m_strFqSpoolFile);
+	CT2A asciiFqOutputFile(m_strFqOutputFile);
 
+	int failed = 0;
+	int code = 0;
 
-
-
-	td.in_file = asciiSpoolFile;
+	thread_data td;
+	td.in_file = asciiFqSpoolFile;
+	td.out_file = asciiFqOutputFile;
 	td.thread_num = 0;
 	td.thread = CreateThread(NULL, 0, worker, &td, 0, NULL);
 	
-	
-	void* status = NULL;
 	WaitForSingleObject(td.thread, INFINITE);
+	fprintf(stderr, "Thread %d finished with %d\n", td.thread_num, td.code);
 
-	/* All the threads should return with 0 */
 	if (td.code != 0)
-		failed = 1;
+		failed += 1;
 	
-	OutputDebugString(L"CONVERSION DONE");
+	OutputDebugString(L"CONVERSION TO PDF DONE");
 	
-	fprintf(stderr, "Thread %d finished with %d\n", 0, td.code);
-	
+	int nCountPrinters = m_vectOutputPrinters.size();
+
+	int thread_counter = 0;
+	for (CString printer : m_vectOutputPrinters)
+	{
+		thread_counter++;
+		td.in_file = asciiFqOutputFile;
+		td.thread_num = thread_counter;
+		td.thread = CreateThread(NULL, 0, worker, &td, 0, NULL);
+		WaitForSingleObject(td.thread, INFINITE);
+		if (td.code != 0)
+			failed += 1;
+	}
+
 	return failed;
 }
 
@@ -237,13 +255,10 @@ static DWORD WINAPI worker(void* td_)
 	int argc = 0;
 	const char* argv[10];
 
-	//sprintf(out, "multi_out_%d_", td->thread_num);
-	//strcat(out, "%d.png");
-	//sprintf(out, "d:\\w\\multi_out_%d.png", td->thread_num);
 	argv[argc++] = "gpdl";
-	argv[argc++] = "-sDEVICE=png16m";
+	argv[argc++] = "-sDEVICE=pdfwrite";
 	argv[argc++] = "-o";
-	argv[argc++] = td->out_dir;
+	argv[argc++] = td->out_file;
 	argv[argc++] = "-r100";
 	argv[argc++] = td->in_file;
 

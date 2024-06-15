@@ -243,6 +243,7 @@ void CTAB1::OnBnClickedRedirect()
 
 	// Setup Print Converter object and thread
 	m_ppcPrintConverter->m_PrintStack = &m_PrintStack;
+	m_ppcPrintConverter->SetOutputPrinters(m_vectPrinterNames);
 	m_ppcPrintConverter->SetStopRequestedEvent(m_pEventConverterStopRequested->m_hObject);
 	m_ppcPrintConverter->SetThreadDoneEvent(m_pEventConverterThreadDone->m_hObject);
 

@@ -19,8 +19,10 @@ public:
 	HANDLE PrintConverter::GetStopRequestedEvent(void);
 	HANDLE PrintConverter::GetThreadDoneEvent(void);
 	int PrintConverter::ConvertMain();
-	void PrintConverter::GetSpoolDirectory();
-	void PrintConverter::SetSpoolFileString(int);
+	void PrintConverter::SetSpoolDirectory();
+	void PrintConverter::SetConverterFiles(int);
+	CString PrintConverter::TimeToString();
+	void PrintConverter::SetOutputPrinters(std::vector<CString>);
 	
 	// Thread control
 	//CEvent* m_pEventSubscriberThreadDone;
@@ -38,4 +40,7 @@ public:
 	CString m_strSpoolFile;
 	CString m_strFqSpoolFile;
 	CString m_strOutputDirectory;
+	CString m_strOutputFile;
+	CString m_strFqOutputFile;
+	std::vector<CString> m_vectOutputPrinters;
 };
