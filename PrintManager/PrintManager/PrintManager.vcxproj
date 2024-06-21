@@ -175,7 +175,7 @@
       <OutputFile>$(OutDir)$(TargetName)$(TargetExt)</OutputFile>
       <EntryPointSymbol>wWinMainCRTStartup</EntryPointSymbol>
       <AdditionalLibraryDirectories>D:\Development\git\PrintManager\GhostPDL;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
-      <AdditionalDependencies>gpdldll64.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>gsdll64.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
@@ -284,6 +284,7 @@
     <ClInclude Include="AboutDlg.h" />
     <ClInclude Include="CTAB1.h" />
     <ClInclude Include="CTAB2.h" />
+    <ClInclude Include="iapi.h" />
     <ClInclude Include="JobInfo.h" />
     <ClInclude Include="LogFile.h" />
     <ClInclude Include="MapEx.h" />
@@ -302,6 +303,13 @@
   </ItemGroup>
   <ItemGroup>
     <CustomBuild Include="res\PrintManager.rc2" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="gsdll64.dll">
+      <DeploymentContent>false</DeploymentContent>
+      <FileType>Document</FileType>
+    </None>
+    <None Include="gsdll64.exp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

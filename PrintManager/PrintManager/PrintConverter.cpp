@@ -7,7 +7,9 @@
 
 #ifdef __cplusplus
 extern "C" {
-#include "plapi.h"  /* GSAPI - gpdf version */
+// #include "plapi.h"  /* GSAPI - gpdf version */
+// #include "psi/iapi.h"       /* GSAPI - ghostscript version */
+#include "iapi.h"
 }
 #endif
 
@@ -18,11 +20,12 @@ typedef struct
 {
 	/* What worker number are we ? */
 	int thread_num;
+	int stage;
 	/* What input file? should this worker use? */
 	char* in_file;
 	/* Somewhere to store the thread id */
 	char* out_file;
-	char* printer_name;
+	char* device;
 	HANDLE thread;
 	/* exit code for the thread */
 	int code;
@@ -135,7 +138,7 @@ UINT PrintConverter::Start(LPVOID pParam)
 			OutputDebugString(buffer);
 
 			// Perform conversion
-			SetSpoolFileString(job_id);
+			SetConverterFiles(job_id);
 			ConvertMain();
 
 			m_PrintStack->pop_back();
@@ -165,8 +168,6 @@ void PrintConverter::SetSpoolDirectory()
 	else
 	{
 		m_strSpoolDirectory = (CString)base_path + L"\\System32\\Spool\\Printers\\";
-		int xxx = 0;
-		xxx++;
 	}
 }
 
@@ -177,8 +178,9 @@ void PrintConverter::SetConverterFiles(int JobId)
 	swprintf(buffer, 100, L"%05d.SPL", JobId);
 	m_strSpoolFile = (CString)buffer;
 	m_strFqSpoolFile = m_strSpoolDirectory + m_strSpoolFile;
-	swprintf(buffer, 100, L"%05d.pdf", JobId);
-	m_strFqOutputFile = m_strOutputDirectory + m_strFqOutputFile;
+	swprintf(buffer, 100, L"%05d.ps", JobId);
+	m_strOutputFile = (CString)buffer;
+	m_strFqOutputFile = m_strOutputDirectory + m_strOutputFile;
 }
 
 
@@ -197,6 +199,8 @@ CString PrintConverter::TimeToString()
 	timeinfo = std::localtime(&rawtime);
 	std::strftime(buffer, 80, "%Y-%m-%d-%H-%M-%S", timeinfo);
 	CString strTime = (CString)buffer;
+
+	return strTime;
 }
 
 
@@ -205,13 +209,19 @@ int PrintConverter::ConvertMain()
 	// Convert CString to char*
 	CT2A asciiFqSpoolFile(m_strFqSpoolFile);
 	CT2A asciiFqOutputFile(m_strFqOutputFile);
+	CT2A asciiDevice((CString)"-sDEVICE=" + (CString)"ps2write");
+	CT2A asciiDevice2((CString)"-sDEVICE=" + (CString)"pdfwrite");
 
 	int failed = 0;
 	int code = 0;
 
 	thread_data td;
+	
+	
+	td.stage = 0;
 	td.in_file = asciiFqSpoolFile;
 	td.out_file = asciiFqOutputFile;
+	td.device = asciiDevice;
 	td.thread_num = 0;
 	td.thread = CreateThread(NULL, 0, worker, &td, 0, NULL);
 	
@@ -221,17 +231,26 @@ int PrintConverter::ConvertMain()
 	if (td.code != 0)
 		failed += 1;
 	
-	OutputDebugString(L"CONVERSION TO PDF DONE");
-	
-	int nCountPrinters = m_vectOutputPrinters.size();
+	OutputDebugString(L"CONVERSION TO PS DONE");
+	Sleep(2000);
 
+
+	int nCountPrinters = m_vectOutputPrinters.size();
 	int thread_counter = 0;
 	for (CString printer : m_vectOutputPrinters)
 	{
 		thread_counter++;
+		CT2A asciiDevice((CString)"-sDEVICE=" + (CString)"mswinpr2");
+		//CT2A asciiWriter((CString)"-sDEVICE=" + (CString)"ps2write");
+		CT2A asciiPrinter((CString)"-sOutputFile=" + (CString)"\"%printer%" + printer + "\"");
+		
+		td.stage = 1;
 		td.in_file = asciiFqOutputFile;
+		td.out_file = asciiPrinter;
+		td.device = asciiDevice;
 		td.thread_num = thread_counter;
 		td.thread = CreateThread(NULL, 0, worker, &td, 0, NULL);
+
 		WaitForSingleObject(td.thread, INFINITE);
 		if (td.code != 0)
 			failed += 1;
@@ -255,12 +274,30 @@ static DWORD WINAPI worker(void* td_)
 	int argc = 0;
 	const char* argv[10];
 
-	argv[argc++] = "gpdl";
-	argv[argc++] = "-sDEVICE=pdfwrite";
-	argv[argc++] = "-o";
-	argv[argc++] = td->out_file;
-	argv[argc++] = "-r100";
-	argv[argc++] = td->in_file;
+	if (td->stage == 0)
+	{
+		// Conversion to PS
+		argv[argc++] = "gs";
+		argv[argc++] = "-dBATCH";
+		argv[argc++] = "-dNOPAUSE";
+		argv[argc++] = td->device;
+		argv[argc++] = "-o";
+		argv[argc++] = td->out_file;
+		argv[argc++] = td->in_file;
+	}
+	else
+	{
+		// Send to printer
+		// -dPrinted -dBATCH -dNOPAUSE -dNOSAFER -dNumCopies=1 -sDEVICE=mswinpr2 -sOutputFile="%printer%Bullzip PDF Printer" "00029.pdf"
+		argv[argc++] = "gs";
+		argv[argc++] = "-dPrinted";
+		argv[argc++] = "-dBATCH";
+		argv[argc++] = "-dNOPAUSE";
+		argv[argc++] = "-dNOSAFER";
+		argv[argc++] = td->device;
+		argv[argc++] = td->out_file;
+		argv[argc++] = td->in_file;
+	}
 
 	/* Create a GS instance. */
 	code = gsapi_new_instance(&instance, NULL);
