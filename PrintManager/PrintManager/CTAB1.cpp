@@ -91,6 +91,7 @@ void CTAB1::DoDataExchange(CDataExchange* pDX)
 	DDX_Control(pDX, IDC_PAUSE_PRINTERS, m_btnPausePrinters);
 	DDX_Control(pDX, IDC_RESUME_PRINTERS, m_btnResumePrinters);
 	DDX_Control(pDX, IDC_PURGE_PRINTERS, m_btnPurgePrinters);
+	DDX_Control(pDX, IDC_TEMP_PATH, m_editTempPath);
 }
 
 

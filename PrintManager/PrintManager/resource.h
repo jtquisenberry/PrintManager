@@ -18,7 +18,7 @@
 #define IDC_BUTTON1                     1006
 #define IDC_BUTTON2                     1007
 #define IDC_BBBBBBBB                    1008
-#define IDC_EDIT1                       1009
+#define IDC_TEMP_PATH                   1009
 #define IDC_COMBO1                      1010
 #define IDC_CB_PRINTERS2                1010
 #define IDC_LC_JOBINFO2                 1011

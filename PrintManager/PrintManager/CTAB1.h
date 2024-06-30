@@ -15,8 +15,8 @@ class CTAB1 : public CDialogEx
 	DECLARE_DYNAMIC(CTAB1)
 
 public:
-	CComboBox	m_cbPrinters;
-	CListCtrl  m_lcPrinters;
+	CComboBox m_cbPrinters;
+	CListCtrl m_lcPrinters;
 
 	// Create button variables
 	CButton m_btnRedirect;
@@ -24,6 +24,7 @@ public:
 	CButton m_btnPausePrinters;
 	CButton m_btnResumePrinters;
 	CButton m_btnPurgePrinters;
+	CEdit m_editTempPath;
 
 	HANDLE m_hPrinter;
 	HANDLE m_hEventSubscriberStopRequested;

@@ -277,6 +277,31 @@ void CPrintManagerDlg::EnumeratePrinters( void )
     EnumPrinters(PRINTER_ENUM_LOCAL | PRINTER_ENUM_CONNECTIONS, NULL, 2, lpBuffer, dwNeeded, &dwNeeded, &dwReturned);
 
     PPRINTER_INFO_2 p1 = (PPRINTER_INFO_2) lpBuffer;
+
+
+    char* base_path;
+    size_t len;
+    errno_t err = _dupenv_s(&base_path, &len, "USERPROFILE");
+    err;
+    wchar_t* wc = new wchar_t[260] {0};
+    if (base_path)
+    {
+        size_t pReturnValue;
+        errno_t err2 = mbstowcs_s(
+            &pReturnValue,
+            &wc[0],
+            260,
+            base_path,
+            260
+        );
+        err2;
+    }
+    else
+    {
+        wc = L"c:";
+    }
+
+    m_tab1.m_editTempPath.SetWindowTextW(wc);
     
     for (DWORD x = 0; x < dwReturned; x++)
     {
