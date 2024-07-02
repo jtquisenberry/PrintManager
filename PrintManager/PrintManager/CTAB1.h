@@ -50,6 +50,7 @@ public:
 	std::vector<int> m_vectPrinterItemIndices;
 	std::vector<CString> m_vectPrinterProperties;
 	CString m_strPrinterName;
+	CString m_strTempDirectory;
 	BOOL m_boolIsRedirected;
 	int m_nSelectedPrinterIndex;
 

@@ -20,6 +20,7 @@ public:
 	HANDLE PrintConverter::GetThreadDoneEvent(void);
 	int PrintConverter::ConvertMain();
 	void PrintConverter::SetSpoolDirectory();
+	void PrintConverter::SetTempDirectory(CString);
 	void PrintConverter::SetConverterFiles(int);
 	CString PrintConverter::TimeToString();
 	void PrintConverter::SetOutputPrinters(std::vector<CString>);

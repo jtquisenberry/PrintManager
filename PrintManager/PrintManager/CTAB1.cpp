@@ -45,6 +45,7 @@ CTAB1::CTAB1(CWnd* pParent /*=nullptr*/)
 	CTAB1::m_pWinThreadSubscriber = NULL;
 	CTAB1::m_pWinThreadConverter = NULL;
 	CTAB1::m_strPrinterName = "";
+	CTAB1::m_strTempDirectory = L"";
 	CTAB1::m_boolIsRedirected = FALSE;
 	CTAB1::m_nSelectedPrinterIndex = -1;
 	CTAB1::m_vectPrinterItemIndices.clear();
@@ -199,6 +200,11 @@ void CTAB1::OnBnClickedRedirect()
 	// Enable Cancel button
 	m_btnCancelRedirect.EnableWindow(TRUE);
 	
+	// Disable temporary path box and get its text.
+	m_editTempPath.EnableWindow(FALSE);
+	m_editTempPath.GetWindowText(m_strTempDirectory);
+
+
 	int redirected_printer_index = m_cbPrinters.GetCurSel();
 
 	if (redirected_printer_index < 0)
@@ -244,6 +250,7 @@ void CTAB1::OnBnClickedRedirect()
 
 	// Setup Print Converter object and thread
 	m_ppcPrintConverter->m_PrintStack = &m_PrintStack;
+	m_ppcPrintConverter->SetTempDirectory(m_strTempDirectory);
 	m_ppcPrintConverter->SetOutputPrinters(m_vectPrinterNames);
 	m_ppcPrintConverter->SetStopRequestedEvent(m_pEventConverterStopRequested->m_hObject);
 	m_ppcPrintConverter->SetThreadDoneEvent(m_pEventConverterThreadDone->m_hObject);
@@ -620,6 +627,9 @@ void CTAB1::OnStop()
 
 	// Enable Redirect button
 	m_btnRedirect.EnableWindow(TRUE);
+
+	// Enable temp directory box
+	m_editTempPath.EnableWindow(TRUE);
 
 	// Disable Cancel Redirect button
 	m_btnCancelRedirect.EnableWindow(FALSE);

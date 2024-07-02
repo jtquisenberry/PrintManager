@@ -184,6 +184,12 @@ void PrintConverter::SetConverterFiles(int JobId)
 }
 
 
+void PrintConverter::SetTempDirectory(CString strTempDirectory)
+{
+	m_strOutputDirectory = strTempDirectory;
+}
+
+
 void PrintConverter::SetOutputPrinters(std::vector<CString> vectOutputPrinters)
 {
 	m_vectOutputPrinters = vectOutputPrinters;

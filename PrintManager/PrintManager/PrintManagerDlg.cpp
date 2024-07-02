@@ -237,6 +237,7 @@ BOOL CPrintManagerDlg::OnInitDialog()
     m_tab1.m_lcPrinters.InsertColumn(1, _T("User"), LVCFMT_LEFT, 190);
     m_tab1.m_lcPrinters.InsertColumn(2, _T("From"), LVCFMT_LEFT, 190);
     m_tab1.m_lcPrinters.InsertColumn(3, _T("Document"), LVCFMT_LEFT, 180);
+    m_tab1.m_btnCancelRedirect.EnableWindow(FALSE);
     
     // Tab 2
     m_tab2.m_lcDrivers.InsertColumn(0, _T("Driver Name"), LVCFMT_RIGHT, 200);
