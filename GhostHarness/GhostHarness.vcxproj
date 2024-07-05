@@ -143,7 +143,10 @@
     <ClInclude Include="plapi.h" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="gpdldll64.dll" />
+    <CopyFileToFolders Include="gpdldll64.dll">
+      <DeploymentContent Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</DeploymentContent>
+      <FileType>Document</FileType>
+    </CopyFileToFolders>
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

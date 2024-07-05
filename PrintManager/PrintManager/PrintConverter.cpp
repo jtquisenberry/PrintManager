@@ -180,7 +180,7 @@ void PrintConverter::SetConverterFiles(int JobId)
 	m_strFqSpoolFile = m_strSpoolDirectory + m_strSpoolFile;
 	swprintf(buffer, 100, L"%05d.ps", JobId);
 	m_strOutputFile = (CString)buffer;
-	m_strFqOutputFile = m_strOutputDirectory + m_strOutputFile;
+	m_strFqOutputFile = m_strOutputDirectory + "\\" + m_strOutputFile;
 }
 
 
@@ -248,7 +248,7 @@ int PrintConverter::ConvertMain()
 		thread_counter++;
 		CT2A asciiDevice((CString)"-sDEVICE=" + (CString)"mswinpr2");
 		//CT2A asciiWriter((CString)"-sDEVICE=" + (CString)"ps2write");
-		CT2A asciiPrinter((CString)"-sOutputFile=" + (CString)"\"%printer%" + printer + "\"");
+		CT2A asciiPrinter((CString)"-sOutputFile=" + (CString)"%printer%" + printer);
 		
 		td.stage = 1;
 		td.in_file = asciiFqOutputFile;
