@@ -29,4 +29,10 @@ gswin64c.exe -sDEVICE=mswinpr2 -dBATCH -dNOPAUSE -sOutputFile="%printer%\\printS
 gpdlwin64 -sDEVICE=mswinpr2 -dBATCH -dNOPAUSE -sOutputFile="%printer%Bullzip PDF Printer" prns/Bullzip_PDF.pdf
 
 gpdlwin64 -sDEVICE=mswinpr2 -dBATCH -dNOPAUSE -sOutputFile="%printer%hp LaserJet 1320 PCL 6" prns/Bullzip_PDF.pdf
+
+gpdlwin64 -dPrinted -dBATCH -dNOPAUSE -dNOSAFER -dNumCopies=1 -sDEVICE=pdfwrite -sOutputFile="%printer%Bullzip PDF Printer" "00029.pdf"
+
+gswin64c -dPrinted -dBATCH -dNOPAUSE -dNOSAFER -dNumCopies=1 -sDEVICE=mswinpr2 -sOutputFile="%printer%Bullzip PDF Printer" "00029.pdf"
+
+
 ```
