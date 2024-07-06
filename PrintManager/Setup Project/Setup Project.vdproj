@@ -45,6 +45,12 @@
         }
         "Entry"
         {
+        "MsmKey" = "8:_3EF06CE0071D4A98BF9313FFF1B247CB"
+        "OwnerKey" = "8:_UNDEFINED"
+        "MsmSig" = "8:_UNDEFINED"
+        }
+        "Entry"
+        {
         "MsmKey" = "8:_4D670A63339CC21A777038AF87BF3D11"
         "OwnerKey" = "8:_1FF76180F38348DE902860D94B92018D"
         "MsmSig" = "8:_UNDEFINED"
@@ -274,6 +280,26 @@
             "Register" = "3:1"
             "Exclude" = "11:FALSE"
             "IsDependency" = "11:TRUE"
+            "IsolateTo" = "8:"
+            }
+            "{1FB2D0AE-D3B9-43D4-B9DD-F88EC61E35DE}:_3EF06CE0071D4A98BF9313FFF1B247CB"
+            {
+            "SourcePath" = "8:..\\PrintManager\\LICENSE.txt"
+            "TargetName" = "8:LICENSE.txt"
+            "Tag" = "8:"
+            "Folder" = "8:_646690C7899D4656867116FE4C5E6932"
+            "Condition" = "8:"
+            "Transitive" = "11:FALSE"
+            "Vital" = "11:TRUE"
+            "ReadOnly" = "11:FALSE"
+            "Hidden" = "11:FALSE"
+            "System" = "11:FALSE"
+            "Permanent" = "11:FALSE"
+            "SharedLegacy" = "11:FALSE"
+            "PackageAs" = "3:1"
+            "Register" = "3:1"
+            "Exclude" = "11:FALSE"
+            "IsDependency" = "11:FALSE"
             "IsolateTo" = "8:"
             }
             "{1FB2D0AE-D3B9-43D4-B9DD-F88EC61E35DE}:_4D670A63339CC21A777038AF87BF3D11"
@@ -560,7 +586,7 @@
         "Name" = "8:Microsoft Visual Studio"
         "ProductName" = "8:PrintManager"
         "ProductCode" = "8:{0A802FD1-2F98-4047-8FC4-8ECC3C031AF6}"
-        "PackageCode" = "8:{9A2A97EF-C68A-434A-A2A4-8DF612EB7428}"
+        "PackageCode" = "8:{ACC8CCBC-E385-4EE5-9E0D-743073B7C17D}"
         "UpgradeCode" = "8:{7F39F375-7737-4559-9910-B2BF44816ABF}"
         "AspNetVersion" = "8:4.0.30319.0"
         "RestartWWWService" = "11:FALSE"

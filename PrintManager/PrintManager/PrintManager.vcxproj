@@ -318,6 +318,11 @@
     </CopyFileToFolders>
     <None Include="gsdll64.exp" />
   </ItemGroup>
+  <ItemGroup>
+    <Text Include="LICENSE.txt">
+      <DeploymentContent Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</DeploymentContent>
+    </Text>
+  </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
   </ImportGroup>
