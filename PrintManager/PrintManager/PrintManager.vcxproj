@@ -302,6 +302,9 @@
     <ClInclude Include="ThreadUtils.h" />
   </ItemGroup>
   <ItemGroup>
+    <Image Include="PrintManager.ico">
+      <DeploymentContent Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</DeploymentContent>
+    </Image>
     <Image Include="res\PrintManager.ico" />
   </ItemGroup>
   <ItemGroup>

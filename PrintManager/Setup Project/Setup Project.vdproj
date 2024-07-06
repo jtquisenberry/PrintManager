@@ -27,12 +27,6 @@
         }
         "Entry"
         {
-        "MsmKey" = "8:_18DDB4DEBB2444E08F4ABE6E07B0F4EF"
-        "OwnerKey" = "8:_UNDEFINED"
-        "MsmSig" = "8:_UNDEFINED"
-        }
-        "Entry"
-        {
         "MsmKey" = "8:_1FF76180F38348DE902860D94B92018D"
         "OwnerKey" = "8:_UNDEFINED"
         "MsmSig" = "8:_UNDEFINED"
@@ -59,6 +53,12 @@
         {
         "MsmKey" = "8:_4D8D7E5C1E1DB15BECB462F23C4A70D2"
         "OwnerKey" = "8:_1FF76180F38348DE902860D94B92018D"
+        "MsmSig" = "8:_UNDEFINED"
+        }
+        "Entry"
+        {
+        "MsmKey" = "8:_555C655A083E404091611319DC46F453"
+        "OwnerKey" = "8:_UNDEFINED"
         "MsmSig" = "8:_UNDEFINED"
         }
         "Entry"
@@ -236,26 +236,6 @@
             "IsDependency" = "11:TRUE"
             "IsolateTo" = "8:"
             }
-            "{1FB2D0AE-D3B9-43D4-B9DD-F88EC61E35DE}:_18DDB4DEBB2444E08F4ABE6E07B0F4EF"
-            {
-            "SourcePath" = "8:..\\PrintManager\\res\\PrintManager.ico"
-            "TargetName" = "8:PrintManager.ico"
-            "Tag" = "8:"
-            "Folder" = "8:_FDAA6AE3A4224B37BF40D59703F4A35A"
-            "Condition" = "8:"
-            "Transitive" = "11:FALSE"
-            "Vital" = "11:TRUE"
-            "ReadOnly" = "11:FALSE"
-            "Hidden" = "11:FALSE"
-            "System" = "11:FALSE"
-            "Permanent" = "11:FALSE"
-            "SharedLegacy" = "11:FALSE"
-            "PackageAs" = "3:1"
-            "Register" = "3:1"
-            "Exclude" = "11:FALSE"
-            "IsDependency" = "11:FALSE"
-            "IsolateTo" = "8:"
-            }
             "{1FB2D0AE-D3B9-43D4-B9DD-F88EC61E35DE}:_2D7DD9E2FFEB60FA8A7A475613F2B9B5"
             {
             "SourcePath" = "8:mfc140u.dll"
@@ -334,6 +314,26 @@
             "Register" = "3:1"
             "Exclude" = "11:FALSE"
             "IsDependency" = "11:TRUE"
+            "IsolateTo" = "8:"
+            }
+            "{1FB2D0AE-D3B9-43D4-B9DD-F88EC61E35DE}:_555C655A083E404091611319DC46F453"
+            {
+            "SourcePath" = "8:..\\PrintManager\\res\\PrintManager.ico"
+            "TargetName" = "8:PrintManager.ico"
+            "Tag" = "8:"
+            "Folder" = "8:_646690C7899D4656867116FE4C5E6932"
+            "Condition" = "8:"
+            "Transitive" = "11:FALSE"
+            "Vital" = "11:TRUE"
+            "ReadOnly" = "11:FALSE"
+            "Hidden" = "11:FALSE"
+            "System" = "11:FALSE"
+            "Permanent" = "11:FALSE"
+            "SharedLegacy" = "11:FALSE"
+            "PackageAs" = "3:1"
+            "Register" = "3:1"
+            "Exclude" = "11:FALSE"
+            "IsDependency" = "11:FALSE"
             "IsolateTo" = "8:"
             }
             "{1FB2D0AE-D3B9-43D4-B9DD-F88EC61E35DE}:_57B6E0A178F53467F7CF9DAA5E84694C"
@@ -528,7 +528,7 @@
             "{1525181F-901A-416C-8A58-119130FE478E}:_FDAA6AE3A4224B37BF40D59703F4A35A"
             {
             "Name" = "8:#1916"
-            "AlwaysCreate" = "11:FALSE"
+            "AlwaysCreate" = "11:TRUE"
             "Condition" = "8:"
             "Transitive" = "11:FALSE"
             "Property" = "8:DesktopFolder"
@@ -560,7 +560,7 @@
         "Name" = "8:Microsoft Visual Studio"
         "ProductName" = "8:Setup Project"
         "ProductCode" = "8:{A567D61E-FBC3-409A-9CB0-266185831BE4}"
-        "PackageCode" = "8:{43165E81-5F7E-4E6C-823F-87706046E352}"
+        "PackageCode" = "8:{98A718D0-278F-4361-880D-264EDF69D37C}"
         "UpgradeCode" = "8:{7F39F375-7737-4559-9910-B2BF44816ABF}"
         "AspNetVersion" = "8:4.0.30319.0"
         "RestartWWWService" = "11:FALSE"
@@ -680,20 +680,6 @@
         }
         "Shortcut"
         {
-            "{970C0BB2-C7D0-45D7-ABFA-7EC378858BC0}:_79FB9E00637F4B209AC90E7796B9DC5F"
-            {
-            "Name" = "8:Shortcut to %sUser's Desktop"
-            "Arguments" = "8:"
-            "Description" = "8:PrintManager"
-            "ShowCmd" = "3:1"
-            "IconIndex" = "3:0"
-            "Transitive" = "11:FALSE"
-            "Target" = "8:_FDAA6AE3A4224B37BF40D59703F4A35A"
-            "Folder" = "8:_FDAA6AE3A4224B37BF40D59703F4A35A"
-            "WorkingFolder" = "8:_FDAA6AE3A4224B37BF40D59703F4A35A"
-            "Icon" = "8:_18DDB4DEBB2444E08F4ABE6E07B0F4EF"
-            "Feature" = "8:"
-            }
             "{970C0BB2-C7D0-45D7-ABFA-7EC378858BC0}:_A83702262D4148EF99E7786A94DCF96A"
             {
             "Name" = "8:PrintManager"
@@ -706,6 +692,20 @@
             "Folder" = "8:_646690C7899D4656867116FE4C5E6932"
             "WorkingFolder" = "8:_646690C7899D4656867116FE4C5E6932"
             "Icon" = "8:"
+            "Feature" = "8:"
+            }
+            "{970C0BB2-C7D0-45D7-ABFA-7EC378858BC0}:_D0C0673A1E164CC68E4D1E1C5F81EC51"
+            {
+            "Name" = "8:PrintManager"
+            "Arguments" = "8:"
+            "Description" = "8:PrintManager"
+            "ShowCmd" = "3:1"
+            "IconIndex" = "3:0"
+            "Transitive" = "11:FALSE"
+            "Target" = "8:_1FF76180F38348DE902860D94B92018D"
+            "Folder" = "8:_FDAA6AE3A4224B37BF40D59703F4A35A"
+            "WorkingFolder" = "8:_646690C7899D4656867116FE4C5E6932"
+            "Icon" = "8:_555C655A083E404091611319DC46F453"
             "Feature" = "8:"
             }
         }
