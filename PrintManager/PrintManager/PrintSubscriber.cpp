@@ -1,35 +1,52 @@
 #include "stdafx.h"
 #include "PrintSubscriber.h"
 #include "JobInfo.h"
+#include "ThreadUtils.h"
 #include <thread>
 
 PrintSubscriber::PrintSubscriber()
 {
-	m_pEventThreadDone = new CEvent(TRUE, TRUE);     // signaled
-	m_pEventStopRequested = new CEvent(FALSE, TRUE); // non-signaled
+	// m_pEventThreadDone = new CEvent(TRUE, TRUE);     // signaled
+	// m_pEventStopRequested = new CEvent(FALSE, TRUE); // non-signaled
+
+	// Print thread ID
+	ThreadUtils::OutputThreadId(L"PrintSubscriber::PrintSubscriber", g_fileSystem);
 
 	m_hPrinter = INVALID_HANDLE_VALUE;
 	m_hEventStopRequested = INVALID_HANDLE_VALUE;
 	m_hEventThreadDone = INVALID_HANDLE_VALUE;
 	m_hWnd = NULL;
-	
+	m_boolNotifyWindow = FALSE;
+	m_boolOutputJobInfo = TRUE;
+	m_boolSetForConversion = TRUE;
+	m_PrintStack = NULL;
+	m_nWindowsMessage = NULL;
+
 	return;
 }
 
 
 PrintSubscriber::~PrintSubscriber()
 {
-	// Print thread ID
-	wchar_t buffer[100];
-	int cx = 0;
-	std::thread::id this_id = std::this_thread::get_id();
-	cx = swprintf(buffer, 100, L"Thread ID: %d \n", *(int*)&this_id);
-	OutputDebugString(L"\n\n");
-	OutputDebugString(L"PrintSubscriber, PrintSubscriber::~PrintSubscriber()\n");
-	OutputDebugString(buffer);
-	OutputDebugString(L"\n\n");
-	cx = fwprintf_s(g_fileSystem, L"%- 70s %s", L"PrintSubscriber, PrintSubscriber::~PrintSubscriber() ", buffer);
-	fflush(g_fileSystem);
+	ThreadUtils::OutputThreadId(L"PrintSubscriber::~PrintSubscriber", g_fileSystem);
+	
+	int c = (int)m_mapJobInfo.GetCount();
+	if (c > 0)
+	{
+		POSITION pos = m_mapJobInfo.GetStartPosition();
+		while (pos != NULL)
+		{
+			int nKey;
+			CJobInfo* pJobInfo;
+			m_mapJobInfo.GetNextAssoc(pos, nKey, pJobInfo);
+			delete pJobInfo;
+		}
+
+		// m_mapJobInfo.Cleanup();
+	}
+	
+	// delete m_pEventThreadDone;
+	// delete m_pEventStopRequested;
 }
 
 HANDLE PrintSubscriber::GetPrinter(void)
@@ -74,8 +91,17 @@ void PrintSubscriber::SetHwnd(HWND hWnd)
 	m_hWnd = hWnd;
 }
 
+void PrintSubscriber::SetWindowsMessage(UINT nWindowsMessage)
+{
+	m_nWindowsMessage = nWindowsMessage;
+}
+
 UINT PrintSubscriber::Start(LPVOID pParam)
 {
+
+	// Print thread ID
+	ThreadUtils::OutputThreadId(L"PrintSubscriber::Start", g_fileSystem);
+	
 	// C4100 unreferenced formal parameter
 	pParam;
 
@@ -107,6 +133,7 @@ UINT PrintSubscriber::Start(LPVOID pParam)
 		JOB_NOTIFY_FIELD_TOTAL_BYTES,          // 0x16
 		JOB_NOTIFY_FIELD_BYTES_PRINTED         // 0x17
 	};
+	
 	PRINTER_NOTIFY_OPTIONS_TYPE	Notifications[1] =
 	{
 		{
@@ -126,7 +153,7 @@ UINT PrintSubscriber::Start(LPVOID pParam)
 		Notifications
 	};
 
-
+	
 	// Get a handle to a change notification object associated with the 
 	// specified printer or print server.	
 	HANDLE hChange = FindFirstPrinterChangeNotification(GetPrinter(),
@@ -185,6 +212,11 @@ UINT PrintSubscriber::Start(LPVOID pParam)
 
 					ASSERT(pJobInfo != NULL);
 					pJobInfo->UpdateInfo(&pNotification->aData[x]);
+
+					if (m_boolNotifyWindow)
+					{
+						::PostMessage(this->GetHwnd(), m_nWindowsMessage, 0, 0);
+					}
 				}
 
 				// Iterate over the members of the CMap. At this point, the 
@@ -193,9 +225,16 @@ UINT PrintSubscriber::Start(LPVOID pParam)
 				while (pos != NULL)
 				{
 					int nKey;
-					CJobInfo* pJobInfo = new CJobInfo(NULL);
+					//CJobInfo* pJobInfo = new CJobInfo(NULL);
+					CJobInfo* pJobInfo;
+
+					
 
 					m_mapJobInfo.GetNextAssoc(pos, nKey, pJobInfo);
+					ThreadUtils::OutputAddress(pJobInfo, L"pJobInfo 2");
+
+					
+
 
 					// This is the first point at which it is possible to build a string
 					// representation of the JobInfo
@@ -205,41 +244,54 @@ UINT PrintSubscriber::Start(LPVOID pParam)
 						continue;
 					}
 										
-
-					// Output JobInfo strings to debug and to file.
-					if (pJobInfo->GetStatusChanges() > 0) 
+					if (m_boolOutputJobInfo)
 					{
-						OutputDebugString(L"\n\n");
-						OutputDebugString(L"***** BEGIN NEW JOB *****\n");
-						OutputDebugStringW(pJobInfo->GetString());
-						OutputDebugString(L"***** END NEW JOB *******\n");
-						OutputDebugString(L"\n\n");						
-						
-						cx = fwprintf_s(g_fileObjects, L"\n\n");
-						cx = fwprintf_s(g_fileObjects, L"***** BEGIN NEW JOB *****\n");
-						cx = fwprintf_s(g_fileObjects, L"%s", (LPCWSTR)pJobInfo->GetString());
-						cx = fwprintf_s(g_fileObjects, L"***** END NEW JOB *******\n");
-						cx = fwprintf_s(g_fileObjects, L"\n\n");
-						fflush(g_fileObjects);
+						// Output JobInfo strings to debug and to file.
+						if ((pJobInfo->GetStatusChanges() > 0) && (pJobInfo->GetStatus() == JOB_STATUS_PRINTED))
+						{
+							OutputDebugString(L"\n\n");
+							OutputDebugString(L"***** BEGIN NEW JOB *****\n");
+							OutputDebugStringW(pJobInfo->GetString());
+							OutputDebugString(L"***** END NEW JOB *******\n");
+							OutputDebugString(L"\n\n");
 
-						// Put JobId in stack
-						m_PrintStack->push_back(pJobInfo->GetJobId());
-						int debug_breakpoint = 0;
-						debug_breakpoint++;
+							cx = fwprintf_s(g_fileObjects, L"\n\n");
+							cx = fwprintf_s(g_fileObjects, L"***** BEGIN NEW JOB *****\n");
+							cx = fwprintf_s(g_fileObjects, L"%s", (LPCWSTR)pJobInfo->GetString());
+							cx = fwprintf_s(g_fileObjects, L"***** END NEW JOB *******\n");
+							cx = fwprintf_s(g_fileObjects, L"\n\n");
+							fflush(g_fileObjects);
+						}
+						else
+						{
+							OutputDebugString(L"\n\n");
+							OutputDebugStringW(pJobInfo->GetString());
+							OutputDebugString(L"\n\n");
+
+							cx = fwprintf_s(g_fileObjects, L"\n\n");
+							cx = fwprintf_s(g_fileObjects, L"%s", (LPCWSTR)pJobInfo->GetString());
+							cx = fwprintf_s(g_fileObjects, L"\n\n");
+							fflush(g_fileObjects);
+						}
 					}
-					else
+
+					if (m_boolSetForConversion)
 					{
-						OutputDebugString(L"\n\n");
-						OutputDebugStringW(pJobInfo->GetString());
-						OutputDebugString(L"\n\n");
-						
-						cx = fwprintf_s(g_fileObjects, L"\n\n");
-						cx = fwprintf_s(g_fileObjects, L"%s", (LPCWSTR)pJobInfo->GetString());
-						cx = fwprintf_s(g_fileObjects, L"\n\n");
-						fflush(g_fileObjects);
+						if ((pJobInfo->GetStatusChanges() > 0) && (pJobInfo->GetStatus() == JOB_STATUS_PRINTED))
+						{
+							// Put JobId in stack
+							m_PrintStack->push_back(pJobInfo->GetJobId());
+							int debug_breakpoint = 0;
+							debug_breakpoint++;
+						}
 					}
+
+
+
+
 
 					ASSERT(pJobInfo != NULL);
+
 
 				}
 
@@ -254,9 +306,15 @@ UINT PrintSubscriber::Start(LPVOID pParam)
 			hChange = INVALID_HANDLE_VALUE;
 		}
 	}
+	
+
+
+	
 
 	// Signal the event to let the primary thread know that this thread is done
 	SetEvent(GetThreadDoneEvent());
+
+	
 
 	return 0;
 }

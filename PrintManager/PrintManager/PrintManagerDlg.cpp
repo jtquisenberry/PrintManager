@@ -4,6 +4,7 @@
 #include "CTAB1.h"
 #include "AboutDlg.h"
 #include "LogFile.h"
+#include "ThreadUtils.h"
 #include "Windows.h"
 
 
@@ -15,10 +16,6 @@ static char THIS_FILE[] = __FILE__;
 
 static const UINT UDM_UPDATE_JOB_LIST = RegisterWindowMessage(_T("UDM_UPDATE_JOB_LIST"));
 
-int aaa=777;
-//FILE* file1 = NULL;  // Declared externally
-//FILE* file2 = NULL;  // Declared externally
-//int written = 0;
 
 /////////////////////////////////////////////////////////////////////////////
 // CPrintManagerDlg dialog
@@ -35,25 +32,18 @@ CPrintManagerDlg::CPrintManagerDlg(CWnd* pParent /*=NULL*/)
     m_rectOrig.SetRectEmpty();
 
     // Thread Elements
-    m_pEventThreadDone    = NULL;
-    m_pEventStopRequested = NULL;
+    m_pEventSubscriberThreadDone    = NULL;
+    m_pEventSubscriberStopRequested = NULL;
 
     // Member variables initialization
     m_nHeight = 0;
     m_nWidth = 0;
-    m_pWinThread = NULL;
-
+    m_pWinThreadSubscriber = NULL;
+    m_pmapJobInfo = NULL;
+    CPrintManagerDlg::m_ppsPrintSubscriber = new PrintSubscriber();
 
     // Print thread ID
-    wchar_t buffer[100];
-    int cx = 0;
-    std::thread::id this_id = std::this_thread::get_id();
-    cx = swprintf(buffer, 100, L"Thread ID: %d \n", *(int*)&this_id);
-    OutputDebugString(L"\n\n");
-    OutputDebugString(L"CPrintManagerDlg::CPrintManagerDlg\n");
-    OutputDebugString(buffer);
-    OutputDebugString(L"\n\n");
-    cx = fwprintf_s(g_fileSystem, L"%- 70s %s", L"CPrintManagerDlg::CPrintManagerDlg: ", buffer);
+    ThreadUtils::OutputThreadId(L"CPrintManagerDlg::CPrintManagerDlg", g_fileSystem);
 
     char* base_path;
     size_t len;
@@ -79,7 +69,7 @@ CPrintManagerDlg::CPrintManagerDlg(CWnd* pParent /*=NULL*/)
 
         HWND handle = GetSafeHwnd();
 
-        HINSTANCE hError = ShellExecute(handle, NULL, wc, NULL, NULL, SW_SHOWNORMAL);
+        HINSTANCE hError = ShellExecute(handle, NULL, wc, NULL, NULL, SW_SHOWMINIMIZED);
         INT_PTR pError = (INT_PTR)hError;  // If > 32, then success.
         if (pError <= 32)
         {
@@ -90,14 +80,20 @@ CPrintManagerDlg::CPrintManagerDlg(CWnd* pParent /*=NULL*/)
 
     }
 
+    //delete pReturnValue;
+    delete[] wc;
+    delete base_path;
+    // delete m_ppsPrintSubscriber;
+
 }
 
 CPrintManagerDlg::~CPrintManagerDlg()
 {
-    
+    ThreadUtils::OutputThreadId(L"CPrintManagerDlg::~CPrintManagerDlg", g_fileSystem);
 
-    fclose(g_fileSystem);
-    fclose(g_fileObjects);
+    delete m_pEventSubscriberStopRequested;
+    delete m_pEventSubscriberThreadDone;
+    delete m_ppsPrintSubscriber;
 }
 
 
@@ -195,14 +191,16 @@ BOOL CPrintManagerDlg::OnInitDialog()
 
     
 
-    m_pEventThreadDone = new CEvent(TRUE, TRUE);     // signaled
-    m_pEventStopRequested = new CEvent(FALSE, TRUE); // non-signaled
+    m_pEventSubscriberThreadDone = new CEvent(TRUE, TRUE);     // signaled
+    m_pEventSubscriberStopRequested = new CEvent(FALSE, TRUE); // non-signaled
 
-    m_ThreadInfo.SetStopRequestedEvent(m_pEventStopRequested->m_hObject);
-    m_ThreadInfo.SetThreadDoneEvent(m_pEventThreadDone->m_hObject);
-    m_ThreadInfo.SetHwnd(GetSafeHwnd());
-
+    // Print thread ID
+    ThreadUtils::OutputThreadId(L"CPrintManagerDlg::OnInitDialog", g_fileSystem);
     
+    m_ppsPrintSubscriber->SetStopRequestedEvent(m_pEventSubscriberStopRequested->m_hObject);
+    m_ppsPrintSubscriber->SetThreadDoneEvent(m_pEventSubscriberThreadDone->m_hObject);
+    m_ppsPrintSubscriber->SetHwnd(GetSafeHwnd());
+    m_ppsPrintSubscriber->SetWindowsMessage(UDM_UPDATE_JOB_LIST);
         
     /*Setup tabcontrol and tabs*/
     CTabCtrl* pTabCtrl = (CTabCtrl*)GetDlgItem(IDC_TABCONTROL);
@@ -233,16 +231,15 @@ BOOL CPrintManagerDlg::OnInitDialog()
     m_tab1.ShowWindow(SW_SHOW);
     m_tab2.ShowWindow(SW_HIDE);
 
-
+    // Tab 1
     m_tab1.m_lcPrinters.SetExtendedStyle(LVS_EX_FULLROWSELECT);
     m_tab1.m_lcPrinters.InsertColumn(0, _T("Printer Name"), LVCFMT_RIGHT, 230);
     m_tab1.m_lcPrinters.InsertColumn(1, _T("User"), LVCFMT_LEFT, 190);
     m_tab1.m_lcPrinters.InsertColumn(2, _T("From"), LVCFMT_LEFT, 190);
     m_tab1.m_lcPrinters.InsertColumn(3, _T("Document"), LVCFMT_LEFT, 180);
-
-
+    m_tab1.m_btnCancelRedirect.EnableWindow(FALSE);
     
-
+    // Tab 2
     m_tab2.m_lcDrivers.InsertColumn(0, _T("Driver Name"), LVCFMT_RIGHT, 200);
     m_tab2.m_lcDrivers.InsertColumn(1, _T("Path"), LVCFMT_LEFT, 150);
     m_tab2.m_lcDrivers.InsertColumn(2, _T("Data File"), LVCFMT_LEFT, 150);
@@ -272,9 +269,8 @@ void CPrintManagerDlg::OnSysCommand(UINT nID, LPARAM lParam)
 
 void CPrintManagerDlg::EnumeratePrinters( void )
 {
-    DWORD dwNeeded, 
-          dwReturned;
-
+    DWORD dwNeeded;
+    DWORD dwReturned;
     
     EnumPrinters(PRINTER_ENUM_LOCAL | PRINTER_ENUM_CONNECTIONS, NULL, 2, NULL, 0, &dwNeeded, &dwReturned);
     
@@ -282,10 +278,34 @@ void CPrintManagerDlg::EnumeratePrinters( void )
     EnumPrinters(PRINTER_ENUM_LOCAL | PRINTER_ENUM_CONNECTIONS, NULL, 2, lpBuffer, dwNeeded, &dwNeeded, &dwReturned);
 
     PPRINTER_INFO_2 p1 = (PPRINTER_INFO_2) lpBuffer;
+
+
+    char* base_path;
+    size_t len;
+    errno_t err = _dupenv_s(&base_path, &len, "USERPROFILE");
+    err;
+    wchar_t* wc = new wchar_t[260] {0};
+    if (base_path)
+    {
+        size_t pReturnValue;
+        errno_t err2 = mbstowcs_s(
+            &pReturnValue,
+            &wc[0],
+            260,
+            base_path,
+            260
+        );
+        err2;
+    }
+    else
+    {
+        wc = L"c:";
+    }
+
+    m_tab1.m_editTempPath.SetWindowTextW(wc);
     
     for (DWORD x = 0; x < dwReturned; x++)
     {
-        // m_cbPrinters.AddString(p1->pName);
         m_cbPrinters.AddString(p1->pPrinterName);
         m_tab1.m_cbPrinters.AddString(p1->pPrinterName);
 
@@ -301,8 +321,6 @@ void CPrintManagerDlg::EnumeratePrinters( void )
 
         strText.Format(_T("%d"), p1->cJobs);
         m_tab1.m_lcPrinters.SetItemText(nItem, 3, strText);
-        
-        
 
         p1++;
     }
@@ -313,8 +331,8 @@ void CPrintManagerDlg::EnumeratePrinters( void )
 
 void CPrintManagerDlg::EnumerateDrivers(void)
 {
-    DWORD dwNeeded,
-        dwReturned;
+    DWORD dwNeeded;
+    DWORD dwReturned;
 
     EnumPrinterDrivers(NULL, _T("all"), 4, NULL, 0, &dwNeeded, &dwReturned);
     LPBYTE lpBuffer = new BYTE[dwNeeded];
@@ -323,7 +341,6 @@ void CPrintManagerDlg::EnumerateDrivers(void)
 
     for (DWORD x = 0; x < dwReturned; x++)
     {
-        
         CString strText;
         strText.Format(_T("%s"), di->pName);
         int nItem = m_tab2.m_lcDrivers.InsertItem(m_tab2.m_lcDrivers.GetItemCount(), strText);
@@ -360,8 +377,11 @@ UINT ThreadFunc( LPVOID pParam )
     OutputDebugString(L"\n\n");
     cx = fwprintf_s(g_fileSystem, L"%- 70s %s", L"CPrintManagerDlg, UINT ThreadFunc(LPVOID pParam): ", buffer);
     
-    CPrintManagerDlg *pDlg = (CPrintManagerDlg *) pParam;
-    return pDlg->ThreadFunc();
+    // CPrintManagerDlg *pDlg = (CPrintManagerDlg *) pParam;
+    // return pDlg->ThreadFunc();
+
+    CPrintManagerDlg* print_manager = (CPrintManagerDlg*)pParam;
+    return print_manager->m_ppsPrintSubscriber->Start(0);
 }
 
 
@@ -382,8 +402,8 @@ void CPrintManagerDlg::OnStart()
     m_mapJobInfo.Cleanup();
     
     // set the events to non-signaled
-    m_pEventStopRequested->ResetEvent();
-    m_pEventThreadDone->ResetEvent();
+    m_pEventSubscriberStopRequested->ResetEvent();
+    m_pEventSubscriberThreadDone->ResetEvent();
 
 
     HANDLE hPrinter;
@@ -392,22 +412,28 @@ void CPrintManagerDlg::OnStart()
     m_cbPrinters.GetWindowText(strPrinter);
     OpenPrinter((LPTSTR) (LPCTSTR) strPrinter, &hPrinter, NULL);
     
-    m_ThreadInfo.SetPrinter(hPrinter);
+    m_ppsPrintSubscriber->SetPrinter(hPrinter);
+    m_ppsPrintSubscriber->m_boolNotifyWindow = TRUE;
+    m_ppsPrintSubscriber->m_boolOutputJobInfo = FALSE;
+    m_ppsPrintSubscriber->m_boolSetForConversion = FALSE;
+
+    m_pmapJobInfo = &(m_ppsPrintSubscriber->m_mapJobInfo);
+    
 
     // Remember that ::Func means the global version of the function.
-    m_pWinThread = AfxBeginThread(::ThreadFunc, this);
+    m_pWinThreadSubscriber = AfxBeginThread(::ThreadFunc, this);
 }
 
 
 void CPrintManagerDlg::OnStop() 
 {
     // signal and wait for ThreadFunc() to end 
-    m_pEventStopRequested->SetEvent();
-    WaitForSingleObject(m_pEventThreadDone->m_hObject, 8000U);
+    m_pEventSubscriberStopRequested->SetEvent();
+    WaitForSingleObject(m_pEventSubscriberThreadDone->m_hObject, 8000U);
 
-    if (m_ThreadInfo.GetPrinter() != INVALID_HANDLE_VALUE)
-        ClosePrinter(m_ThreadInfo.GetPrinter());
-    
+    if (m_ppsPrintSubscriber->GetPrinter() != INVALID_HANDLE_VALUE)
+        ClosePrinter(m_ppsPrintSubscriber->GetPrinter());
+
     m_btnStart.EnableWindow(TRUE);
     m_btnStop.EnableWindow(FALSE);
     m_cbPrinters.EnableWindow(TRUE);
@@ -418,8 +444,8 @@ void CPrintManagerDlg::OnCancel()
 {
     OnStop();
 
-    delete m_pEventStopRequested;
-    delete m_pEventThreadDone;
+    delete m_pEventSubscriberStopRequested;
+    delete m_pEventSubscriberThreadDone;
 
     m_mapJobInfo.Cleanup();
 
@@ -427,156 +453,16 @@ void CPrintManagerDlg::OnCancel()
 }
 
 
-UINT CPrintManagerDlg::ThreadFunc( void )
-{
-    // Print thread ID
-    wchar_t buffer[100];
-    int cx = 0;
-    std::thread::id this_id = std::this_thread::get_id();
-    cx = swprintf(buffer, 100, L"Thread ID: %d \n", *(int*)&this_id);
-    OutputDebugString(L"\n\n");
-    OutputDebugString(L"CPrintManagerDlg, UINT CPrintManagerDlg::ThreadFunc( void )\n");
-    OutputDebugString(buffer);
-    OutputDebugString(L"\n\n");
-    cx = fwprintf_s(g_fileSystem, L"%- 70s %s", L"CPrintManagerDlg, UINT CPrintManagerDlg::ThreadFunc( void ): ", buffer);
-    
-    
-    
-    
-    PPRINTER_NOTIFY_INFO pNotification = NULL;
-
-    WORD JobFields[] = 
-    {
-        JOB_NOTIFY_FIELD_PRINTER_NAME,
-        JOB_NOTIFY_FIELD_MACHINE_NAME,
-        JOB_NOTIFY_FIELD_PORT_NAME,
-        JOB_NOTIFY_FIELD_USER_NAME,
-        JOB_NOTIFY_FIELD_NOTIFY_NAME,
-        JOB_NOTIFY_FIELD_DATATYPE,
-        JOB_NOTIFY_FIELD_PRINT_PROCESSOR,
-        JOB_NOTIFY_FIELD_PARAMETERS,
-        JOB_NOTIFY_FIELD_DRIVER_NAME,
-        JOB_NOTIFY_FIELD_DEVMODE,
-        JOB_NOTIFY_FIELD_STATUS,
-        JOB_NOTIFY_FIELD_STATUS_STRING,
-        JOB_NOTIFY_FIELD_DOCUMENT,
-        JOB_NOTIFY_FIELD_PRIORITY,
-        JOB_NOTIFY_FIELD_POSITION,
-        JOB_NOTIFY_FIELD_SUBMITTED,
-        JOB_NOTIFY_FIELD_START_TIME,
-        JOB_NOTIFY_FIELD_UNTIL_TIME,
-        JOB_NOTIFY_FIELD_TIME,
-        JOB_NOTIFY_FIELD_TOTAL_PAGES,
-        JOB_NOTIFY_FIELD_PAGES_PRINTED,
-        JOB_NOTIFY_FIELD_TOTAL_BYTES,
-        JOB_NOTIFY_FIELD_BYTES_PRINTED
-    };
-    PRINTER_NOTIFY_OPTIONS_TYPE	Notifications[1] =					
-    {
-        {
-            JOB_NOTIFY_TYPE,
-            0,
-            0,
-            0,
-            sizeof(JobFields) / sizeof(JobFields[0]),
-            JobFields
-        },
-    };
-    PRINTER_NOTIFY_OPTIONS NotificationOptions = 
-    {
-        2,
-        PRINTER_NOTIFY_OPTIONS_REFRESH,
-        sizeof(Notifications) / sizeof(Notifications[0]),
-        Notifications
-    };
-
-    // get a handle to a printer change notification object.
-    HANDLE hChange = FindFirstPrinterChangeNotification(m_ThreadInfo.GetPrinter(),
-                                                        PRINTER_CHANGE_ALL,
-                                                        0, 
-                                                        &NotificationOptions);
-
-    DWORD dwChange;
-    HANDLE aHandles[2];
-    aHandles[0] = hChange;
-    aHandles[1] = m_ThreadInfo.GetStopRequestedEvent();
-
-    while (hChange != INVALID_HANDLE_VALUE)
-    {
-        // sleep until a printer change notification wakes this thread or the
-        // event becomes set indicating it's time for the thread to end.
-        WaitForMultipleObjects(2, aHandles, FALSE, INFINITE);
-
-        if (WaitForSingleObject(hChange, 0U) == WAIT_OBJECT_0)
-        {
-            FindNextPrinterChangeNotification(hChange, &dwChange, &NotificationOptions, (LPVOID *) &pNotification);
-
-            if (pNotification != NULL)
-            {
-                // if a notification overflow occurred,
-                if (pNotification->Flags & PRINTER_NOTIFY_INFO_DISCARDED)
-                {
-                    DWORD dwOldFlags = NotificationOptions.Flags;
-                    
-                    // we must refresh to continue
-                    NotificationOptions.Flags = PRINTER_NOTIFY_OPTIONS_REFRESH;
-
-                    FreePrinterNotifyInfo(pNotification);
-
-                    FindNextPrinterChangeNotification(hChange, &dwChange, &NotificationOptions, (LPVOID *) &pNotification);
-
-                    NotificationOptions.Flags = dwOldFlags;
-                }
-
-                // iterate through each notification
-                for (DWORD x = 0; x < pNotification->Count; x++)
-                {
-                    ASSERT(pNotification->aData[x].Type == JOB_NOTIFY_TYPE);
-
-                    CJobInfo *pJobInfo = NULL;
-
-                    // if the job info item does not exist, create a new one
-                    if (! m_mapJobInfo.Lookup(pNotification->aData[x].Id, pJobInfo))
-                    {
-                        pJobInfo = new CJobInfo(pNotification->aData[x].Id);
-
-                        m_mapJobInfo.SetAt(pNotification->aData[x].Id, pJobInfo);
-                    }
-
-                    ASSERT(pJobInfo != NULL);
-                    pJobInfo->UpdateInfo(&pNotification->aData[x]);
-
-                    ::PostMessage(m_ThreadInfo.GetHwnd(), UDM_UPDATE_JOB_LIST, 0, 0);
-                }
-            }
-
-            FreePrinterNotifyInfo(pNotification);
-            pNotification = NULL;
-        }
-        else if (WaitForSingleObject(m_ThreadInfo.GetStopRequestedEvent(), 0U) == WAIT_OBJECT_0)
-        {
-            FindClosePrinterChangeNotification(hChange);
-            hChange = INVALID_HANDLE_VALUE;
-        }
-    }
-
-    // Signal the event to let the primary thread know that this thread is done
-    SetEvent(m_ThreadInfo.GetThreadDoneEvent());
-
-    return 0;
-}
-
-
 LRESULT CPrintManagerDlg::OnUpdateJobList( WPARAM, LPARAM )
 {
     m_lcJobInfo.DeleteAllItems();
 
-    POSITION pos = m_mapJobInfo.GetStartPosition();
+    POSITION pos = m_pmapJobInfo->GetStartPosition();
     while (pos != NULL)
     {
         int nKey;
         CJobInfo *pJobInfo;
-        m_mapJobInfo.GetNextAssoc(pos, nKey, pJobInfo);
+        m_pmapJobInfo->GetNextAssoc(pos, nKey, pJobInfo);
 
         // ASSERT(pJobInfo != NULL);
 
@@ -700,8 +586,6 @@ void CPrintManagerDlg::OnSize(UINT nType, int cx, int cy)
         m_tabcontrol.SetWindowPos(NULL, rect2.left, rect2.top, 
             cx - 21, rect2.bottom - rect2.top + nHeightOffset,
             SWP_NOZORDER);
-        
-        
         
         m_tab1.SetWindowPos(NULL, rcItem.left, rcItem.bottom + 1,
             cx, rect3.bottom - rect3.top + nHeightOffset,

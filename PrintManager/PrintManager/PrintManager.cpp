@@ -2,6 +2,7 @@
 #include "PrintManager.h"
 #include "PrintManagerDlg.h"
 #include "LogFile.h"
+#include "ThreadUtils.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -29,8 +30,24 @@ END_MESSAGE_MAP()
 
 CPrintManagerApp::CPrintManagerApp()
 {
+
+	// Debug memory leak on normal block # value in parentheses
+	// _CrtSetDbgFlag(_CRTDBG_ALLOC_MEM_DF | _CRTDBG_LEAK_CHECK_DF);
+	// _CrtSetBreakAlloc(1546);
+	// _CrtSetBreakAlloc(3551);
+
 	// TODO: add construction code here,
 	// Place all significant initialization in InitInstance
+	OpenLogs();
+	StartLogs();
+	ThreadUtils::OutputThreadId(L"CPrintManagerApp::CPrintManagerApp", g_fileSystem);
+}
+
+CPrintManagerApp::~CPrintManagerApp()
+{
+	// Destructor
+	ThreadUtils::OutputThreadId(L"CPrintManagerApp::~CPrintManagerApp", g_fileSystem);
+	CloseLogs();
 }
 
 /////////////////////////////////////////////////////////////////////////////
@@ -43,9 +60,7 @@ CPrintManagerApp theApp;
 
 BOOL CPrintManagerApp::InitInstance()
 {
-	// Start working with log files
-	OpenLogs();
-	StartLogs();
+	ThreadUtils::OutputThreadId(L"CPrintManagerApp::InitInstance", g_fileSystem);	
 	
 	CPrintManagerDlg dlg;
 	m_pMainWnd = &dlg;
@@ -83,10 +98,10 @@ BOOL CPrintManagerApp::OpenLogs()
 	}
 
 	// Open files
-	// g_fileSystem = fopen(str_SystemPath, "a+");
-	// g_fileObjects = fopen(str_ObjectsPath, "a+");
 	fopen_s(&g_fileSystem, str_SystemPath, "a+");
 	fopen_s(&g_fileObjects, str_ObjectsPath, "a+");
+
+	delete base_path;
 
 	return TRUE;
 }
@@ -95,9 +110,19 @@ BOOL CPrintManagerApp::StartLogs()
 {
 	fwprintf_s(g_fileSystem, L"\nSTART\n");
 	fwprintf_s(g_fileSystem, L"---------------------------------------\n\n");
+	ThreadUtils::OutputThreadId(L"CPrintManagerApp::StartLogs", g_fileSystem);
 	fwprintf_s(g_fileObjects, L"\nSTART\n");
 	fwprintf_s(g_fileObjects, L"---------------------------------------\n\n");
 	fflush(g_fileSystem);
 	fflush(g_fileObjects);
+	return TRUE;
+}
+
+
+BOOL CPrintManagerApp::CloseLogs()
+{
+	ThreadUtils::OutputThreadId(L"CPrintManagerApp::CloseLogs", g_fileSystem);
+	fclose(g_fileSystem);
+	fclose(g_fileObjects);
 	return TRUE;
 }
