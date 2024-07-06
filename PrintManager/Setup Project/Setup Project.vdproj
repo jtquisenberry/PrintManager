@@ -27,6 +27,12 @@
         }
         "Entry"
         {
+        "MsmKey" = "8:_18DDB4DEBB2444E08F4ABE6E07B0F4EF"
+        "OwnerKey" = "8:_UNDEFINED"
+        "MsmSig" = "8:_UNDEFINED"
+        }
+        "Entry"
+        {
         "MsmKey" = "8:_1FF76180F38348DE902860D94B92018D"
         "OwnerKey" = "8:_UNDEFINED"
         "MsmSig" = "8:_UNDEFINED"
@@ -121,6 +127,22 @@
         "PrivateKeyFile" = "8:"
         "TimeStampServer" = "8:"
         "InstallerBootstrapper" = "3:2"
+            "BootstrapperCfg:{63ACBE69-63AA-4F98-B2B6-99F9E24495F2}"
+            {
+            "Enabled" = "11:TRUE"
+            "PromptEnabled" = "11:TRUE"
+            "PrerequisitesLocation" = "2:1"
+            "Url" = "8:"
+            "ComponentsUrl" = "8:"
+                "Items"
+                {
+                    "{EDC2488A-8267-493A-A98E-7D9C3B36CDF3}:.NETFramework,Version=v4.7.2"
+                    {
+                    "Name" = "8:Microsoft .NET Framework 4.7.2 (x86 and x64)"
+                    "ProductCode" = "8:.NETFramework,Version=v4.7.2"
+                    }
+                }
+            }
         }
         "Release"
         {
@@ -137,6 +159,22 @@
         "PrivateKeyFile" = "8:"
         "TimeStampServer" = "8:"
         "InstallerBootstrapper" = "3:2"
+            "BootstrapperCfg:{63ACBE69-63AA-4F98-B2B6-99F9E24495F2}"
+            {
+            "Enabled" = "11:TRUE"
+            "PromptEnabled" = "11:TRUE"
+            "PrerequisitesLocation" = "2:1"
+            "Url" = "8:"
+            "ComponentsUrl" = "8:"
+                "Items"
+                {
+                    "{EDC2488A-8267-493A-A98E-7D9C3B36CDF3}:.NETFramework,Version=v4.7.2"
+                    {
+                    "Name" = "8:Microsoft .NET Framework 4.7.2 (x86 and x64)"
+                    "ProductCode" = "8:.NETFramework,Version=v4.7.2"
+                    }
+                }
+            }
         }
     }
     "Deployable"
@@ -196,6 +234,26 @@
             "Register" = "3:1"
             "Exclude" = "11:FALSE"
             "IsDependency" = "11:TRUE"
+            "IsolateTo" = "8:"
+            }
+            "{1FB2D0AE-D3B9-43D4-B9DD-F88EC61E35DE}:_18DDB4DEBB2444E08F4ABE6E07B0F4EF"
+            {
+            "SourcePath" = "8:..\\PrintManager\\res\\PrintManager.ico"
+            "TargetName" = "8:PrintManager.ico"
+            "Tag" = "8:"
+            "Folder" = "8:_FDAA6AE3A4224B37BF40D59703F4A35A"
+            "Condition" = "8:"
+            "Transitive" = "11:FALSE"
+            "Vital" = "11:TRUE"
+            "ReadOnly" = "11:FALSE"
+            "Hidden" = "11:FALSE"
+            "System" = "11:FALSE"
+            "Permanent" = "11:FALSE"
+            "SharedLegacy" = "11:FALSE"
+            "PackageAs" = "3:1"
+            "Register" = "3:1"
+            "Exclude" = "11:FALSE"
+            "IsDependency" = "11:FALSE"
             "IsolateTo" = "8:"
             }
             "{1FB2D0AE-D3B9-43D4-B9DD-F88EC61E35DE}:_2D7DD9E2FFEB60FA8A7A475613F2B9B5"
@@ -502,7 +560,7 @@
         "Name" = "8:Microsoft Visual Studio"
         "ProductName" = "8:Setup Project"
         "ProductCode" = "8:{A567D61E-FBC3-409A-9CB0-266185831BE4}"
-        "PackageCode" = "8:{49558E1F-27B2-44E9-A9F5-A0AC76C58581}"
+        "PackageCode" = "8:{43165E81-5F7E-4E6C-823F-87706046E352}"
         "UpgradeCode" = "8:{7F39F375-7737-4559-9910-B2BF44816ABF}"
         "AspNetVersion" = "8:4.0.30319.0"
         "RestartWWWService" = "11:FALSE"
@@ -622,6 +680,20 @@
         }
         "Shortcut"
         {
+            "{970C0BB2-C7D0-45D7-ABFA-7EC378858BC0}:_79FB9E00637F4B209AC90E7796B9DC5F"
+            {
+            "Name" = "8:Shortcut to %sUser's Desktop"
+            "Arguments" = "8:"
+            "Description" = "8:PrintManager"
+            "ShowCmd" = "3:1"
+            "IconIndex" = "3:0"
+            "Transitive" = "11:FALSE"
+            "Target" = "8:_FDAA6AE3A4224B37BF40D59703F4A35A"
+            "Folder" = "8:_FDAA6AE3A4224B37BF40D59703F4A35A"
+            "WorkingFolder" = "8:_FDAA6AE3A4224B37BF40D59703F4A35A"
+            "Icon" = "8:_18DDB4DEBB2444E08F4ABE6E07B0F4EF"
+            "Feature" = "8:"
+            }
             "{970C0BB2-C7D0-45D7-ABFA-7EC378858BC0}:_A83702262D4148EF99E7786A94DCF96A"
             {
             "Name" = "8:PrintManager"
