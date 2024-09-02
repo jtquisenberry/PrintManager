@@ -338,6 +338,72 @@ void GetClickedPrinter()
 }
 
 
+void CTAB1::UpdatePrintersList(void)
+{
+
+	m_lcPrinters.DeleteAllItems();
+
+	DWORD dwNeeded;
+	DWORD dwReturned;
+
+	EnumPrinters(PRINTER_ENUM_LOCAL | PRINTER_ENUM_CONNECTIONS, NULL, 2, NULL, 0, &dwNeeded, &dwReturned);
+
+	LPBYTE lpBuffer = new BYTE[dwNeeded];
+	EnumPrinters(PRINTER_ENUM_LOCAL | PRINTER_ENUM_CONNECTIONS, NULL, 2, lpBuffer, dwNeeded, &dwNeeded, &dwReturned);
+
+	PPRINTER_INFO_2 p1 = (PPRINTER_INFO_2)lpBuffer;
+
+
+	char* base_path;
+	size_t len;
+	errno_t err = _dupenv_s(&base_path, &len, "USERPROFILE");
+	err;
+	wchar_t* wc = new wchar_t[260] {0};
+	if (base_path)
+	{
+		size_t pReturnValue;
+		errno_t err2 = mbstowcs_s(
+			&pReturnValue,
+			&wc[0],
+			260,
+			base_path,
+			260
+		);
+		err2;
+	}
+	else
+	{
+		wc = L"c:";
+	}
+
+	m_editTempPath.SetWindowTextW(wc);
+
+	for (DWORD x = 0; x < dwReturned; x++)
+	{
+		//m_cbPrinters.AddString(p1->pPrinterName);
+		//m_cbPrinters.AddString(p1->pPrinterName);
+
+
+		CString strText;
+		strText.Format(_T("%s"), p1->pPrinterName);
+		int nItem = m_lcPrinters.InsertItem(m_lcPrinters.GetItemCount(), strText);
+
+		m_lcPrinters.SetItemText(nItem, 1, p1->pDriverName);
+
+		strText.Format(_T("%d on %s"), p1->Status, p1->pPortName);
+		m_lcPrinters.SetItemText(nItem, 2, strText);
+
+		strText.Format(_T("%d"), p1->cJobs);
+		m_lcPrinters.SetItemText(nItem, 3, strText);
+
+		p1++;
+	}
+
+	delete[] lpBuffer;
+}
+
+
+
 int SetPrinterStatus(CString printer_name, int Command)
 {
 	// Initialize for output
@@ -477,7 +543,7 @@ int CTAB1::ReadPrinter(CString printer_name)
 }
 
 
-int PausePrinter(CString printer_name)
+int CTAB1::PausePrinter(CString printer_name)
 {
 	BOOL result = 0;
 	result = SetPrinterStatus(printer_name, PRINTER_CONTROL_PAUSE);
@@ -485,7 +551,7 @@ int PausePrinter(CString printer_name)
 }
 
 
-int ResumePrinter(CString printer_name)
+int CTAB1::ResumePrinter(CString printer_name)
 {
 	BOOL result = 0;
 	result = SetPrinterStatus(printer_name, PRINTER_CONTROL_RESUME);
@@ -493,7 +559,7 @@ int ResumePrinter(CString printer_name)
 }
 
 
-int PurgePrinter(CString printer_name)
+int CTAB1::PurgePrinter(CString printer_name)
 {
 	BOOL result = 0;
 	result = SetPrinterStatus(printer_name, PRINTER_CONTROL_PURGE);
@@ -513,6 +579,8 @@ void CTAB1::OnBnClickedPausePrinters()
 		result = PausePrinter(printer_name);
 	}
 
+	CTAB1::UpdatePrintersList();
+
 	return;
 }
 
@@ -529,6 +597,8 @@ void CTAB1::OnBnClickedResumePrinters()
 		result = ResumePrinter(printer_name);
 	}
 
+	CTAB1::UpdatePrintersList();
+
 	return;
 }
 
@@ -544,6 +614,8 @@ void CTAB1::OnBnClickedPurgePrinters()
 		OutputDebugString(L"\n");
 		result = PurgePrinter(printer_name);
 	}
+
+	CTAB1::UpdatePrintersList();
 
 	return;
 }
