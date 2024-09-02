@@ -42,7 +42,10 @@ public:
 	//void OutputThreadId(CString);
 	int UnsetRedirectedPrinter();
 	int ReadPrinter(CString);
-
+	int PausePrinter(CString);
+	void UpdatePrintersList();
+	int ResumePrinter(CString);
+	int PurgePrinter(CString);
 	std::vector<int> m_PrintStack;
 	// std::vector<int>* m_PrintStack2;
 	std::vector<CString> m_vectPrinterNames;
