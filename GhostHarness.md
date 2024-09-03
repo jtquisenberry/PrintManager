@@ -10,9 +10,10 @@
 
 ### Visual Studio Project Properties
 
-* Set C/C++ -> General -> Additional Include Directories = ..\GhostPDL
+Set these properties:
+* C/C++ -> General -> Additional Include Directories = ..\GhostPDL
 * Linker -> All Options -> Additional Dependencies prepend gpdldll64.lib;
-* Set Linker -> All Options -> Additional Library Directories = ..\GhostPDL
+* Linker -> All Options -> Additional Library Directories = ..\GhostPDL
 
 ### Project Files
 * Rename GhostHarness.c to GhostHarness.cpp
