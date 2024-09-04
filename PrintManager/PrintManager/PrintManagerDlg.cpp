@@ -479,9 +479,11 @@ LRESULT CPrintManagerDlg::OnUpdateJobList( WPARAM, LPARAM )
         int nItem = m_lcJobInfo.InsertItem(m_lcJobInfo.GetItemCount(), strText);
 
         m_lcJobInfo.SetItemText(nItem, 1, pJobInfo->GetUserName());
+        // m_lcJobInfo.SetItemText(nItem, 1, L"MyUser");
         
         strText.Format(_T("%s on %s"), pJobInfo->GetPortName(), pJobInfo->GetMachineName());
         m_lcJobInfo.SetItemText(nItem, 2, strText);
+        // m_lcJobInfo.SetItemText(nItem, 2, L"MyMachine");
         
         m_lcJobInfo.SetItemText(nItem, 3, pJobInfo->GetDocument());
 
